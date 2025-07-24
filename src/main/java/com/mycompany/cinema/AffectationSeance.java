@@ -34,4 +34,6 @@ public class AffectationSeance implements Serializable {
     public void setIdPersonnel(int idPersonnel) {
         this.idPersonnel = idPersonnel;
     }
+    
+    
 }
