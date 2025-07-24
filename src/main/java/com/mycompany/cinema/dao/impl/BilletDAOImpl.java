@@ -1,3 +1,4 @@
+// Fichier : src/main/java/com/mycompany/cinema/dao/impl/BilletDAOImpl.java
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Billet;
@@ -22,6 +23,14 @@ public class BilletDAOImpl extends GenericDAOImpl<Billet> implements BilletDAO {
     public List<Billet> getBilletsByReservationId(int reservationId) {
         return this.data.stream()
                 .filter(b -> b.getIdReservation() == reservationId)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Billet> getBilletsBySeanceId(int seanceId) {
+        // Voici l'implémentation que tu cherches. Elle filtre par l'ID de la séance.
+        return this.data.stream()
+                .filter(b -> b.getIdSeance() == seanceId)
                 .collect(Collectors.toList());
     }
 
