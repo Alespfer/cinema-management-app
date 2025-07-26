@@ -5,13 +5,10 @@ import com.mycompany.cinema.dao.ReservationDAO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class ReservationDAOImpl extends GenericDAOImpl<Reservation> implements ReservationDAO {
 
-    public ReservationDAOImpl() {
-        super("reservations.dat");
-    }
+    public ReservationDAOImpl() { super("reservations.dat"); }
 
     @Override
     public void addReservation(Reservation reservation) {
@@ -21,7 +18,12 @@ public class ReservationDAOImpl extends GenericDAOImpl<Reservation> implements R
 
     @Override
     public Optional<Reservation> getReservationById(int id) {
-        return this.data.stream().filter(r -> r.getId() == id).findFirst();
+        for (Reservation r : this.data) {
+            if (r.getId() == id) {
+                return Optional.of(r);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -31,9 +33,13 @@ public class ReservationDAOImpl extends GenericDAOImpl<Reservation> implements R
 
     @Override
     public List<Reservation> getReservationsByClientId(int clientId) {
-        return this.data.stream()
-                .filter(r -> r.getIdClient() == clientId)
-                .collect(Collectors.toList());
+        List<Reservation> resultat = new ArrayList<>();
+        for (Reservation r : this.data) {
+            if (r.getIdClient() == clientId) {
+                resultat.add(r);
+            }
+        }
+        return resultat;
     }
 
     @Override

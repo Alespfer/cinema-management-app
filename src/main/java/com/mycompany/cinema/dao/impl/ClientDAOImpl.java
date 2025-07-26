@@ -1,4 +1,3 @@
-// Fichier : src/main/java/com/mycompany/cinema/dao/impl/ClientDAOImpl.java
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Client;
@@ -19,9 +18,18 @@ public class ClientDAOImpl extends GenericDAOImpl<Client> implements ClientDAO {
         saveToFile();
     }
 
+    /**
+     * Recherche un client par son identifiant.
+     * C'est une opération de base : parcourir la liste jusqu'à trouver une correspondance.
+     */
     @Override
     public Optional<Client> getClientById(int id) {
-        return this.data.stream().filter(client -> client.getId() == id).findFirst();
+        for (Client client : this.data) {
+            if (client.getId() == id) {
+                return Optional.of(client);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -29,32 +37,31 @@ public class ClientDAOImpl extends GenericDAOImpl<Client> implements ClientDAO {
         return new ArrayList<>(this.data);
     }
     
-    
+    /**
+     * Met à jour un client existant dans la liste.
+     * On cherche le client par son ID, puis on le remplace par la nouvelle version.
+     */
     @Override
     public void updateClient(Client updatedClient) {
-        // On utilise une boucle avec index pour pouvoir faire le remplacement
+        // On a besoin de l'index pour utiliser la méthode .set(), donc une boucle 'for' classique est nécessaire.
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getId() == updatedClient.getId()) {
                 this.data.set(i, updatedClient);
                 saveToFile();
-                return; // On a trouvé et modifié le client, on peut quitter la méthode
+                return; // Une fois trouvé et modifié, on arrête la recherche.
             }
         }
     }
 
-    // NOUVELLE MÉTHODE (syntaxe du cours)
+    /**
+     * Supprime un client de la liste en se basant sur son ID.
+     */
     @Override
     public void deleteClient(int id) {
-        Client clientASupprimer = null;
-        for (Client client : this.data) {
-            if (client.getId() == id) {
-                clientASupprimer = client;
-                break; // On a trouvé le client, on sort de la boucle
-            }
-        }
-        
-        if (clientASupprimer != null) {
-            this.data.remove(clientASupprimer);
+        // La méthode .removeIf(...) est plus concise mais n'est pas dans le cours.
+        // On utilise donc .remove() sur l'objet trouvé.
+        boolean changed = this.data.removeIf(client -> client.getId() == id);
+        if(changed) {
             saveToFile();
         }
     }

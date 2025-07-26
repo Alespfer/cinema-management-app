@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
 
@@ -22,7 +21,12 @@ public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
 
     @Override
     public Optional<Seance> getSeanceById(int id) {
-        return this.data.stream().filter(s -> s.getId() == id).findFirst();
+        for (Seance seance : this.data) {
+            if (seance.getId() == id) {
+                return Optional.of(seance);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -32,18 +36,27 @@ public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
 
     @Override
     public List<Seance> getSeancesByFilmId(int filmId) {
-        return this.data.stream()
-                .filter(s -> s.getIdFilm() == filmId)
-                .collect(Collectors.toList());
+        List<Seance> resultat = new ArrayList<>();
+        for (Seance seance : this.data) {
+            if (seance.getIdFilm() == filmId) {
+                resultat.add(seance);
+            }
+        }
+        return resultat;
     }
 
     @Override
     public List<Seance> getSeancesByDate(LocalDate date) {
-        return this.data.stream()
-                .filter(s -> s.getDateHeureDebut().toLocalDate().isEqual(date))
-                .collect(Collectors.toList());
+        List<Seance> resultat = new ArrayList<>();
+        for (Seance seance : this.data) {
+            // On compare uniquement la partie "date" du LocalDateTime de la séance.
+            if (seance.getDateHeureDebut().toLocalDate().isEqual(date)) {
+                resultat.add(seance);
+            }
+        }
+        return resultat;
     }
- // NOUVELLE MÉTHODE (syntaxe du cours)
+
     @Override
     public void updateSeance(Seance updatedSeance) {
         for (int i = 0; i < this.data.size(); i++) {
@@ -57,17 +70,8 @@ public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
 
     @Override
     public void deleteSeance(int id) {
-        // La méthode removeIf est pratique mais non vue en cours.
-        // Faisons-le manuellement.
-        Seance seanceASupprimer = null;
-        for (Seance seance : this.data) {
-            if (seance.getId() == id) {
-                seanceASupprimer = seance;
-                break;
-            }
-        }
-        if (seanceASupprimer != null) {
-            this.data.remove(seanceASupprimer);
+        boolean changed = this.data.removeIf(seance -> seance.getId() == id);
+        if(changed) {
             saveToFile();
         }
     }

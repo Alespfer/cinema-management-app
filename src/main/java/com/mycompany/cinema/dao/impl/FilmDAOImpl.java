@@ -1,4 +1,3 @@
-// Fichier : src/main/java/com/mycompany/cinema/dao/impl/FilmDAOImpl.java
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Film;
@@ -10,7 +9,7 @@ import java.util.Optional;
 public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
 
     public FilmDAOImpl() {
-        super("films.dat"); // On spécifie le nom du fichier de données
+        super("films.dat");
     }
 
     @Override
@@ -21,43 +20,52 @@ public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
 
     @Override
     public Optional<Film> getFilmById(int id) {
-        return this.data.stream().filter(film -> film.getId() == id).findFirst();
+        for (Film film : this.data) {
+            if (film.getId() == id) {
+                return Optional.of(film);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
     public List<Film> getAllFilms() {
-        return new ArrayList<>(this.data); // Retourne une copie pour la sécurité
+        return new ArrayList<>(this.data);
     }
 
     @Override
     public void updateFilm(Film updatedFilm) {
-        getFilmById(updatedFilm.getId()).ifPresent(existingFilm -> {
-            int index = this.data.indexOf(existingFilm);
-            this.data.set(index, updatedFilm);
-            saveToFile();
-        });
+        for (int i = 0; i < this.data.size(); i++) {
+            if (this.data.get(i).getId() == updatedFilm.getId()) {
+                this.data.set(i, updatedFilm);
+                saveToFile();
+                return;
+            }
+        }
     }
 
     @Override
     public void deleteFilm(int id) {
-        if (this.data.removeIf(film -> film.getId() == id)) {
+        boolean changed = this.data.removeIf(film -> film.getId() == id);
+        if(changed) {
             saveToFile();
         }
     }
     
     /**
-     * On implémente la logique de recherche. On parcourt tous les films et on ajoute à une liste de résultats ceux 
-     * dont le titre (en minuscules, pour ne pas être sensible à la casse) contient le mot-clé (lui aussi en minuscules).
-     * @param keyword
-     * @return 
+     * Trouve des films en cherchant un mot-clé dans leur titre.
+     * La recherche n'est pas sensible à la casse (majuscules/minuscules).
+     * @param keyword Le texte à rechercher dans le titre.
+     * @return Une liste de films dont le titre contient le mot-clé.
      */
     @Override
     public List<Film> findFilmsByTitre(String keyword) {
         List<Film> filmsTrouves = new ArrayList<>();
-        String motCleMinuscule = keyword.toLowerCase(); // Pour une recherche insensible à la casse
+        // On met le mot-clé en minuscules une seule fois avant la boucle pour être efficace.
+        String motCleMinuscule = keyword.toLowerCase();
 
         for (Film film : this.data) {
-            // On vérifie si le titre du film en minuscule contient le mot-clé en minuscule
+            // On compare le titre du film (aussi en minuscules) avec le mot-clé.
             if (film.getTitre().toLowerCase().contains(motCleMinuscule)) {
                 filmsTrouves.add(film);
             }

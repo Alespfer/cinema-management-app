@@ -4,7 +4,6 @@ import com.mycompany.cinema.Siege;
 import com.mycompany.cinema.dao.SiegeDAO;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SiegeDAOImpl extends GenericDAOImpl<Siege> implements SiegeDAO {
 
@@ -20,9 +19,13 @@ public class SiegeDAOImpl extends GenericDAOImpl<Siege> implements SiegeDAO {
     
     @Override
     public List<Siege> getSiegesBySalleId(int salleId) {
-        return this.data.stream()
-                .filter(s -> s.getIdSalle() == salleId)
-                .collect(Collectors.toList());
+        List<Siege> resultat = new ArrayList<>();
+        for (Siege siege : this.data) {
+            if (siege.getIdSalle() == salleId) {
+                resultat.add(siege);
+            }
+        }
+        return resultat;
     }
 
     @Override

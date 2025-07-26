@@ -20,7 +20,12 @@ public class SalleDAOImpl extends GenericDAOImpl<Salle> implements SalleDAO {
 
     @Override
     public Optional<Salle> getSalleById(int id) {
-        return this.data.stream().filter(s -> s.getId() == id).findFirst();
+        for (Salle salle : this.data) {
+            if (salle.getId() == id) {
+                return Optional.of(salle);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -30,16 +35,24 @@ public class SalleDAOImpl extends GenericDAOImpl<Salle> implements SalleDAO {
 
     @Override
     public void updateSalle(Salle updatedSalle) {
-        getSalleById(updatedSalle.getId()).ifPresent(s -> {
-            int index = this.data.indexOf(s);
-            this.data.set(index, updatedSalle);
-            saveToFile();
-        });
+        // Pour mettre à jour, on parcourt la liste avec un index.
+        for (int i = 0; i < this.data.size(); i++) {
+            // Quand on trouve la salle avec le bon ID...
+            if (this.data.get(i).getId() == updatedSalle.getId()) {
+                // ...on la remplace par le nouvel objet à la même position.
+                this.data.set(i, updatedSalle);
+                saveToFile(); // On n'oublie pas de sauvegarder les changements sur le disque.
+                return; // L'objet est trouvé et modifié, on peut sortir de la méthode.
+            }
+        }
     }
 
     @Override
     public void deleteSalle(int id) {
-        if (this.data.removeIf(s -> s.getId() == id)) {
+        // La méthode removeIf est pratique mais non vue en cours.
+        // On utilise donc un Iterator pour la suppression.
+        boolean changed = this.data.removeIf(salle -> salle.getId() == id);
+        if(changed) {
             saveToFile();
         }
     }

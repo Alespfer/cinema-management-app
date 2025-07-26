@@ -8,9 +8,7 @@ import java.util.Optional;
 
 public class ProduitSnackDAOImpl extends GenericDAOImpl<ProduitSnack> implements ProduitSnackDAO {
 
-    public ProduitSnackDAOImpl() {
-        super("produits_snack.dat");
-    }
+    public ProduitSnackDAOImpl() { super("produits_snack.dat"); }
 
     @Override
     public void addProduit(ProduitSnack produit) {
@@ -20,7 +18,12 @@ public class ProduitSnackDAOImpl extends GenericDAOImpl<ProduitSnack> implements
 
     @Override
     public Optional<ProduitSnack> getProduitById(int id) {
-        return this.data.stream().filter(p -> p.getId() == id).findFirst();
+        for (ProduitSnack p : this.data) {
+            if (p.getId() == id) {
+                return Optional.of(p);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -30,10 +33,12 @@ public class ProduitSnackDAOImpl extends GenericDAOImpl<ProduitSnack> implements
 
     @Override
     public void updateProduit(ProduitSnack updatedProduit) {
-        getProduitById(updatedProduit.getId()).ifPresent(p -> {
-            int index = this.data.indexOf(p);
-            this.data.set(index, updatedProduit);
-            saveToFile();
-        });
+        for (int i = 0; i < this.data.size(); i++) {
+            if (this.data.get(i).getId() == updatedProduit.getId()) {
+                this.data.set(i, updatedProduit);
+                saveToFile();
+                return;
+            }
+        }
     }
 }

@@ -1,4 +1,3 @@
-// Fichier : src/main/java/com/mycompany/cinema/dao/impl/PersonnelDAOImpl.java
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Personnel;
@@ -9,9 +8,7 @@ import java.util.Optional;
 
 public class PersonnelDAOImpl extends GenericDAOImpl<Personnel> implements PersonnelDAO {
 
-    public PersonnelDAOImpl() {
-        super("personnel.dat");
-    }
+    public PersonnelDAOImpl() { super("personnel.dat"); }
 
     @Override
     public void addPersonnel(Personnel personnel) {
@@ -21,7 +18,12 @@ public class PersonnelDAOImpl extends GenericDAOImpl<Personnel> implements Perso
 
     @Override
     public Optional<Personnel> getPersonnelById(int id) {
-        return this.data.stream().filter(p -> p.getId() == id).findFirst();
+        for (Personnel p : this.data) {
+            if (p.getId() == id) {
+                return Optional.of(p);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -31,17 +33,18 @@ public class PersonnelDAOImpl extends GenericDAOImpl<Personnel> implements Perso
 
     @Override
     public void updatePersonnel(Personnel updatedPersonnel) {
-        getPersonnelById(updatedPersonnel.getId()).ifPresent(p -> {
-            int index = this.data.indexOf(p);
-            this.data.set(index, updatedPersonnel);
-            saveToFile();
-        });
+        for (int i = 0; i < this.data.size(); i++) {
+            if (this.data.get(i).getId() == updatedPersonnel.getId()) {
+                this.data.set(i, updatedPersonnel);
+                saveToFile();
+                return;
+            }
+        }
     }
 
     @Override
     public void deletePersonnel(int id) {
-        if (this.data.removeIf(p -> p.getId() == id)) {
-            saveToFile();
-        }
+        this.data.removeIf(p -> p.getId() == id);
+        saveToFile();
     }
 }

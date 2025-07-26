@@ -18,13 +18,28 @@ public class RoleDAOImpl extends GenericDAOImpl<Role> implements RoleDAO {
         saveToFile();
     }
 
+    /**
+     * Recherche un rôle par son identifiant en parcourant la liste.
+     * C'est la méthode de base pour trouver un objet par sa clé.
+     */
     @Override
     public Optional<Role> getRoleById(int id) {
-        return this.data.stream().filter(r -> r.getId() == id).findFirst();
+        // On parcourt toute la liste des rôles en mémoire.
+        for (Role role : this.data) {
+            // Si l'ID du rôle actuel correspond à celui qu'on cherche...
+            if (role.getId() == id) {
+                // ... on l'encapsule dans un Optional et on le retourne.
+                return Optional.of(role);
+            }
+        }
+        // Si on a fini la boucle sans rien trouver, on retourne un Optional vide.
+        return Optional.empty();
     }
 
     @Override
     public List<Role> getAllRoles() {
+        // On retourne une nouvelle ArrayList pour éviter que le code extérieur
+        // ne modifie directement notre liste de données interne (this.data).
         return new ArrayList<>(this.data);
     }
 }

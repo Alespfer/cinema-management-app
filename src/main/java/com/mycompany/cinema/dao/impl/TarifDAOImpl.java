@@ -35,17 +35,19 @@ public class TarifDAOImpl extends GenericDAOImpl<Tarif> implements TarifDAO {
 
     @Override
     public void updateTarif(Tarif updatedTarif) {
-        Optional<Tarif> existingTarifOpt = getTarifById(updatedTarif.getId());
-        if (existingTarifOpt.isPresent()) {
-            int index = this.data.indexOf(existingTarifOpt.get());
-            this.data.set(index, updatedTarif);
-            saveToFile();
+        for (int i = 0; i < this.data.size(); i++) {
+            if (this.data.get(i).getId() == updatedTarif.getId()) {
+                this.data.set(i, updatedTarif);
+                saveToFile();
+                return;
+            }
         }
     }
 
     @Override
     public void deleteTarif(int id) {
-        if (this.data.removeIf(tarif -> tarif.getId() == id)) {
+        boolean changed = this.data.removeIf(tarif -> tarif.getId() == id);
+        if(changed) {
             saveToFile();
         }
     }

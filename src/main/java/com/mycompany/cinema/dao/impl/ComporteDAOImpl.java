@@ -2,14 +2,12 @@ package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Comporte;
 import com.mycompany.cinema.dao.ComporteDAO;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ComporteDAOImpl extends GenericDAOImpl<Comporte> implements ComporteDAO {
 
-    public ComporteDAOImpl() {
-        super("lignes_ventes.dat");
-    }
+    public ComporteDAOImpl() { super("lignes_ventes.dat"); }
 
     @Override
     public void addLigneVente(Comporte comporte) {
@@ -19,8 +17,12 @@ public class ComporteDAOImpl extends GenericDAOImpl<Comporte> implements Comport
 
     @Override
     public List<Comporte> getLignesByVenteId(int venteId) {
-        return this.data.stream()
-                .filter(ligne -> ligne.getIdVente() == venteId)
-                .collect(Collectors.toList());
+        List<Comporte> resultat = new ArrayList<>();
+        for (Comporte ligne : this.data) {
+            if (ligne.getIdVente() == venteId) {
+                resultat.add(ligne);
+            }
+        }
+        return resultat;
     }
 }

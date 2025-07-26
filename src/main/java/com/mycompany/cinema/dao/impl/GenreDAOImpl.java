@@ -8,9 +8,7 @@ import java.util.Optional;
 
 public class GenreDAOImpl extends GenericDAOImpl<Genre> implements GenreDAO {
 
-    public GenreDAOImpl() {
-        super("genres.dat");
-    }
+    public GenreDAOImpl() { super("genres.dat"); }
 
     @Override
     public void addGenre(Genre genre) {
@@ -20,7 +18,12 @@ public class GenreDAOImpl extends GenericDAOImpl<Genre> implements GenreDAO {
 
     @Override
     public Optional<Genre> getGenreById(int id) {
-        return this.data.stream().filter(g -> g.getId() == id).findFirst();
+        for (Genre g : this.data) {
+            if (g.getId() == id) {
+                return Optional.of(g);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override

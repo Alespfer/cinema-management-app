@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class VenteSnackDAOImpl extends GenericDAOImpl<VenteSnack> implements VenteSnackDAO {
 
@@ -22,7 +21,12 @@ public class VenteSnackDAOImpl extends GenericDAOImpl<VenteSnack> implements Ven
 
     @Override
     public Optional<VenteSnack> getVenteSnackById(int id) {
-        return this.data.stream().filter(v -> v.getIdVente() == id).findFirst();
+        for (VenteSnack vente : this.data) {
+            if (vente.getIdVente() == id) {
+                return Optional.of(vente);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -32,8 +36,12 @@ public class VenteSnackDAOImpl extends GenericDAOImpl<VenteSnack> implements Ven
 
     @Override
     public List<VenteSnack> getVentesByDate(LocalDate date) {
-        return this.data.stream()
-                .filter(v -> v.getDateVente().toLocalDate().isEqual(date))
-                .collect(Collectors.toList());
+        List<VenteSnack> resultat = new ArrayList<>();
+        for (VenteSnack vente : this.data) {
+            if (vente.getDateVente().toLocalDate().isEqual(date)) {
+                resultat.add(vente);
+            }
+        }
+        return resultat;
     }
 }

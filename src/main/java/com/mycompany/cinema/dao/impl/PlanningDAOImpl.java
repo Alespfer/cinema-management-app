@@ -17,6 +17,11 @@ public class PlanningDAOImpl extends GenericDAOImpl<Planning> implements Plannin
         saveToFile();
     }
 
+    /**
+     * Récupère tous les créneaux de planning pour un membre du personnel donné.
+     * @param personnelId L'ID du membre du personnel.
+     * @return Une liste de ses plannings.
+     */
     @Override
     public List<Planning> getPlanningsByPersonnelId(int personnelId) {
         List<Planning> planningsDuPersonnel = new ArrayList<>();

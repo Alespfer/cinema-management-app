@@ -1,4 +1,3 @@
-// Fichier : src/main/java/com/mycompany/cinema/dao/impl/CaisseDAOImpl.java
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Caisse;
@@ -9,9 +8,7 @@ import java.util.Optional;
 
 public class CaisseDAOImpl extends GenericDAOImpl<Caisse> implements CaisseDAO {
 
-    public CaisseDAOImpl() {
-        super("caisses.dat");
-    }
+    public CaisseDAOImpl() { super("caisses.dat"); }
 
     @Override
     public void addCaisse(Caisse caisse) {
@@ -21,7 +18,12 @@ public class CaisseDAOImpl extends GenericDAOImpl<Caisse> implements CaisseDAO {
 
     @Override
     public Optional<Caisse> getCaisseById(int id) {
-        return this.data.stream().filter(c -> c.getId() == id).findFirst();
+        for (Caisse c : this.data) {
+            if (c.getId() == id) {
+                return Optional.of(c);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -31,11 +33,13 @@ public class CaisseDAOImpl extends GenericDAOImpl<Caisse> implements CaisseDAO {
 
     @Override
     public void updateCaisse(Caisse updatedCaisse) {
-        getCaisseById(updatedCaisse.getId()).ifPresent(c -> {
-            int index = this.data.indexOf(c);
-            this.data.set(index, updatedCaisse);
-            saveToFile();
-        });
+        for (int i = 0; i < this.data.size(); i++) {
+            if (this.data.get(i).getId() == updatedCaisse.getId()) {
+                this.data.set(i, updatedCaisse);
+                saveToFile();
+                return;
+            }
+        }
     }
 
     @Override
