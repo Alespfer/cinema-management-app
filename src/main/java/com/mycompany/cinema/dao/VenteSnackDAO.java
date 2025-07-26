@@ -14,8 +14,4 @@ public interface VenteSnackDAO {
     List<VenteSnack> getAllVentesSnack();
     List<VenteSnack> getVentesByDate(LocalDate date);
     
-    
-    int n = 6;
-    
-    
 }
