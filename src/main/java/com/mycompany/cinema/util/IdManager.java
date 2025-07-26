@@ -64,10 +64,7 @@ public final class IdManager {
         return calculateNextId(new TarifDAOImpl().getAllTarifs(), Tarif::getId);
     }
     public static int getNextPlanningId() {
-        // NOTE: PlanningDAO et son implémentation doivent être créés pour que cela fonctionne.
-        // Je suppose qu'ils existent.
-        // return calculateNextId(new PlanningDAOImpl().getAllPlannings(), Planning::getId);
-        return 0; // Temporaire - à décommenter
+        return calculateNextId(new PlanningDAOImpl().getAllPlannings(), Planning::getId);
     }
 
     /**

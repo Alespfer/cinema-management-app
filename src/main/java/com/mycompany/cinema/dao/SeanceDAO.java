@@ -15,5 +15,7 @@ public interface SeanceDAO {
     List<Seance> getAllSeances();
     List<Seance> getSeancesByFilmId(int filmId);
     List<Seance> getSeancesByDate(LocalDate date);
+    void updateSeance(Seance seance);
+
     void deleteSeance(int id);
 }

@@ -44,4 +44,24 @@ public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
             saveToFile();
         }
     }
+    
+    /**
+     * On implémente la logique de recherche. On parcourt tous les films et on ajoute à une liste de résultats ceux 
+     * dont le titre (en minuscules, pour ne pas être sensible à la casse) contient le mot-clé (lui aussi en minuscules).
+     * @param keyword
+     * @return 
+     */
+    @Override
+    public List<Film> findFilmsByTitre(String keyword) {
+        List<Film> filmsTrouves = new ArrayList<>();
+        String motCleMinuscule = keyword.toLowerCase(); // Pour une recherche insensible à la casse
+
+        for (Film film : this.data) {
+            // On vérifie si le titre du film en minuscule contient le mot-clé en minuscule
+            if (film.getTitre().toLowerCase().contains(motCleMinuscule)) {
+                filmsTrouves.add(film);
+            }
+        }
+        return filmsTrouves;
+    }
 }

@@ -9,4 +9,5 @@ public interface FilmDAO {
     List<Film> getAllFilms();
     void updateFilm(Film film);
     void deleteFilm(int id);
+    List<Film> findFilmsByTitre(String keyword); 
 }

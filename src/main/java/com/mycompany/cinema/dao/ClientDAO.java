@@ -7,4 +7,6 @@ public interface ClientDAO {
     void addClient(Client client);
     Optional<Client> getClientById(int id);
     List<Client> getAllClients();
+    void updateClient(Client client);
+    void deleteClient(int id);
 }
