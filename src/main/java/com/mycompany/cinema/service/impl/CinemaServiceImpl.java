@@ -470,7 +470,7 @@ public class CinemaServiceImpl implements ClientService, AdminService {
      * @param seanceAVerifier La séance à ajouter ou à modifier.
      * @throws Exception si un conflit est détecté.
      */
-    private void verifierConflitPlanning(Seance seanceAVerifier) throws Exception {
+        private void verifierConflitPlanning(Seance seanceAVerifier) throws Exception {
         Optional<Film> filmOpt = filmDAO.getFilmById(seanceAVerifier.getIdFilm());
         if (filmOpt.isEmpty()) {
             throw new Exception("Film non trouvé pour la vérification du planning.");
@@ -480,33 +480,36 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         LocalDateTime debutSeanceAVerifier = seanceAVerifier.getDateHeureDebut();
         LocalDateTime finSeanceAVerifier = debutSeanceAVerifier.plusMinutes(dureeFilm);
 
-        // On récupère TOUTES les séances
-        List<Seance> seancesExistantes = seanceDAO.getAllSeances();
+        // On ne récupère QUE les séances du MÊME JOUR dans la MÊME SALLE
+        List<Seance> seancesDuJourDansLaSalle = new ArrayList<>();
+        List<Seance> seancesDuJour = seanceDAO.getSeancesByDate(debutSeanceAVerifier.toLocalDate());
+        for (Seance s : seancesDuJour) {
+            if (s.getIdSalle() == seanceAVerifier.getIdSalle()) {
+                seancesDuJourDansLaSalle.add(s);
+            }
+        }
         
-        for (Seance existante : seancesExistantes) {
+        for (Seance existante : seancesDuJourDansLaSalle) {
             // On ne se compare pas à soi-même (cas d'une modification)
             if (existante.getId() == seanceAVerifier.getId()) {
                 continue;
             }
 
-            // --- CORRECTION DE LA LOGIQUE ---
-            // On ne procède à la vérification QUE si la séance existante est dans la MÊME salle
-            if (existante.getIdSalle() == seanceAVerifier.getIdSalle()) {
-                Optional<Film> filmExistantOpt = filmDAO.getFilmById(existante.getIdFilm());
-                if (filmExistantOpt.isEmpty()) continue;
-                
-                int dureeFilmExistant = filmExistantOpt.get().getDureeMinutes();
-                LocalDateTime debutExistant = existante.getDateHeureDebut();
-                LocalDateTime finExistant = debutExistant.plusMinutes(dureeFilmExistant);
+            Optional<Film> filmExistantOpt = filmDAO.getFilmById(existante.getIdFilm());
+            if (filmExistantOpt.isEmpty()) continue;
+            
+            int dureeFilmExistant = filmExistantOpt.get().getDureeMinutes();
+            LocalDateTime debutExistant = existante.getDateHeureDebut();
+            LocalDateTime finExistant = debutExistant.plusMinutes(dureeFilmExistant);
 
-                // Logique de détection de chevauchement d'intervalles de temps
-                // Conflit si [D1, F1] et [D2, F2] se chevauchent, c'est-à-dire si D1 < F2 ET D2 < F1
-                if (debutSeanceAVerifier.isBefore(finExistant) && debutExistant.isBefore(finSeanceAVerifier)) {
-                    throw new Exception("Conflit de planning : La salle est déjà occupée par le film '" 
-                                        + filmExistantOpt.get().getTitre() + "' de " 
-                                        + debutExistant.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")) 
-                                        + " à " + finExistant.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")) + ".");
-                }
+            // Logique de détection de chevauchement [D1, F1] et [D2, F2]
+            // Il y a conflit si le début de l'un est avant la fin de l'autre, et vice-versa.
+            if (debutSeanceAVerifier.isBefore(finExistant) && debutExistant.isBefore(finSeanceAVerifier)) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+                throw new Exception("Conflit de planning : La salle est déjà occupée par le film '" 
+                                    + filmExistantOpt.get().getTitre() + "' de " 
+                                    + debutExistant.toLocalTime().format(formatter) 
+                                    + " à " + finExistant.toLocalTime().format(formatter) + ".");
             }
         }
     }
