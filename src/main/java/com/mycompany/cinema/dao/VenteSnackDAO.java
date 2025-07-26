@@ -13,4 +13,7 @@ public interface VenteSnackDAO {
     Optional<VenteSnack> getVenteSnackById(int id);
     List<VenteSnack> getAllVentesSnack();
     List<VenteSnack> getVentesByDate(LocalDate date);
+    
+    
+    int n = 6;
 }
