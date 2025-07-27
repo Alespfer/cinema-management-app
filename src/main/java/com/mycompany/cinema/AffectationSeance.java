@@ -10,7 +10,7 @@ import java.io.Serializable;
  * entre PERSONNEL et SEANCE.
  * 
  * Elle doit implémenter 'Serializable' pour que je puisse la sauvegarder dans un fichier
- * avec le GenericDAOImpl, comme on l'a vu dans le chapitre sur les IO Fichiers.
+ * avec le GenericDAOImpl. 
  * 
  */
 public class AffectationSeance implements Serializable {

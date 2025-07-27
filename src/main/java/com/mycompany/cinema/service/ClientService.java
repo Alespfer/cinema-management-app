@@ -51,6 +51,24 @@ public interface ClientService extends CinemaService {
 
     /** Retourne les sièges disponibles pour une séance. */
     List<Siege> getSiegesDisponibles(int seanceId);
+    
+    /** Retourne la liste de tous les tarifs disponibles (Plein, Étudiant, etc.). */
+    List<Tarif> getAllTarifs();
+
+     /** Retourne la liste de tous les genres disponibles. */
+    List<Genre> getAllGenres();
+    
+    List<Salle> getAllSalles();
+
+    /**
+     * Recherche les séances selon des critères combinés. Les paramètres null sont ignorés.
+     * @param date La date souhaitée (peut être null).
+     * @param genreId L'ID du genre souhaité (peut être null).
+     * @param titreKeyword Un mot-clé à rechercher dans le titre du film (peut être null).
+     * @return Une liste de séances correspondant aux filtres.
+     */
+    List<Seance> rechercherSeances(LocalDate date, Integer genreId, String titreKeyword);
+
 
     // --- Transactionnel ---
 
@@ -66,4 +84,7 @@ public interface ClientService extends CinemaService {
 
     /** Retourne l’historique des réservations du client. */
     List<Reservation> getHistoriqueReservationsClient(int clientId);
+
+
+ 
 }

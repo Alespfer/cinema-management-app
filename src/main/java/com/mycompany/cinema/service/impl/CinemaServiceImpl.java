@@ -31,6 +31,7 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     private final PlanningDAO planningDAO = new PlanningDAOImpl();
     private final ComporteDAO comporteDAO = new ComporteDAOImpl();
     private final RoleDAO roleDAO = new RoleDAOImpl(); // DAO MANQUANT AJOUTÉ
+    private final GenreDAO genreDAO = new GenreDAOImpl(); // Assurez-vous qu'il est bien instancié
 
     // =========================================================================
     // SECTION COMMUNE (implémentation de la base CinemaService)
@@ -52,6 +53,69 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     public List<Film> findFilmsByTitre(String keyword) {
         return filmDAO.findFilmsByTitre(keyword);
     }
+    
+     @Override
+    public List<Genre> getAllGenres() {
+        return genreDAO.getAllGenres();
+    }
+
+    @Override
+    public List<Seance> rechercherSeances(LocalDate date, Integer genreId, String titreKeyword) {
+        List<Seance> resultatFinal = new ArrayList<>();
+        List<Seance> seancesSource = seanceDAO.getAllSeances(); // On part de toutes les séances
+
+        for (Seance seance : seancesSource) {
+            boolean correspond = true;
+
+            // Filtre 1 : La date (si fournie)
+            if (date != null) {
+                if (!seance.getDateHeureDebut().toLocalDate().isEqual(date)) {
+                    correspond = false;
+                }
+            }
+
+            // Filtres 2 & 3 : Le titre et le genre (liés au film)
+            if (correspond) { // Inutile de vérifier le film si la date ne correspond déjà pas
+                Optional<Film> filmOpt = filmDAO.getFilmById(seance.getIdFilm());
+                if (filmOpt.isPresent()) {
+                    Film film = filmOpt.get();
+                    
+                    // Filtre par mot-clé dans le titre
+                    if (titreKeyword != null && !titreKeyword.trim().isEmpty()) {
+                        if (!film.getTitre().toLowerCase().contains(titreKeyword.toLowerCase())) {
+                            correspond = false;
+                        }
+                    }
+                    
+                    // Filtre par genre
+                    if (correspond && genreId != null) {
+                        boolean genreTrouve = false;
+                        // Attention : la liste des genres peut être null si non initialisée dans le constructeur
+                        if (film.getGenres() != null) { 
+                            for (Genre g : film.getGenres()) {
+                                if (g.getId() == genreId) {
+                                    genreTrouve = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!genreTrouve) {
+                            correspond = false;
+                        }
+                    }
+                } else {
+                    correspond = false; // Le film associé n'existe pas, on ignore la séance
+                }
+            }
+            
+            if (correspond) {
+                resultatFinal.add(seance);
+            }
+        }
+        return resultatFinal;
+    }
+       
+  
     
     // =========================================================================
     // SECTION CLIENT (implémentation de ClientService)
@@ -384,7 +448,7 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         salleDAO.deleteSalle(salleId);
     }
 
-     /**
+    /**
      * Retourne la liste de toutes les salles enregistrées.
      */
     @Override
