@@ -1,39 +1,47 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.cinema;
-
-// package com.mycompany.cinema; // Garde ton package
-
-// package com.mycompany.cinema; // Garde ton package
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * Représente une transaction de vente au comptoir de snacks.
+ * C'est l'équivalent d'un ticket de caisse, qui est ensuite détaillé
+ * par un ou plusieurs objets 'Comporte'.
+ * 
+ * Implémente Serializable pour la sauvegarde.
+ * 
+ */
 public class VenteSnack implements Serializable {
+    
     private int idVente;
     private LocalDateTime dateVente;
+    
+    // Clés étrangères
     private int idPersonnel;
-    private int idCaisse;       // Non-nullable, car une vente a toujours lieu quelque part.
-    private Integer idClient;   // Nullable, pour les ventes anonymes.
+    private int idCaisse;
+    
+    // L'ID client est un 'Integer' (objet) et non un 'int' (primitif)
+    // pour pouvoir accepter la valeur 'null'. C'est utile pour les ventes
+    // aux clients non enregistrés (anonymes).
+    private Integer idClient;
 
     public VenteSnack() {}
 
     /**
-     * Le constructeur principal. Toutes les autres formes doivent l'appeler.
+     * Constructeur principal pour créer une nouvelle vente.
      * Il garantit qu'un objet VenteSnack est toujours complet.
      */
     public VenteSnack(int idVente, LocalDateTime dateVente, int idPersonnel, int idCaisse, Integer idClient) {
         this.idVente = idVente;
         this.dateVente = dateVente;
         this.idPersonnel = idPersonnel;
-        this.idCaisse = idCaisse; // L'initialisation manquante est maintenant là. C'est obligatoire.
+        this.idCaisse = idCaisse;
         this.idClient = idClient;
     }
 
     /**
-     * Constructeur de convenance pour une vente anonyme à une caisse donnée.
+     * Constructeur de convenance pour une vente anonyme (sans client associé).
+     * Il appelle le constructeur principal en passant 'null' pour l'ID client.
      */
     public VenteSnack(int idVente, LocalDateTime dateVente, int idPersonnel, int idCaisse) {
         this(idVente, dateVente, idPersonnel, idCaisse, null);
@@ -41,45 +49,37 @@ public class VenteSnack implements Serializable {
     
     // --- Getters ---
 
-    public int getIdVente() {
-        return idVente;
+    public int getIdVente() { 
+        return idVente; 
     }
-
-    public LocalDateTime getDateVente() {
-        return dateVente;
+    public LocalDateTime getDateVente() { 
+        return dateVente; 
     }
-
-    public int getIdPersonnel() {
-        return idPersonnel;
+    public int getIdPersonnel() { 
+        return idPersonnel; 
     }
-    
-    public int getIdCaisse() {
-        return idCaisse;
+    public int getIdCaisse() { 
+        return idCaisse; 
     }
-    
-    public Integer getIdClient() {
-        return idClient;
+    public Integer getIdClient() { 
+        return idClient; 
     }
     
     // --- Setters ---
 
-    public void setIdVente(int idVente) {
-        this.idVente = idVente;
+    public void setIdVente(int idVente) { 
+        this.idVente = idVente; 
     }
-
-    public void setDateVente(LocalDateTime dateVente) {
-        this.dateVente = dateVente;
+    public void setDateVente(LocalDateTime dateVente) { 
+        this.dateVente = dateVente; 
     }
-
-    public void setIdPersonnel(int idPersonnel) {
-        this.idPersonnel = idPersonnel;
+    public void setIdPersonnel(int idPersonnel) { 
+        this.idPersonnel = idPersonnel; 
     }
-    
-    public void setIdCaisse(int idCaisse) {
-        this.idCaisse = idCaisse;
+    public void setIdCaisse(int idCaisse) { 
+        this.idCaisse = idCaisse; 
     }
-
-    public void setIdClient(Integer idClient) {
-        this.idClient = idClient;
+    public void setIdClient(Integer idClient) { 
+        this.idClient = idClient; 
     }
 }

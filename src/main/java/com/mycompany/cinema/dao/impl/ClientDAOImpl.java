@@ -6,22 +6,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+// DAO pour gérer les opérations liées aux clients (ajout, recherche, modification, suppression).
 public class ClientDAOImpl extends GenericDAOImpl<Client> implements ClientDAO {
 
+    // Initialise le fichier de persistance lié aux clients.
     public ClientDAOImpl() {
         super("clients.dat");
     }
 
+    // Ajoute un nouveau client à la base de données.
     @Override
     public void addClient(Client client) {
         this.data.add(client);
         saveToFile();
     }
 
-    /**
-     * Recherche un client par son identifiant.
-     * C'est une opération de base : parcourir la liste jusqu'à trouver une correspondance.
-     */
+    // Recherche un client en fonction de son identifiant.
     @Override
     public Optional<Client> getClientById(int id) {
         for (Client client : this.data) {
@@ -32,36 +32,36 @@ public class ClientDAOImpl extends GenericDAOImpl<Client> implements ClientDAO {
         return Optional.empty();
     }
 
+    // Retourne la liste complète des clients enregistrés.
     @Override
     public List<Client> getAllClients() {
         return new ArrayList<>(this.data);
     }
-    
-    /**
-     * Met à jour un client existant dans la liste.
-     * On cherche le client par son ID, puis on le remplace par la nouvelle version.
-     */
+
+    // Met à jour les données d’un client existant.
     @Override
     public void updateClient(Client updatedClient) {
-        // On a besoin de l'index pour utiliser la méthode .set(), donc une boucle 'for' classique est nécessaire.
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getId() == updatedClient.getId()) {
                 this.data.set(i, updatedClient);
                 saveToFile();
-                return; // Une fois trouvé et modifié, on arrête la recherche.
+                return;
             }
         }
     }
 
-    /**
-     * Supprime un client de la liste en se basant sur son ID.
-     */
+    // Supprime un client en fonction de son identifiant.
     @Override
     public void deleteClient(int id) {
-        // La méthode .removeIf(...) est plus concise mais n'est pas dans le cours.
-        // On utilise donc .remove() sur l'objet trouvé.
-        boolean changed = this.data.removeIf(client -> client.getId() == id);
-        if(changed) {
+        boolean changed = false;
+        for (int i = 0; i < this.data.size(); i++) {
+            if (this.data.get(i).getId() == id) {
+                this.data.remove(i);
+                changed = true;
+                break;
+            }
+        }
+        if (changed) {
             saveToFile();
         }
     }

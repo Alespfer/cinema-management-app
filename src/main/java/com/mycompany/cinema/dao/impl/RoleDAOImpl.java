@@ -8,10 +8,11 @@ import java.util.Optional;
 
 public class RoleDAOImpl extends GenericDAOImpl<Role> implements RoleDAO {
 
+    // Initialise le DAO avec le fichier des rôles.
     public RoleDAOImpl() {
         super("roles.dat");
     }
-
+    // Ajoute un rôle dans la base de données.
     @Override
     public void addRole(Role role) {
         this.data.add(role);
@@ -35,7 +36,8 @@ public class RoleDAOImpl extends GenericDAOImpl<Role> implements RoleDAO {
         // Si on a fini la boucle sans rien trouver, on retourne un Optional vide.
         return Optional.empty();
     }
-
+    
+    // Retourne tous les rôles disponibles.
     @Override
     public List<Role> getAllRoles() {
         // On retourne une nouvelle ArrayList pour éviter que le code extérieur

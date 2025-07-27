@@ -36,10 +36,12 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     // SECTION COMMUNE (implémentation de la base CinemaService)
     // =========================================================================
     
+    
     @Override
     public List<Film> getFilmsAffiche() {
         return filmDAO.getAllFilms();
     }
+    
     
     @Override
     public Film getFilmDetails(int filmId) {
@@ -55,6 +57,10 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     // SECTION CLIENT (implémentation de ClientService)
     // =========================================================================
 
+    /**
+     * Crée un compte client en vérifiant qu'aucun autre client n'utilise le même email.
+     * @throws Exception si un client avec le même email existe déjà.
+     */
     @Override
     public Client creerCompteClient(String nom, String email, String motDePasse) throws Exception {
         for (Client clientExistant : clientDAO.getAllClients()) {
@@ -68,6 +74,9 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return nouveauClient;
     }
 
+    /**
+     * Vérifie les identifiants du client et retourne un Optional avec le client si trouvé.
+     */
     @Override
     public Optional<Client> authentifierClient(String email, String motDePasse) {
         for (Client client : clientDAO.getAllClients()) {
@@ -77,6 +86,11 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         }
         return Optional.empty();
     }
+    
+    /**
+     * Modifie les informations d'un client existant après vérification de son existence.
+     * @throws Exception si le client n'existe pas.
+     */
 
     @Override
     public void modifierCompteClient(Client client) throws Exception {
@@ -85,6 +99,11 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         }
         clientDAO.updateClient(client);
     }
+
+    /**
+     * Supprime un compte client ainsi que toutes ses réservations associées.
+     * @throws Exception si le client est introuvable.
+     */
 
     @Override
     public void supprimerCompteClient(int clientId) throws Exception {
@@ -98,6 +117,10 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         clientDAO.deleteClient(clientId);
     }
     
+    
+    /**
+    * Retourne toutes les séances correspondant à un film donné à une date donnée.
+    */
     @Override
     public List<Seance> getSeancesPourFilmEtDate(int filmId, LocalDate date) {
         List<Seance> seancesDuJour = seanceDAO.getSeancesByDate(date);
@@ -110,6 +133,10 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return seancesResultat;
     }
     
+    
+    /**
+    * Retourne les séances correspondant aux critères fournis (date, film, salle).
+    */
      @Override
     public List<Seance> findSeancesFiltrees(LocalDate date, Integer filmId, Integer salleId) {
         List<Seance> resultat = new ArrayList<>();
@@ -135,16 +162,19 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return resultat;
     }
 
+    // Retourne la liste des sièges associés à une salle donnée
     @Override
     public List<Siege> getSiegesPourSalle(int salleId) {
         return siegeDAO.getSiegesBySalleId(salleId);
     }
-
+    
+    // Retourne la liste des billets vendus pour une séance
     @Override
     public List<Billet> getBilletsPourSeance(int seanceId) {
         return billetDAO.getBilletsBySeanceId(seanceId);
     }
 
+    // Retourne les sièges disponibles (non réservés) pour une séance donnée
     @Override
     public List<Siege> getSiegesDisponibles(int seanceId) {
         Optional<Seance> seanceOpt = seanceDAO.getSeanceById(seanceId);
@@ -167,6 +197,10 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return siegesDisponibles;
     }
 
+    /**
+    * Permet à un client de réserver un ou plusieurs sièges pour une séance donnée.
+    * Effectue toutes les vérifications nécessaires (disponibilité, cohérence).
+    */
     @Override
     public Reservation effectuerReservation(int clientId, int seanceId, List<Integer> siegeIds, int tarifId) throws Exception {
         if (clientDAO.getClientById(clientId).isEmpty()) throw new Exception("Client non trouvé.");
@@ -207,6 +241,9 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return reservation;
     }
 
+    /**
+    * Permet d'annuler une réservation (suppression des billets et de la réservation).
+    */
     @Override
     public void annulerReservation(int reservationId) throws Exception {
         if (reservationDAO.getReservationById(reservationId).isEmpty()) {
@@ -216,6 +253,10 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         reservationDAO.deleteReservation(reservationId);
     }
 
+    /**
+    * Retourne l'historique de toutes les réservations effectuées par un client.
+    */
+
     @Override
     public List<Reservation> getHistoriqueReservationsClient(int clientId) {
         return reservationDAO.getReservationsByClientId(clientId);
@@ -224,7 +265,10 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     // =========================================================================
     // SECTION ADMINISTRATEUR (implémentation de AdminService)
     // =========================================================================
-    
+    /**
+    * Authentifie un membre du personnel à partir de son nom d'utilisateur et mot de passe.
+    * Renvoie un Optional<Personnel> si les identifiants sont valides.
+    */
     @Override
     public Optional<Personnel> authentifierPersonnel(String nomUtilisateur, String motDePasse) {
         for (Personnel p : personnelDAO.getAllPersonnel()) {
@@ -235,17 +279,28 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return Optional.empty();
     }
     
+    
+    /**
+    * Ajoute un nouveau film à la base.
+    * L'ID est généré automatiquement.
+    */
     @Override
     public void ajouterFilm(Film film) {
         film.setId(IdManager.getNextFilmId());
         filmDAO.addFilm(film);
     }
 
+    /**
+    * Met à jour les informations d'un film existant.
+    */
     @Override
     public void mettreAJourFilm(Film film) {
         filmDAO.updateFilm(film);
     }
 
+    /**
+    * Supprime un film uniquement s'il n'est pas associé à une séance existante.
+    */
     @Override
     public void supprimerFilm(int filmId) throws Exception {
         if (!seanceDAO.getSeancesByFilmId(filmId).isEmpty()) {
@@ -254,6 +309,9 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         filmDAO.deleteFilm(filmId);
     }
 
+    /**
+    * Ajoute une nouvelle séance après vérification des conflits dans la salle.
+    */
     @Override
     public void ajouterSeance(Seance seance) throws Exception {
         verifierConflitPlanning(seance);
@@ -261,12 +319,18 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         seanceDAO.addSeance(seance);
     }
 
+    /**
+    * Met à jour une séance existante après vérification des conflits.
+    */
     @Override
     public void modifierSeance(Seance seance) throws Exception {
         verifierConflitPlanning(seance);
         seanceDAO.updateSeance(seance);
     }
 
+    /**
+    * Supprime une séance uniquement si aucun billet n'y est associé.
+    */
     @Override
     public void supprimerSeance(int seanceId) throws Exception {
         if (!billetDAO.getBilletsBySeanceId(seanceId).isEmpty()) {
@@ -275,10 +339,17 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         seanceDAO.deleteSeance(seanceId);
     }
 
+    /**
+    * Retourne toutes les séances (utile côté admin).
+    */
     @Override
     public List<Seance> getAllSeances() {
         return seanceDAO.getAllSeances();
     }
+    
+    /**
+    * Ajoute une nouvelle salle dans la base avec un ID généré automatiquement.
+    */
 
     @Override
     public void ajouterSalle(Salle salle) {
@@ -286,11 +357,18 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         salleDAO.addSalle(salle);
     }
 
+    /**
+    * Met à jour les informations d'une salle existante.
+    */
     @Override
     public void modifierSalle(Salle salle) {
         salleDAO.updateSalle(salle);
     }
-
+    
+    
+    /**
+    * Supprime une salle uniquement si elle n'est pas utilisée dans une séance.
+    */
     @Override
     public void supprimerSalle(int salleId) throws Exception {
         boolean isUsed = false;
@@ -306,11 +384,17 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         salleDAO.deleteSalle(salleId);
     }
 
+     /**
+     * Retourne la liste de toutes les salles enregistrées.
+     */
     @Override
     public List<Salle> getAllSalles() {
         return salleDAO.getAllSalles();
     }
-
+    
+    /**
+     * Ajoute un nouveau tarif après vérification que le prix est valide (non négatif).
+     */
     @Override
     public void ajouterTarif(Tarif tarif) throws Exception {
         if (tarif.getPrix() < 0) {
@@ -320,6 +404,10 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         tarifDAO.addTarif(tarif);
     }
 
+    /**
+    * Met à jour un tarif existant, après validation du prix.
+    */
+
     @Override
     public void modifierTarif(Tarif tarif) throws Exception {
         if (tarif.getPrix() < 0) {
@@ -328,42 +416,73 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         tarifDAO.updateTarif(tarif);
     }
 
+    /**
+    * Supprime un tarif sans contrainte particulière.
+    */
     @Override
     public void supprimerTarif(int tarifId) {
         tarifDAO.deleteTarif(tarifId);
     }
     
+    /**
+    * Retourne tous les tarifs disponibles.
+    */
     @Override
     public List<Tarif> getAllTarifs() {
         return tarifDAO.getAllTarifs();
     }
     
+    
+    /**
+    * Retourne la liste de tous les rôles (utile pour les interfaces d'administration).
+    */
+
     @Override
     public List<Role> getAllRoles() {
         return roleDAO.getAllRoles();
     }
 
+    /**
+    * Ajoute un nouveau membre du personnel avec un ID généré automatiquement.
+    */
     @Override
     public void ajouterPersonnel(Personnel personnel) {
         personnel.setId(IdManager.getNextPersonnelId());
         personnelDAO.addPersonnel(personnel);
     }
+    
+    
+    /**
+    * Met à jour les informations d’un personnel existant.
+    */
 
     @Override
     public void modifierPersonnel(Personnel personnel) {
         personnelDAO.updatePersonnel(personnel);
     }
 
+    /**
+    * Supprime un membre du personnel par son ID.
+    */
+
     @Override
     public void supprimerPersonnel(int personnelId) {
         personnelDAO.deletePersonnel(personnelId);
     }
 
+    
+    /**
+    * Retourne la liste complète du personnel enregistré.
+    */
     @Override
     public List<Personnel> getAllPersonnel() {
         return personnelDAO.getAllPersonnel();
     }
-
+    
+    
+    /**
+    * Affecte un personnel à une séance précise après vérification d'existence.
+    */
     @Override
     public void affecterPersonnelASeance(int personnelId, int seanceId) throws Exception {
         if (personnelDAO.getPersonnelById(personnelId).isEmpty()) throw new Exception("Personnel non trouvé.");
@@ -371,12 +490,18 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         AffectationSeance nouvelleAffectation = new AffectationSeance(seanceId, personnelId);
         affectationSeanceDAO.addAffectation(nouvelleAffectation);
     }
-
+    
+    /**
+     * Supprime une affectation de personnel à une séance.
+     */
     @Override
     public void desaffecterPersonnelDeSeance(int personnelId, int seanceId) throws Exception {
         affectationSeanceDAO.deleteAffectation(seanceId, personnelId);
     }
-
+    
+    /**
+     * Crée un planning pour un membre du personnel sur une période donnée avec poste.
+     */
     @Override
     public Planning creerPlanning(int personnelId, LocalDateTime debut, LocalDateTime fin, String poste) throws Exception {
         if (personnelDAO.getPersonnelById(personnelId).isEmpty()) {
@@ -387,27 +512,45 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         planningDAO.addPlanning(nouveauPlanning);
         return nouveauPlanning;
     }
-
+    
+    
+    
+    /**
+    * Récupère tous les plannings associés à un membre du personnel.
+    */
     @Override
     public List<Planning> getPlanningPourPersonnel(int personnelId) {
         return planningDAO.getPlanningsByPersonnelId(personnelId);
     }
 
+    /**
+    * Récupère toutes les ventes snack effectuées un jour donné.
+    */
     @Override
     public List<VenteSnack> getVentesSnackParJour(LocalDate date) {
         return venteSnackDAO.getVentesByDate(date);
     }
     
+    
+    /**
+    * Retourne l'ensemble des réservations effectuées, pour usage administratif.
+    */
     @Override
     public List<Reservation> getAllReservations() {
         return reservationDAO.getAllReservations();
     }
-
+    
+    
+    /**
+    * Retourne toutes les ventes snack enregistrées.
+    */
     @Override
     public List<VenteSnack> getAllVentesSnack() {
         return venteSnackDAO.getAllVentesSnack();
     }
-
+    /**
+     * Calcule le chiffre d’affaires généré par les réservations pour une séance donnée.
+     */
     @Override
     public double calculerChiffreAffairesReservationsPourSeance(int seanceId) {
         double total = 0.0;
@@ -421,6 +564,9 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return total;
     }
 
+    /**
+    * Récupère tous les billets associés à un film (via ses séances).
+    */
     @Override
     public List<Billet> getBilletsPourFilm(int filmId) {
         List<Billet> billetsPourFilm = new ArrayList<>();
@@ -430,7 +576,11 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         }
         return billetsPourFilm;
     }
-
+    
+    
+    /**
+    * Calcule le chiffre d'affaires cumulé pour toutes les séances d’un film donné.
+    */
     @Override
     public double calculerChiffreAffairesPourFilm(int filmId) {
         double total = 0.0;
@@ -441,6 +591,9 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return total;
     }
 
+    /**
+    * Calcule le chiffre d'affaires pour toutes les séances ayant lieu à une date donnée.
+    */
     @Override
     public double calculerChiffreAffairesPourJour(LocalDate date) {
         double total = 0.0;
@@ -451,6 +604,10 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return total;
     }
 
+    /**
+    * Calcule le chiffre d’affaires pour les ventes snack d’une journée.
+    * Multiplie la quantité vendue par le prix unitaire de chaque article.
+    */
     @Override
     public double calculerChiffreAffairesSnackPourJour(LocalDate date) {
         double total = 0.0;

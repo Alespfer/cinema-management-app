@@ -5,23 +5,22 @@ import com.mycompany.cinema.dao.PlanningDAO;
 import java.util.ArrayList;
 import java.util.List;
 
+// DAO pour la gestion des plannings du personnel.
 public class PlanningDAOImpl extends GenericDAOImpl<Planning> implements PlanningDAO {
 
+    // Initialise le DAO avec le fichier associé aux plannings.
     public PlanningDAOImpl() {
         super("plannings.dat");
     }
 
+    // Ajoute un nouveau planning à la liste.
     @Override
     public void addPlanning(Planning planning) {
         this.data.add(planning);
         saveToFile();
     }
 
-    /**
-     * Récupère tous les créneaux de planning pour un membre du personnel donné.
-     * @param personnelId L'ID du membre du personnel.
-     * @return Une liste de ses plannings.
-     */
+    // Retourne les plannings associés à un identifiant de personnel donné.
     @Override
     public List<Planning> getPlanningsByPersonnelId(int personnelId) {
         List<Planning> planningsDuPersonnel = new ArrayList<>();
@@ -33,6 +32,7 @@ public class PlanningDAOImpl extends GenericDAOImpl<Planning> implements Plannin
         return planningsDuPersonnel;
     }
 
+    // Retourne la liste complète des plannings enregistrés.
     @Override
     public List<Planning> getAllPlannings() {
         return new ArrayList<>(this.data);

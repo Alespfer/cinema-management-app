@@ -1,20 +1,31 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.cinema;
-
-// package com.mycompany.cinema; // Garde ton package
 
 import java.io.Serializable;
 
+/**
+ * Classe représentant une caisse enregistreuse ou un point de vente.
+ * Utilisée principalement pour les ventes de snacks.
+ * 
+ * Implémente 'Serializable' pour la persistance des données.
+ * 
+ */
 public class Caisse implements Serializable {
+    
     private int idCaisse;
     private String nom;
     private String emplacement;
 
+    /**
+     * Constructeur par défaut.
+     */
     public Caisse() {}
 
+    /**
+     * Constructeur principal pour définir une nouvelle caisse.
+     * @param idCaisse L'identifiant unique de la caisse.
+     * @param nom Un nom descriptif (ex: "Comptoir Principal").
+     * @param emplacement Une description de sa localisation (ex: "Hall d'entrée").
+     */
     public Caisse(int idCaisse, String nom, String emplacement) {
         this.idCaisse = idCaisse;
         this.nom = nom;
@@ -22,6 +33,7 @@ public class Caisse implements Serializable {
     }
 
     // --- Getters ---
+
     public int getId() {
         return idCaisse;
     }
@@ -35,6 +47,7 @@ public class Caisse implements Serializable {
     }
 
     // --- Setters ---
+
     public void setId(int idCaisse) {
         this.idCaisse = idCaisse;
     }

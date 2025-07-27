@@ -6,18 +6,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+// DAO pour la gestion des films (ajout, recherche, modification, suppression).
 public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
 
+    // Initialise le DAO avec le fichier associé aux films.
     public FilmDAOImpl() {
         super("films.dat");
     }
 
+    // Ajoute un nouveau film à la base de données.
     @Override
     public void addFilm(Film film) {
         this.data.add(film);
         saveToFile();
     }
 
+    // Recherche un film par son identifiant.
     @Override
     public Optional<Film> getFilmById(int id) {
         for (Film film : this.data) {
@@ -28,11 +32,13 @@ public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
         return Optional.empty();
     }
 
+    // Retourne l'ensemble des films enregistrés.
     @Override
     public List<Film> getAllFilms() {
         return new ArrayList<>(this.data);
     }
 
+    // Met à jour les informations d'un film existant.
     @Override
     public void updateFilm(Film updatedFilm) {
         for (int i = 0; i < this.data.size(); i++) {
@@ -44,28 +50,28 @@ public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
         }
     }
 
+    // Supprime un film selon son identifiant.
     @Override
     public void deleteFilm(int id) {
-        boolean changed = this.data.removeIf(film -> film.getId() == id);
-        if(changed) {
+        boolean changed = false;
+        for (int i = 0; i < this.data.size(); i++) {
+            if (this.data.get(i).getId() == id) {
+                this.data.remove(i);
+                changed = true;
+                break;
+            }
+        }
+        if (changed) {
             saveToFile();
         }
     }
-    
-    /**
-     * Trouve des films en cherchant un mot-clé dans leur titre.
-     * La recherche n'est pas sensible à la casse (majuscules/minuscules).
-     * @param keyword Le texte à rechercher dans le titre.
-     * @return Une liste de films dont le titre contient le mot-clé.
-     */
+
+    // Recherche les films dont le titre contient un mot-clé donné (sans tenir compte de la casse).
     @Override
     public List<Film> findFilmsByTitre(String keyword) {
         List<Film> filmsTrouves = new ArrayList<>();
-        // On met le mot-clé en minuscules une seule fois avant la boucle pour être efficace.
         String motCleMinuscule = keyword.toLowerCase();
-
         for (Film film : this.data) {
-            // On compare le titre du film (aussi en minuscules) avec le mot-clé.
             if (film.getTitre().toLowerCase().contains(motCleMinuscule)) {
                 filmsTrouves.add(film);
             }

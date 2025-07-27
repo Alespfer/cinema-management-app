@@ -14,7 +14,6 @@ public interface BilletDAO {
 
     List<Billet> getBilletsByReservationId(int reservationId);
 
-    // LA PROMESSE MANQUANTE EST MAINTENANT DANS LE CONTRAT.
     List<Billet> getBilletsBySeanceId(int seanceId);
 
     List<Billet> getAllBillets();
