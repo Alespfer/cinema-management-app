@@ -2,122 +2,115 @@ package com.mycompany.cinema.view;
 
 import com.mycompany.cinema.Client;
 import com.mycompany.cinema.Personnel;
+import com.mycompany.cinema.Role; // Importation nécessaire pour la redirection par rôle.
 import com.mycompany.cinema.service.AdminService;
 import com.mycompany.cinema.service.ClientService;
 import com.mycompany.cinema.service.impl.CinemaServiceImpl;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Optional;
 
+/**
+ * Fenêtre de connexion initiale de l'application.
+ * Elle sert de point d'entrée et redirige l'utilisateur vers l'interface appropriée
+ * (Client, Administrateur, ou Vendeur) en fonction de son authentification.
+ */
 public class LoginFrame extends JFrame {
     
-    // On garde des références aux deux interfaces de service.
+    // Références aux deux interfaces de service.
     private final ClientService clientService;
     private final AdminService adminService;
 
-    // Déclaration des composants graphiques
+    // Composants graphiques du formulaire.
     private JTextField userField;
     private JPasswordField passField;
     private JRadioButton clientRadio, adminRadio;
 
     public LoginFrame() {
-        // On instancie une seule fois l'implémentation
+        // Instanciation unique de l'implémentation du service.
         CinemaServiceImpl serviceImpl = new CinemaServiceImpl();
-        
-        // On la "cast" dans les deux types d'interfaces qu'elle implémente.
-        // Cela nous garantit que nous n'utiliserons que les méthodes de l'interface appropriée.
         this.clientService = serviceImpl;
         this.adminService = serviceImpl;
 
-        setTitle("Connexion - Cinéma PISE");
-        setSize(400, 200);
+        setTitle("Connexion - Alespfer Cinema");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         initComponents();
     }
 
-        private void initComponents() {
-        // Panneau principal avec un BorderLayout pour une structure globale (Nord, Centre, Sud...)
+    /**
+     * Construit et organise tous les composants graphiques de la fenêtre.
+     */
+    private void initComponents() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
-        // --- 1. Panneau pour le formulaire (au centre du mainPanel) ---
-        // On utilise GridBagLayout pour un alignement précis des colonnes
+        // --- Formulaire de connexion ---
         JPanel formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5); // Marge entre les composants
-        gbc.anchor = GridBagConstraints.WEST; // Aligner les composants à gauche
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
 
         // Ligne 0: Utilisateur/Email
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        formPanel.add(new JLabel("Utilisateur/Email:"), gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL; // Le champ de texte prend toute la largeur
-        gbc.weightx = 1.0; // Donne du "poids" à cette colonne pour qu'elle s'étende
-        userField = new JTextField(20); // 20 colonnes de large par défaut
+        gbc.gridx = 0; gbc.gridy = 0; formPanel.add(new JLabel("Utilisateur/Email:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 0; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        userField = new JTextField(20);
         formPanel.add(userField, gbc);
         
         // Ligne 1: Mot de passe
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.fill = GridBagConstraints.NONE; // Le label ne s'étire pas
-        gbc.weightx = 0.0;
+        gbc.gridx = 0; gbc.gridy = 1; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
         formPanel.add(new JLabel("Mot de passe:"), gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0;
+        gbc.gridx = 1; gbc.gridy = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
         passField = new JPasswordField();
         formPanel.add(passField, gbc);
         
-        // Ligne 2: Boutons Radio
+        // Ligne 2: Boutons Radio pour sélectionner le type de compte
         clientRadio = new JRadioButton("Client", true);
-        adminRadio = new JRadioButton("Admin");
+        adminRadio = new JRadioButton("Personnel");
         ButtonGroup roleGroup = new ButtonGroup();
         roleGroup.add(clientRadio);
         roleGroup.add(adminRadio);
-        
         JPanel radioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         radioPanel.add(clientRadio);
         radioPanel.add(adminRadio);
 
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0;
+        gbc.gridx = 1; gbc.gridy = 2; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
         formPanel.add(radioPanel, gbc);
-
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
-        // --- 2. Panneau pour les boutons (au sud du mainPanel) ---
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT)); // Aligner les boutons à droite
+        // --- Panneau des boutons d'action ---
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton registerButton = new JButton("S'inscrire");
         JButton loginButton = new JButton("Connexion");
-        
         buttonPanel.add(registerButton);
         buttonPanel.add(loginButton);
-        
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // On ajoute le panneau principal à la fenêtre
         add(mainPanel);
 
-        // On associe les actions aux boutons
-        loginButton.addActionListener(e -> handleLogin());
-        registerButton.addActionListener(e -> {
-            RegisterDialog registerDialog = new RegisterDialog(this, clientService);
-            registerDialog.setVisible(true);
+        // --- Association des actions aux boutons (sans lambdas) ---
+        loginButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleLogin();
+            }
         });
         
-        // Ajuste la taille de la fenêtre à son contenu préféré
-        pack();
+        registerButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                RegisterDialog registerDialog = new RegisterDialog(LoginFrame.this, clientService);
+                registerDialog.setVisible(true);
+            }
+        });
+        
+        pack(); // Ajuste la taille de la fenêtre au contenu.
     }
 
+    /**
+     * Gère la logique d'authentification et de redirection après un clic sur "Connexion".
+     */
     private void handleLogin() {
         String user = userField.getText();
         String password = new String(passField.getPassword());
@@ -128,32 +121,46 @@ public class LoginFrame extends JFrame {
         }
 
         if (clientRadio.isSelected()) {
-            // Tentative de connexion en tant que client
+            // --- Logique de connexion pour un CLIENT ---
             Optional<Client> clientOpt = clientService.authentifierClient(user, password);
             
             if (clientOpt.isPresent()) {
-                // Succès : on ferme la fenêtre de login...
-                this.dispose(); 
-                // ...et on lance la fenêtre principale du client.
-                ClientMainFrame frame = new ClientMainFrame(clientService, clientOpt.get());
-                frame.setVisible(true);
+                this.dispose(); // Ferme la fenêtre de login.
+                new ClientMainFrame(clientService, clientOpt.get()).setVisible(true); // Ouvre l'interface client.
             } else {
-                // Échec : on affiche une erreur
                 JOptionPane.showMessageDialog(this, "Email ou mot de passe client incorrect.", "Erreur d'authentification", JOptionPane.ERROR_MESSAGE);
             }
-        } else { // Admin radio is selected
-            // Tentative de connexion en tant qu'admin
+        } else { 
+            // --- Logique de connexion pour un MEMBRE DU PERSONNEL ---
             Optional<Personnel> personnelOpt = adminService.authentifierPersonnel(user, password);
             
             if (personnelOpt.isPresent()) {
-                // Succès : on ferme la fenêtre de login...
-                this.dispose();
-                // ...et on lance la fenêtre principale de l'admin.
-                AdminMainFrame frame = new AdminMainFrame(adminService, personnelOpt.get());
-                frame.setVisible(true);
+                Personnel personnel = personnelOpt.get();
+                
+                // --- DÉBUT DE LA LOGIQUE DE REDIRECTION PAR RÔLE ---
+                Role role = null;
+                // On parcourt la liste des rôles pour trouver celui qui correspond à l'ID du personnel connecté.
+                for (Role r : adminService.getAllRoles()) {
+                    if (r.getId() == personnel.getIdRole()) {
+                        role = r;
+                        break;
+                    }
+                }
+
+                this.dispose(); // Ferme la fenêtre de login.
+                
+                // Redirection conditionnelle basée sur le libellé du rôle.
+                if (role != null && role.getLibelle().equalsIgnoreCase("Vendeur")) {
+                    // Si le rôle est "Vendeur", on lance le Point de Vente.
+                    new PointDeVenteFrame(adminService, personnel).setVisible(true);
+                } else {
+                    // Pour tous les autres rôles (ex: Administrateur), on lance le panneau d'administration complet.
+                    new AdminMainFrame(adminService, personnel).setVisible(true);
+                }
+                // --- FIN DE LA LOGIQUE DE REDIRECTION PAR RÔLE ---
+
             } else {
-                // Échec : on affiche une erreur
-                JOptionPane.showMessageDialog(this, "Nom d'utilisateur ou mot de passe admin incorrect.", "Erreur d'authentification", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Nom d'utilisateur ou mot de passe du personnel incorrect.", "Erreur d'authentification", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

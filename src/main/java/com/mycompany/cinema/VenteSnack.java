@@ -24,6 +24,9 @@ public class VenteSnack implements Serializable {
     // pour pouvoir accepter la valeur 'null'. C'est utile pour les ventes
     // aux clients non enregistrés (anonymes).
     private Integer idClient;
+    
+    private Integer idReservation; // Clé étrangère nullable vers la réservation
+
 
     public VenteSnack() {}
 
@@ -65,6 +68,11 @@ public class VenteSnack implements Serializable {
         return idClient; 
     }
     
+    public Integer getIdReservation() {
+        return idReservation;
+    }
+
+    
     // --- Setters ---
 
     public void setIdVente(int idVente) { 
@@ -81,5 +89,9 @@ public class VenteSnack implements Serializable {
     }
     public void setIdClient(Integer idClient) { 
         this.idClient = idClient; 
+    }  
+      
+    public void setIdReservation(Integer idReservation) {
+        this.idReservation = idReservation;
     }
 }

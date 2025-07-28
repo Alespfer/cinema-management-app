@@ -125,7 +125,36 @@ public interface AdminService extends CinemaService {
 
     /** Retourne tous les rôles possibles pour le personnel. */
     List<Role> getAllRoles();
+    
+    // =========================================================================
+    // === Section Gestion Snacking                       ===
+    // =========================================================================
+    
+    /** Retourne la liste de tous les produits de snacking. */
+    List<ProduitSnack> getAllProduitsSnack();
 
+    /** Ajoute un nouveau produit de snacking au catalogue. */
+    void ajouterProduitSnack(ProduitSnack produit) throws Exception;
+
+    /** Met à jour les informations d'un produit de snacking existant. */
+    void modifierProduitSnack(ProduitSnack produit) throws Exception;
+
+    /** Supprime un produit de snacking du catalogue. */
+    void supprimerProduitSnack(int produitId) throws Exception;
+
+
+    
+    
+    /**
+     * Enregistre une nouvelle vente de snacks dans le système.
+     * @param idPersonnel L'ID de l'employé qui réalise la vente.
+     * @param idCaisse L'ID de la caisse utilisée.
+     * @param panier Une map contenant les ProduitsSnack et leur quantité vendue.
+     * @return L'objet VenteSnack qui a été créé.
+     * @throws Exception en cas de stock insuffisant ou autre erreur métier.
+     */
+    VenteSnack enregistrerVenteSnack(int idPersonnel, int idCaisse, java.util.Map<ProduitSnack, Integer> panier) throws Exception;
+    
     // =========================================================================
     // SECTION REPORTING (Suivi des Ventes)
     // =========================================================================
@@ -146,6 +175,8 @@ public interface AdminService extends CinemaService {
 
     /** Retourne toutes les réservations enregistrées. */
     List<Reservation> getAllReservations();
+    
+   
 
     // --- Ventes Snacking ---
 
@@ -157,4 +188,41 @@ public interface AdminService extends CinemaService {
 
     /** Retourne toutes les ventes snack enregistrées. */
     List<VenteSnack> getAllVentesSnack();
+    
+     /**
+     * Calcule le montant total pour une seule vente de snack.
+     * Nécessaire pour l'affichage du détail dans le tableau du ReportingPanel.
+     * @param vente L'objet VenteSnack concerné.
+     * @return Le montant total de cette transaction.
+     */
+    double calculerTotalPourVenteSnack(VenteSnack vente);
+
+    
+    // --- Méthodes de support pour les vues Admin ---
+
+    
+     /**
+     * Récupère un client par son identifiant.
+     * Nécessaire pour l'affichage des détails dans les rapports ou l'historique.
+     * @param clientId L'ID du client.
+     * @return Un Optional contenant le client.
+     */
+    Optional<Client> getClientById(int clientId);
+
+    /**
+     * Récupère tous les billets associés à un numéro de réservation spécifique.
+     * Nécessaire pour l'historique des réservations.
+     * @param reservationId L'ID de la réservation.
+     * @return Une liste de billets.
+     */
+    List<Billet> getBilletsByReservationId(int reservationId);
+
+    /**
+     * Récupère une séance par son identifiant.
+     * Utile pour obtenir les détails d'une séance à partir d'un billet.
+     * @param seanceId L'ID de la séance.
+     * @return Un Optional contenant la séance.
+     */
+    Optional<Seance> getSeanceById(int seanceId);
+
 }

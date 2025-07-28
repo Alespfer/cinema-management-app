@@ -69,6 +69,30 @@ public interface ClientService extends CinemaService {
      */
     List<Seance> rechercherSeances(LocalDate date, Integer genreId, String titreKeyword);
 
+    
+     /**
+     * Récupère un client par son identifiant.
+     * Nécessaire pour l'affichage des détails dans les rapports ou l'historique.
+     * @param clientId L'ID du client.
+     * @return Un Optional contenant le client.
+     */
+    Optional<Client> getClientById(int clientId);
+
+    /**
+     * Récupère tous les billets associés à un numéro de réservation spécifique.
+     * Nécessaire pour l'historique des réservations.
+     * @param reservationId L'ID de la réservation.
+     * @return Une liste de billets.
+     */
+    List<Billet> getBilletsByReservationId(int reservationId);
+
+    /**
+     * Récupère une séance par son identifiant.
+     * Utile pour obtenir les détails d'une séance à partir d'un billet.
+     * @param seanceId L'ID de la séance.
+     * @return Un Optional contenant la séance.
+     */
+    Optional<Seance> getSeanceById(int seanceId);
 
     // --- Transactionnel ---
 
@@ -84,6 +108,22 @@ public interface ClientService extends CinemaService {
 
     /** Retourne l’historique des réservations du client. */
     List<Reservation> getHistoriqueReservationsClient(int clientId);
+    
+    
+    /**
+     * Enregistre une nouvelle évaluation pour un film par le client connecté.
+     * @param evaluation L'objet EvaluationClient à sauvegarder.
+     * @throws Exception si le client a déjà noté ce film.
+     */
+    void ajouterEvaluation(EvaluationClient evaluation) throws Exception;
+    
+    /**
+     * Vérifie si un client a déjà évalué un film spécifique.
+     * @param clientId L'ID du client.
+     * @param filmId L'ID du film.
+     * @return true si une évaluation existe, false sinon.
+     */
+    boolean aDejaEvalue(int clientId, int filmId);
 
 
  

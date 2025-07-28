@@ -18,4 +18,12 @@ public interface CinemaService {
      * La recherche n’est pas sensible à la casse.
      */
     List<Film> findFilmsByTitre(String keyword);
+    
+    
+    /**
+     * Calcule la note moyenne des spectateurs pour un film donné.
+     * @param filmId L'ID du film.
+     * @return La note moyenne, ou 0.0 si aucune note n'existe.
+     */
+    double getNoteMoyenneSpectateurs(int filmId);
 }

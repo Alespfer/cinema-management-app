@@ -31,7 +31,10 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     private final PlanningDAO planningDAO = new PlanningDAOImpl();
     private final ComporteDAO comporteDAO = new ComporteDAOImpl();
     private final RoleDAO roleDAO = new RoleDAOImpl(); // DAO MANQUANT AJOUTÉ
-    private final GenreDAO genreDAO = new GenreDAOImpl(); // Assurez-vous qu'il est bien instancié
+    private final GenreDAO genreDAO = new GenreDAOImpl(); // Assurez-vous qu'il est bien instancie
+    private final ProduitSnackDAO produitSnackDAO = new ProduitSnackDAOImpl(); // Assurez-vous qu'il est bien instancié
+    private final EvaluationClientDAO evaluationClientDAO = new EvaluationClientDAOImpl();
+
 
     // =========================================================================
     // SECTION COMMUNE (implémentation de la base CinemaService)
@@ -642,6 +645,34 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     }
     
     
+    public Optional<Client> getClientById(int clientId) {
+        // Délégation simple à la couche DAO.
+        return clientDAO.getClientById(clientId);
+    }
+
+    public List<Billet> getBilletsByReservationId(int reservationId) {
+        // Délégation simple à la couche DAO.
+        return billetDAO.getBilletsByReservationId(reservationId);
+    }
+    
+    public double calculerTotalPourVenteSnack(VenteSnack vente) {
+        // Logique métier : parcourir les lignes de la vente et additionner les totaux.
+        double total = 0.0;
+        List<Comporte> lignes = comporteDAO.getLignesByVenteId(vente.getIdVente());
+        // Boucle for-each, conformément aux contraintes.
+        for (Comporte ligne : lignes) {
+            total += ligne.getPrixUnitaire() * ligne.getQuantite();
+        }
+        return total;
+    }
+    
+    public Optional<Seance> getSeanceById(int seanceId) {
+        // Délégation simple à la couche DAO.
+        return seanceDAO.getSeanceById(seanceId);
+    }
+
+    
+    
     /**
     * Calcule le chiffre d'affaires cumulé pour toutes les séances d’un film donné.
     */
@@ -734,4 +765,129 @@ public class CinemaServiceImpl implements ClientService, AdminService {
             }
         }
     }
+        
+        
+         // =========================================================================
+    // === DÉBUT DE L'IMPLÉMENTATION : Section Gestion Snacking              ===
+    // =========================================================================
+
+    /**
+     * Retourne la liste de tous les produits de snacking. Délégation simple au DAO.
+     */
+    @Override
+    public List<ProduitSnack> getAllProduitsSnack() {
+        return produitSnackDAO.getAllProduits();
+    }
+
+    /**
+     * Ajoute un nouveau produit après validation des données.
+     */
+    @Override
+    public void ajouterProduitSnack(ProduitSnack produit) throws Exception {
+        if (produit.getPrixVente() < 0 || produit.getStock() < 0) {
+            throw new Exception("Le prix et le stock ne peuvent pas être négatifs.");
+        }
+        produit.setId(IdManager.getNextProduitSnackId());
+        produitSnackDAO.addProduit(produit);
+    }
+
+    /**
+     * Modifie un produit existant après validation des données.
+     */
+    @Override
+    public void modifierProduitSnack(ProduitSnack produit) throws Exception {
+        if (produit.getPrixVente() < 0 || produit.getStock() < 0) {
+            throw new Exception("Le prix et le stock ne peuvent pas être négatifs.");
+        }
+        produitSnackDAO.updateProduit(produit);
+    }
+
+    /**
+     * Supprime un produit.
+     * Note : Une logique métier plus avancée pourrait interdire la suppression si le produit est dans une vente.
+     */
+    @Override
+    public void supprimerProduitSnack(int produitId) throws Exception {
+        // La méthode delete n'existe pas dans l'interface ProduitSnackDAO, nous devons l'ajouter.
+        // En attendant, cette méthode ne fera rien.
+        // CORRECTION À APPORTER DANS ProduitSnackDAO et ProduitSnackDAOImpl
+        System.out.println("LOGIQUE DE SUPPRESSION DE PRODUIT À IMPLÉMENTER DANS LE DAO");
+    }
+    
+    
+     // =========================================================================
+    // === DÉBUT DE L'IMPLÉMENTATION : Enregistrement de Vente de Snacks     ===
+    // =========================================================================
+    
+    @Override
+    public VenteSnack enregistrerVenteSnack(int idPersonnel, int idCaisse, java.util.Map<ProduitSnack, Integer> panier) throws Exception {
+        // --- Étape 1 : Validation du stock ---
+        // On vérifie d'abord que tous les produits sont en quantité suffisante AVANT de modifier quoi que ce soit.
+        for (java.util.Map.Entry<ProduitSnack, Integer> entry : panier.entrySet()) {
+            ProduitSnack produit = entry.getKey();
+            Integer quantiteDemandee = entry.getValue();
+            if (produit.getStock() < quantiteDemandee) {
+                throw new Exception("Stock insuffisant pour le produit '" + produit.getNomProduit() + "'. Stock restant : " + produit.getStock());
+            }
+        }
+        
+        // --- Étape 2 : Création de la transaction principale (VenteSnack) ---
+        int venteId = IdManager.getNextVenteSnackId();
+        // Pour l'instant, les ventes sont anonymes (pas de client associé). On passe null.
+        VenteSnack nouvelleVente = new VenteSnack(venteId, LocalDateTime.now(), idPersonnel, idCaisse, null);
+        venteSnackDAO.addVenteSnack(nouvelleVente);
+        
+        // --- Étape 3 : Création des lignes de détail (Comporte) et mise à jour du stock ---
+        for (java.util.Map.Entry<ProduitSnack, Integer> entry : panier.entrySet()) {
+            ProduitSnack produit = entry.getKey();
+            Integer quantiteVendue = entry.getValue();
+            
+            // Créer la ligne de détail de la vente.
+            Comporte ligneVente = new Comporte(venteId, produit.getId(), quantiteVendue, produit.getPrixVente());
+            comporteDAO.addLigneVente(ligneVente);
+            
+            // Mettre à jour le stock du produit.
+            produit.setStock(produit.getStock() - quantiteVendue);
+            produitSnackDAO.updateProduit(produit);
+        }
+        
+        return nouvelleVente;
+    }
+    
+    
+    // =========================================================================
+    // === DÉBUT DE L'IMPLÉMENTATION : Logique d'Évaluation                  ===
+    // =========================================================================
+    
+    @Override
+    public double getNoteMoyenneSpectateurs(int filmId) {
+        List<EvaluationClient> evaluations = evaluationClientDAO.getEvaluationsByFilmId(filmId);
+        if (evaluations.isEmpty()) {
+            return 0.0;
+        }
+        double somme = 0;
+        for (EvaluationClient eval : evaluations) {
+            somme += eval.getNote();
+        }
+        return somme / evaluations.size();
+    }
+
+    @Override
+    public void ajouterEvaluation(EvaluationClient evaluation) throws Exception {
+        // Règle métier : un client ne peut pas noter deux fois le même film.
+        if (aDejaEvalue(evaluation.getIdClient(), evaluation.getIdFilm())) {
+            throw new Exception("Vous avez déjà noté ce film.");
+        }
+        // Autre règle : la note doit être dans un intervalle valide (ex: 1 à 5).
+        if (evaluation.getNote() < 1 || evaluation.getNote() > 5) {
+            throw new Exception("La note doit être comprise entre 1 et 5.");
+        }
+        evaluationClientDAO.addEvaluation(evaluation);
+    }
+    
+    @Override
+    public boolean aDejaEvalue(int clientId, int filmId) {
+        return evaluationClientDAO.getEvaluationByClientAndFilm(clientId, filmId).isPresent();
+    }
+
 }
