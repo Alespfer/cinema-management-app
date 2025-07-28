@@ -9,4 +9,7 @@ public interface ClientDAO {
     List<Client> getAllClients();
     void updateClient(Client client);
     void deleteClient(int id);
+    
+    void rechargerDonnees();
+
 }

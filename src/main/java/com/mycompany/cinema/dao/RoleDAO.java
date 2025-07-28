@@ -12,4 +12,7 @@ public interface RoleDAO {
     void addRole(Role role);
     Optional<Role> getRoleById(int id);
     List<Role> getAllRoles();
+    
+    void rechargerDonnees();
+
 }

@@ -225,4 +225,23 @@ public interface AdminService extends CinemaService {
      */
     Optional<Seance> getSeanceById(int seanceId);
 
+    public Optional<Personnel> getPersonnelById(int idPersonnel);
+    
+    
+    /**
+     * AJOUT NÉCESSAIRE POUR LE REPORTING AMÉLIORÉ.
+     * Récupère une caisse par son identifiant.
+     * @param caisseId L'ID de la caisse.
+     * @return Un Optional contenant la caisse si elle est trouvée.
+     */
+    Optional<Caisse> getCaisseById(int caisseId);
+    
+    
+     /**
+     * Force le service à recharger toutes ses données depuis la source de persistance.
+     * C'est la méthode à appeler pour garantir la fraîcheur des données.
+     */
+    void rechargerTouteLaBase();
+
+
 }

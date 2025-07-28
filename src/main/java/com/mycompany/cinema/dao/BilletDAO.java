@@ -19,4 +19,6 @@ public interface BilletDAO {
     List<Billet> getAllBillets();
 
     void deleteBilletsByReservationId(int reservationId);
+
+    void rechargerDonnees();
 }

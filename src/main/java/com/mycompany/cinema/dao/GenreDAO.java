@@ -8,4 +8,8 @@ public interface GenreDAO {
     void addGenre(Genre genre);
     Optional<Genre> getGenreById(int id);
     List<Genre> getAllGenres();
+    
+    
+    void rechargerDonnees();
+
 }

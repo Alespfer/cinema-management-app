@@ -10,4 +10,8 @@ public interface TarifDAO {
     List<Tarif> getAllTarifs();
     void updateTarif(Tarif tarif);
     void deleteTarif(int id);
+    
+    
+    void rechargerDonnees();
+
 }

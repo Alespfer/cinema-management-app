@@ -24,6 +24,17 @@ public abstract class GenericDAOImpl<T> {
         this.filePath = "data/" + fileName;
         this.data = loadFromFile();
     }
+    
+    
+    /**
+     * NOUVELLE MÉTHODE PUBLIQUE.
+     * Force le DAO à relire son fichier de données depuis le disque,
+     * écrasant la liste actuellement en mémoire.
+     */
+    public void rechargerDonnees() {
+        this.data = loadFromFile();
+    }
+
 
     /**
      * Charge la liste d'objets depuis le fichier.

@@ -2,8 +2,6 @@ package com.mycompany.cinema.view;
 
 import com.mycompany.cinema.Billet;
 import com.mycompany.cinema.Client;
-import com.mycompany.cinema.Reservation; // Importation nécessaire
-import com.mycompany.cinema.Salle; // Importation nécessaire
 import com.mycompany.cinema.Seance;
 import com.mycompany.cinema.Siege;
 import com.mycompany.cinema.Tarif;
@@ -14,17 +12,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
-import java.time.format.DateTimeFormatter; // Importation nécessaire
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional; // Importation nécessaire
 
 public class SiegePanel extends JPanel {
-    // ... (Tout le début du fichier reste identique)
     private final ClientService clientService;
-    private final Client clientConnecte;
     private Seance currentSeance;
     private JPanel planSallePanel;
     private JButton reserveButton;
@@ -35,22 +29,24 @@ public class SiegePanel extends JPanel {
     private static final Color COULEUR_OCCUPE = new Color(237, 28, 36);
     private static final Color COULEUR_SELECTIONNE = new Color(63, 72, 204);
 
-    public interface RetourListener {
-        void onRetourClicked();
-    }
+    public interface RetourListener { void onRetourClicked(); }
     private RetourListener retourListener;
+
+    // --- INTERFACE DE LISTENER MODIFIÉE ---
+    public interface ReservationListener {
+        void onReservationDetailsSelected(List<Siege> sieges, Tarif tarif);
+    }
+    private ReservationListener reservationListener;
 
     public SiegePanel(ClientService clientService, Client clientConnecte) {
         this.clientService = clientService;
-        this.clientConnecte = clientConnecte;
         initComponents();
         loadTarifs();
     }
 
     private void initComponents() {
-        // ... (cette méthode reste identique)
         setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createTitledBorder("Choisissez vos places et votre tarif"));
+        setBorder(BorderFactory.createTitledBorder("Étape 2/3 : Choisissez vos places et votre tarif"));
         planSallePanel = new JPanel();
         add(new JScrollPane(planSallePanel), BorderLayout.CENTER);
         JPanel bottomPanel = new JPanel(new BorderLayout(10, 5));
@@ -61,7 +57,7 @@ public class SiegePanel extends JPanel {
         tarifPanel.add(tarifComboBox);
         prixTotalLabel = new JLabel("Prix total : 0.00 €");
         prixTotalLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        reserveButton = new JButton("Valider la réservation");
+        reserveButton = new JButton("Continuer vers les Snacks >>"); // Texte du bouton mis à jour
         JPanel eastPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         eastPanel.add(prixTotalLabel);
         eastPanel.add(reserveButton);
@@ -69,14 +65,10 @@ public class SiegePanel extends JPanel {
         bottomPanel.add(tarifPanel, BorderLayout.CENTER);
         bottomPanel.add(eastPanel, BorderLayout.EAST);
         add(bottomPanel, BorderLayout.SOUTH);
-        initListeners(retourButton);
-    }
-    
-    private void initListeners(JButton retourButton) {
-        // ... (cette méthode reste identique)
+        
         reserveButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                handleReservation();
+                handleContinueToSnacks();
             }
         });
         tarifComboBox.addActionListener(new ActionListener() {
@@ -94,10 +86,8 @@ public class SiegePanel extends JPanel {
     }
 
     private void loadTarifs() {
-        // ... (cette méthode reste identique)
         try {
             List<Tarif> tarifs = clientService.getAllTarifs();
-            tarifComboBox.removeAllItems();
             for (Tarif tarif : tarifs) {
                 tarifComboBox.addItem(tarif);
             }
@@ -116,9 +106,8 @@ public class SiegePanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Erreur lors du chargement des tarifs.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
     private void updatePrixTotal() {
-        // ... (cette méthode reste identique)
         Tarif tarifSelectionne = (Tarif) tarifComboBox.getSelectedItem();
         if (tarifSelectionne == null) { return; }
         int nombreDeSieges = 0;
@@ -129,31 +118,20 @@ public class SiegePanel extends JPanel {
         }
         double prixTotal = tarifSelectionne.getPrix() * nombreDeSieges;
         DecimalFormat df = new DecimalFormat("#,##0.00");
-        prixTotalLabel.setText("Prix total : " + df.format(prixTotal) + " €");
+        prixTotalLabel.setText("Prix billets : " + df.format(prixTotal) + " €");
     }
 
-    /**
-     * Logique exécutée lors du clic sur "Valider la réservation".
-     * Modifiée pour inclure la génération du billet après la réservation.
-     */
-    private void handleReservation() {
-        if (currentSeance == null) {
-            JOptionPane.showMessageDialog(this, "Veuillez sélectionner une séance.", "Action impossible", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        
+    private void handleContinueToSnacks() {
         List<Siege> siegesSelectionnes = new ArrayList<>();
-        List<Integer> selectedSiegeIds = new ArrayList<>();
         for (Map.Entry<JToggleButton, Siege> entry : siegeButtonMap.entrySet()) {
             if (entry.getKey().isSelected()) {
-                selectedSiegeIds.add(entry.getValue().getId());
-                siegesSelectionnes.add(entry.getValue()); // On garde l'objet Siège complet.
+                siegesSelectionnes.add(entry.getValue());
             }
         }
         
         Tarif tarifSelectionne = (Tarif) tarifComboBox.getSelectedItem();
 
-        if (selectedSiegeIds.isEmpty()) {
+        if (siegesSelectionnes.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Veuillez sélectionner au moins un siège.", "Erreur", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -162,68 +140,27 @@ public class SiegePanel extends JPanel {
             return;
         }
 
-        try {
-            // ÉTAPE 1 : Exécuter la réservation et récupérer l'objet Reservation créé.
-            Reservation reservation = clientService.effectuerReservation(clientConnecte.getId(), currentSeance.getId(), selectedSiegeIds, tarifSelectionne.getId());
-            
-            // =====================================================================
-            // === DÉBUT DE L'AJOUT : Préparation et affichage du billet       ===
-            // =====================================================================
-            
-            // ÉTAPE 2 : Rassembler toutes les informations pour le billet.
-            BilletInfo infosBillet = new BilletInfo();
-            infosBillet.clientNom = clientConnecte.getNom();
-            infosBillet.reservationId = reservation.getId();
-            infosBillet.filmTitre = clientService.getFilmDetails(currentSeance.getIdFilm()).getTitre();
-            // On cherche le nom de la salle (amélioration par rapport à l'ID seul).
-            // Remarque : cette recherche pourrait être optimisée dans un vrai projet (ex: Map en cache).
-            Optional<Salle> salleOpt = clientService.getAllSalles().stream().filter(s -> s.getId() == currentSeance.getIdSalle()).findFirst();
-            infosBillet.salleNumero = salleOpt.isPresent() ? salleOpt.get().getNumero() : "Salle " + currentSeance.getIdSalle();
-
-            infosBillet.seanceDateHeure = currentSeance.getDateHeureDebut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'à' HH:mm"));
-            infosBillet.sieges = siegesSelectionnes;
-            infosBillet.tarifLibelle = tarifSelectionne.getLibelle();
-            infosBillet.prixTotal = prixTotalLabel.getText();
-            
-            // ÉTAPE 3 : Créer et afficher le dialogue du billet.
-            BilletDialog billetDialog = new BilletDialog((Frame) SwingUtilities.getWindowAncestor(this), infosBillet);
-            billetDialog.setVisible(true);
-
-            // =====================================================================
-            // === FIN DE L'AJOUT                                                ===
-            // =====================================================================
-
-            // ÉTAPE 4 : Mettre à jour la vue des sièges pour refléter les nouvelles places prises.
-            displaySieges(currentSeance);
-
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Erreur lors de la réservation : \n" + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace(); // Utile pour le débogage.
+        if (reservationListener != null) {
+            reservationListener.onReservationDetailsSelected(siegesSelectionnes, tarifSelectionne);
         }
     }
 
     public void displaySieges(Seance seance) {
-        // ... (cette méthode reste identique)
         this.currentSeance = seance;
         planSallePanel.removeAll();
         siegeButtonMap.clear();
 
         if (seance == null) {
-            planSallePanel.revalidate();
-            planSallePanel.repaint();
-            updatePrixTotal();
-            return;
+            planSallePanel.revalidate(); planSallePanel.repaint();
+            updatePrixTotal(); return;
         }
 
         List<Siege> tousLesSieges = clientService.getSiegesPourSalle(seance.getIdSalle());
         List<Billet> billetsVendus = clientService.getBilletsPourSeance(seance.getId());
         List<Integer> idsSiegesOccupes = new ArrayList<>();
-        for (Billet billet : billetsVendus) {
-            idsSiegesOccupes.add(billet.getIdSiege());
-        }
+        for (Billet billet : billetsVendus) idsSiegesOccupes.add(billet.getIdSiege());
 
-        int maxRangee = 0;
-        int maxSiegeNum = 0;
+        int maxRangee = 0, maxSiegeNum = 0;
         for (Siege siege : tousLesSieges) {
             if (siege.getNumeroRangee() > maxRangee) maxRangee = siege.getNumeroRangee();
             if (siege.getNumeroSiege() > maxSiegeNum) maxSiegeNum = siege.getNumeroSiege();
@@ -234,26 +171,17 @@ public class SiegePanel extends JPanel {
 
         for (Siege siege : tousLesSieges) {
             final JToggleButton siegeButton = new JToggleButton(String.valueOf(siege.getNumeroSiege()));
-            
-            siegeButton.setOpaque(true); 
-            siegeButton.setForeground(Color.WHITE);
+            siegeButton.setOpaque(true); siegeButton.setForeground(Color.WHITE);
             siegeButton.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
-
             siegeButtonMap.put(siegeButton, siege);
 
             if (idsSiegesOccupes.contains(siege.getId())) {
-                siegeButton.setEnabled(false);
-                siegeButton.setBackground(COULEUR_OCCUPE);
+                siegeButton.setEnabled(false); siegeButton.setBackground(COULEUR_OCCUPE);
             } else {
                 siegeButton.setBackground(COULEUR_DISPONIBLE);
-                
                 siegeButton.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        if (siegeButton.isSelected()) {
-                            siegeButton.setBackground(COULEUR_SELECTIONNE);
-                        } else {
-                            siegeButton.setBackground(COULEUR_DISPONIBLE);
-                        }
+                        siegeButton.setBackground(siegeButton.isSelected() ? COULEUR_SELECTIONNE : COULEUR_DISPONIBLE);
                         updatePrixTotal();
                     }
                 });
@@ -267,18 +195,11 @@ public class SiegePanel extends JPanel {
             }
         }
         
-        planSallePanel.revalidate();
-        planSallePanel.repaint();
+        planSallePanel.revalidate(); planSallePanel.repaint();
         updatePrixTotal();
     }
     
-    public void clearPanel() {
-        // ... (cette méthode reste identique)
-        displaySieges(null);
-    }
-
-    public void setRetourListener(RetourListener listener) {
-        // ... (cette méthode reste identique)
-        this.retourListener = listener;
-    }
+    public Seance getCurrentSeance() { return this.currentSeance; }
+    public void setRetourListener(RetourListener listener) { this.retourListener = listener; }
+    public void setReservationListener(ReservationListener listener) { this.reservationListener = listener; }
 }

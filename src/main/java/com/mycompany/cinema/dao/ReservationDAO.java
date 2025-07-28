@@ -14,4 +14,8 @@ public interface ReservationDAO {
     List<Reservation> getAllReservations();
     List<Reservation> getReservationsByClientId(int clientID);
     void deleteReservation(int id);
+    
+    
+    void rechargerDonnees();
+
 }

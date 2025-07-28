@@ -15,16 +15,10 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Panneau de reporting pour l'administrateur.
- * Affiche les chiffres d'affaires pour une date donnée et liste
- * le détail des réservations de billets et des ventes de snacks.
- */
 public class ReportingPanel extends JPanel {
 
     private final AdminService adminService;
 
-    // --- Composants de l'interface ---
     private JTextField dateField;
     private JButton calcCaJourButton;
     private JLabel resultatCaBilletsLabel;
@@ -35,7 +29,6 @@ public class ReportingPanel extends JPanel {
     private JTable ventesSnackTable;
     private DefaultTableModel ventesSnackTableModel;
 
-    // Formateurs pour un affichage propre des nombres et des dates
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final DecimalFormat CURRENCY_FORMATTER = new DecimalFormat("#,##0.00 €");
@@ -84,7 +77,7 @@ public class ReportingPanel extends JPanel {
         reservationsTable = new JTable(reservationsTableModel);
         tabbedPane.addTab("Détail des Réservations", new JScrollPane(reservationsTable));
 
-        String[] ventesSnackColumns = {"ID Vente", "Date", "Personnel", "Total Vente"};
+        String[] ventesSnackColumns = {"ID Vente", "Date", "Canal de Vente", "Vendeur", "Client Associé", "Total Vente"};
         ventesSnackTableModel = new DefaultTableModel(ventesSnackColumns, 0) {
             public boolean isCellEditable(int row, int column) { return false; }
         };
@@ -130,41 +123,37 @@ public class ReportingPanel extends JPanel {
         List<Reservation> reservations = adminService.getAllReservations();
         
         for (Reservation reservation : reservations) {
-            Client client = null;
             Optional<Client> clientOpt = adminService.getClientById(reservation.getIdClient());
-            if (clientOpt.isPresent()) {
-                client = clientOpt.get();
-            }
+            String clientNom = clientOpt.map(Client::getNom).orElse("Client inconnu");
 
             List<Billet> billets = adminService.getBilletsByReservationId(reservation.getId());
             if (billets.isEmpty()) continue;
             
             Billet premierBillet = billets.get(0);
-            
-            Seance seance = null;
             Optional<Seance> seanceOpt = adminService.getSeanceById(premierBillet.getIdSeance());
-            if (seanceOpt.isPresent()){
-                seance = seanceOpt.get();
-            }
             
-            Film film = (seance != null) ? adminService.getFilmDetails(seance.getIdFilm()) : null;
+            String filmTitre = "Film inconnu";
+            String seanceDate = "Date inconnue";
+            if(seanceOpt.isPresent()){
+                Seance seance = seanceOpt.get();
+                seanceDate = seance.getDateHeureDebut().format(DATETIME_FORMATTER);
+                Film film = adminService.getFilmDetails(seance.getIdFilm());
+                if (film != null) {
+                    filmTitre = film.getTitre();
+                }
+            }
 
             double prixTotal = 0;
             for (Billet b : billets) {
-                for (Tarif t : adminService.getAllTarifs()) {
-                    if (t.getId() == b.getIdTarif()) {
-                        prixTotal += t.getPrix();
-                        break;
-                    }
+                final int tarifId = b.getIdTarif();
+                Optional<Tarif> tarifOpt = adminService.getAllTarifs().stream().filter(t -> t.getId() == tarifId).findFirst();
+                if(tarifOpt.isPresent()){
+                    prixTotal += tarifOpt.get().getPrix();
                 }
             }
 
             Object[] rowData = {
-                reservation.getId(),
-                client != null ? client.getNom() : "Client inconnu",
-                film != null ? film.getTitre() : "Film inconnu",
-                seance != null ? seance.getDateHeureDebut().format(DATETIME_FORMATTER) : "Date inconnue",
-                CURRENCY_FORMATTER.format(prixTotal)
+                reservation.getId(), clientNom, filmTitre, seanceDate, CURRENCY_FORMATTER.format(prixTotal)
             };
             reservationsTableModel.addRow(rowData);
         }
@@ -175,12 +164,26 @@ public class ReportingPanel extends JPanel {
         List<VenteSnack> ventes = adminService.getAllVentesSnack();
 
         for (VenteSnack vente : ventes) {
-            Personnel personnel = null;
-            for (Personnel p : adminService.getAllPersonnel()) {
-                if (p.getId() == vente.getIdPersonnel()) {
-                    personnel = p;
-                    break;
-                }
+            String canalDeVente;
+            String vendeur;
+            String clientAssocie;
+            
+            if (vente.getIdPersonnel() >= 0) {
+                Optional<Personnel> pOpt = adminService.getPersonnelById(vente.getIdPersonnel());
+                vendeur = pOpt.map(p -> p.getPrenom() + " " + p.getNom()).orElse("ID " + vente.getIdPersonnel());
+                
+                Optional<Caisse> cOpt = adminService.getCaisseById(vente.getIdCaisse());
+                canalDeVente = cOpt.map(Caisse::getNom).orElse("Caisse ID " + vente.getIdCaisse());
+            } else {
+                vendeur = "N/A";
+                canalDeVente = "Achat en Ligne";
+            }
+
+            if (vente.getIdClient() != null) {
+                Optional<Client> cOpt = adminService.getClientById(vente.getIdClient());
+                clientAssocie = cOpt.map(Client::getNom).orElse("Client ID " + vente.getIdClient());
+            } else {
+                clientAssocie = "Vente Anonyme";
             }
             
             double totalVente = adminService.calculerTotalPourVenteSnack(vente);
@@ -188,7 +191,9 @@ public class ReportingPanel extends JPanel {
             Object[] rowData = {
                 vente.getIdVente(),
                 vente.getDateVente().format(DATETIME_FORMATTER),
-                personnel != null ? personnel.getPrenom() + " " + personnel.getNom() : "Personnel inconnu",
+                canalDeVente,
+                vendeur,
+                clientAssocie,
                 CURRENCY_FORMATTER.format(totalVente)
             };
             ventesSnackTableModel.addRow(rowData);

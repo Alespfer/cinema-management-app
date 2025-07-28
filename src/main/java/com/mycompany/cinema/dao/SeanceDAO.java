@@ -18,4 +18,6 @@ public interface SeanceDAO {
     void updateSeance(Seance seance);
 
     void deleteSeance(int id);
+
+    void rechargerDonnees();
 }

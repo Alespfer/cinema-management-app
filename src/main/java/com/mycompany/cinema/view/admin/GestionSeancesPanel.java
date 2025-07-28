@@ -6,7 +6,11 @@ import com.mycompany.cinema.Seance;
 import com.mycompany.cinema.service.AdminService;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -14,7 +18,6 @@ import java.util.List;
 public class GestionSeancesPanel extends JPanel {
     private final AdminService adminService;
 
-    // Composants de l'interface
     private JList<Seance> seanceJList;
     private DefaultListModel<Seance> seanceListModel;
     private JTextField dateHeureField;
@@ -27,17 +30,25 @@ public class GestionSeancesPanel extends JPanel {
         this.adminService = adminService;
         setLayout(new BorderLayout(10, 10));
         initComponents();
-        loadSeances();
+        // APPEL UNIQUE ET OPTIMISÉ AU DÉMARRAGE
+        rafraichirDonnees();
+    }
+    
+    /**
+     * NOUVELLE MÉTHODE PUBLIQUE.
+     * Cette méthode est la clé de la correction. Elle peut être appelée de l'extérieur
+     * (par AdminMainFrame) pour forcer le rechargement de toutes les données du panneau.
+     */
+    public void rafraichirDonnees() {
         loadFilmsAndSalles();
+        loadSeances();
     }
 
     private void initComponents() {
-        // --- Panneau de la liste des séances (à gauche) ---
         seanceListModel = new DefaultListModel<>();
         seanceJList = new JList<>(seanceListModel);
         seanceJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
-        // Formatter pour afficher les dates et heures de manière lisible
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         seanceJList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
@@ -45,30 +56,30 @@ public class GestionSeancesPanel extends JPanel {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Seance) {
                     Seance seance = (Seance) value;
-                    // On rend l'affichage plus informatif
-                    String filmTitre = adminService.getFilmDetails(seance.getIdFilm()).getTitre();
+                    Film film = adminService.getFilmDetails(seance.getIdFilm());
+                    String filmTitre = (film != null) ? film.getTitre() : "Film inconnu";
                     setText(filmTitre + " - " + seance.getDateHeureDebut().format(formatter));
                 }
                 return this;
             }
         });
 
-        seanceJList.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                seanceSelectionnee = seanceJList.getSelectedValue();
-                displaySeanceDetails(seanceSelectionnee);
+        seanceJList.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    seanceSelectionnee = seanceJList.getSelectedValue();
+                    displaySeanceDetails(seanceSelectionnee);
+                }
             }
         });
         add(new JScrollPane(seanceJList), BorderLayout.WEST);
 
-        // --- Panneau des détails (au centre) ---
         JPanel detailsPanel = new JPanel(new GridLayout(0, 2, 5, 5));
         detailsPanel.setBorder(BorderFactory.createTitledBorder("Détails de la Séance"));
         dateHeureField = new JTextField();
         filmComboBox = new JComboBox<>();
         salleComboBox = new JComboBox<>();
         
-        // Rendu pour afficher le titre du film dans le ComboBox
         filmComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -78,7 +89,6 @@ public class GestionSeancesPanel extends JPanel {
             }
         });
         
-        // Rendu pour afficher le numéro de la salle dans le ComboBox
         salleComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -96,7 +106,6 @@ public class GestionSeancesPanel extends JPanel {
         detailsPanel.add(salleComboBox);
         add(detailsPanel, BorderLayout.CENTER);
 
-        // --- Panneau des boutons d'action (en bas) ---
         JPanel actionPanel = new JPanel();
         nouveauButton = new JButton("Nouveau");
         enregistrerButton = new JButton("Enregistrer");
@@ -106,14 +115,23 @@ public class GestionSeancesPanel extends JPanel {
         actionPanel.add(supprimerButton);
         add(actionPanel, BorderLayout.SOUTH);
 
-        // --- Logique des boutons ---
-        nouveauButton.addActionListener(e -> clearForm());
-        enregistrerButton.addActionListener(e -> saveSeance());
-        supprimerButton.addActionListener(e -> deleteSeance());
+        nouveauButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                clearForm();
+            }
+        });
+        enregistrerButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                saveSeance();
+            }
+        });
+        supprimerButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                deleteSeance();
+            }
+        });
     }
     
-    // --- Méthodes de logique interne ---
-
     private void loadSeances() {
         seanceListModel.clear();
         List<Seance> seances = adminService.getAllSeances();
@@ -121,12 +139,24 @@ public class GestionSeancesPanel extends JPanel {
     }
     
     private void loadFilmsAndSalles() {
-        // On peuple les listes déroulantes
+        Object selectedFilm = filmComboBox.getSelectedItem();
+        Object selectedSalle = salleComboBox.getSelectedItem();
+
+        filmComboBox.removeAllItems();
+        salleComboBox.removeAllItems();
+        
         List<Film> films = adminService.getFilmsAffiche();
-        for (Film film : films) filmComboBox.addItem(film);
+        for (Film film : films) {
+            filmComboBox.addItem(film);
+        }
 
         List<Salle> salles = adminService.getAllSalles();
-        for (Salle salle : salles) salleComboBox.addItem(salle);
+        for (Salle salle : salles) {
+            salleComboBox.addItem(salle);
+        }
+
+        if(selectedFilm != null) filmComboBox.setSelectedItem(selectedFilm);
+        if(selectedSalle != null) salleComboBox.setSelectedItem(selectedSalle);
     }
 
     private void displaySeanceDetails(Seance seance) {
@@ -134,12 +164,9 @@ public class GestionSeancesPanel extends JPanel {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
             dateHeureField.setText(seance.getDateHeureDebut().format(formatter));
             
-            // Sélectionner le bon film dans le ComboBox
             Film filmSeance = adminService.getFilmDetails(seance.getIdFilm());
             filmComboBox.setSelectedItem(filmSeance);
             
-            // Sélectionner la bonne salle dans le ComboBox
-            // Note: C'est lourd. Dans une vraie appli, on utiliserait une Map pour la performance.
             for (int i = 0; i < salleComboBox.getItemCount(); i++) {
                 if (salleComboBox.getItemAt(i).getId() == seance.getIdSalle()) {
                     salleComboBox.setSelectedIndex(i);
@@ -171,22 +198,18 @@ public class GestionSeancesPanel extends JPanel {
                 return;
             }
 
-            // Création d'une nouvelle séance
             if (this.seanceSelectionnee == null) {
-                Seance nouvelleSeance = new Seance();
-                nouvelleSeance.setDateHeureDebut(dateHeure);
-                nouvelleSeance.setIdFilm(filmSelectionne.getId());
-                nouvelleSeance.setIdSalle(salleSelectionnee.getId());
+                Seance nouvelleSeance = new Seance(0, dateHeure, salleSelectionnee.getId(), filmSelectionne.getId());
                 adminService.ajouterSeance(nouvelleSeance);
                 JOptionPane.showMessageDialog(this, "Séance ajoutée avec succès !");
-            } else { // Mise à jour
+            } else {
                 this.seanceSelectionnee.setDateHeureDebut(dateHeure);
                 this.seanceSelectionnee.setIdFilm(filmSelectionne.getId());
                 this.seanceSelectionnee.setIdSalle(salleSelectionnee.getId());
                 adminService.modifierSeance(this.seanceSelectionnee);
                 JOptionPane.showMessageDialog(this, "Séance mise à jour avec succès !");
             }
-            loadSeances();
+            rafraichirDonnees();
             clearForm();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erreur lors de l'enregistrement : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
@@ -204,7 +227,7 @@ public class GestionSeancesPanel extends JPanel {
             try {
                 adminService.supprimerSeance(seanceSelectionnee.getId());
                 JOptionPane.showMessageDialog(this, "Séance supprimée avec succès !");
-                loadSeances();
+                rafraichirDonnees();
                 clearForm();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Erreur lors de la suppression : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);

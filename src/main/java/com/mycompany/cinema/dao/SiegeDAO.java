@@ -12,4 +12,7 @@ public interface SiegeDAO {
     List<Siege> getAllSieges();
     // Le CRUD individuel sur les sièges est rarement nécessaire, mais l'interface le permet.
     void addSiege(Siege siege);
+    
+    void rechargerDonnees();
+
 }

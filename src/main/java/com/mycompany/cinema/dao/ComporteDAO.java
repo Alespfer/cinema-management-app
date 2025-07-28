@@ -10,4 +10,6 @@ import java.util.List;
 public interface ComporteDAO {
     void addLigneVente(Comporte comporte);
     List<Comporte> getLignesByVenteId(int venteId);
+    void rechargerDonnees();
+
 }

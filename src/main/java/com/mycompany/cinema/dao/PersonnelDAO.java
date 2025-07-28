@@ -13,4 +13,8 @@ public interface PersonnelDAO {
     List<Personnel> getAllPersonnel();
     void updatePersonnel(Personnel personnel);
     void deletePersonnel(int id);
+    
+    
+    void rechargerDonnees();
+
 }

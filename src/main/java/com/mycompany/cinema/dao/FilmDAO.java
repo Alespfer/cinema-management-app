@@ -10,4 +10,6 @@ public interface FilmDAO {
     void updateFilm(Film film);
     void deleteFilm(int id);
     List<Film> findFilmsByTitre(String keyword); 
+
+    void rechargerDonnees();
 }

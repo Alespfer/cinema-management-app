@@ -6,6 +6,8 @@ import com.mycompany.cinema.view.admin.*; // Importation groupée pour la lisibi
 
 import javax.swing.*;
 import java.awt.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class AdminMainFrame extends JFrame {
 
@@ -44,6 +46,23 @@ public class AdminMainFrame extends JFrame {
         // On instancie notre nouveau panneau de rapport complet.
         ReportingPanel reportingPanel = new ReportingPanel(this.adminService);
         tabbedPane.addTab("Rapports de Ventes", reportingPanel);
+        
+         // --- MISE EN PLACE DU PROTOCOLE DE RAFRAÎCHISSEMENT ---
+        tabbedPane.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                // On récupère le composant de l'onglet qui vient d'être sélectionné
+                Component selectedComponent = tabbedPane.getSelectedComponent();
+                
+                // Si l'onglet sélectionné est notre panneau de gestion des séances...
+                if (selectedComponent instanceof GestionSeancesPanel) {
+                    // ...on lui ordonne de rafraîchir ses données.
+                    ((GestionSeancesPanel) selectedComponent).rafraichirDonnees();
+                }
+                
+                // On peut ajouter d'autres 'instanceof' ici si d'autres panneaux
+                // ont besoin d'être rafraîchis de la même manière.
+            }
+        });
 
         // =====================================================================
         // === FIN DE LA MODIFICATION                                        ===

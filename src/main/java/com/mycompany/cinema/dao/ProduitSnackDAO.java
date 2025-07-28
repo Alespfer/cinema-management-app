@@ -31,4 +31,8 @@ public interface ProduitSnackDAO {
      * Met à jour les informations d'un produit existant (notamment le stock).
      */
     void updateProduit(ProduitSnack produit);
+    
+    
+    void rechargerDonnees();
+
 }

@@ -3,6 +3,7 @@ package com.mycompany.cinema.service;
 import com.mycompany.cinema.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -93,6 +94,10 @@ public interface ClientService extends CinemaService {
      * @return Un Optional contenant la séance.
      */
     Optional<Seance> getSeanceById(int seanceId);
+    
+    
+    List<ProduitSnack> getAllProduitsSnack(); 
+
 
     // --- Transactionnel ---
 
@@ -101,6 +106,8 @@ public interface ClientService extends CinemaService {
      */
     Reservation effectuerReservation(int clientId, int seanceId, List<Integer> siegeIds, int tarifId) throws Exception;
 
+    
+         
     /** Annule une réservation existante.
      * @throws Exception si la réservation n’existe pas.
      */
@@ -108,6 +115,7 @@ public interface ClientService extends CinemaService {
 
     /** Retourne l’historique des réservations du client. */
     List<Reservation> getHistoriqueReservationsClient(int clientId);
+    
     
     
     /**
@@ -124,7 +132,34 @@ public interface ClientService extends CinemaService {
      * @return true si une évaluation existe, false sinon.
      */
     boolean aDejaEvalue(int clientId, int filmId);
+    
+    
+    /**
+     * Récupère toutes les évaluations postées pour un film spécifique.
+     * @param filmId L'ID du film.
+     * @return Une liste d'objets EvaluationClient.
+     */
+    List<EvaluationClient> getEvaluationsByFilmId(int filmId);
+    
+    
+    
+    /**
+     * Finalise une commande complète incluant billets et snacks.
+     * @param clientId L'ID du client.
+     * @param seanceId L'ID de la séance.
+     * @param siegeIds La liste des IDs des sièges.
+     * @param tarifId L'ID du tarif appliqué.
+     * @param panierSnacks Le panier de snacks (Produit -> Quantité).
+     * @return La réservation créée.
+     * @throws Exception en cas d'erreur (siège non dispo, stock insuffisant...).
+     */
+    Reservation finaliserCommandeComplete(int clientId, int seanceId, List<Integer> siegeIds, int tarifId, Map<ProduitSnack, Integer> panierSnacks) throws Exception;
 
+    /**
+     * Force le service à recharger toutes ses données depuis la source de persistance.
+     * C'est la méthode à appeler pour garantir la fraîcheur des données.
+     */
+    void rechargerTouteLaBase();
 
  
 }

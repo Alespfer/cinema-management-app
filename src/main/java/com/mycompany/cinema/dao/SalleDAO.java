@@ -13,4 +13,6 @@ public interface SalleDAO {
     List<Salle> getAllSalles();
     void updateSalle(Salle salle);
     void deleteSalle(int id);
+
+    void rechargerDonnees();
 }

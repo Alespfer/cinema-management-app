@@ -19,4 +19,7 @@ public interface CaisseDAO {
     void updateCaisse(Caisse caisse);
     
     void deleteCaisse(int id);
+    
+    void rechargerDonnees();
+
 }

@@ -13,4 +13,8 @@ public interface PlanningDAO {
     List<Planning> getPlanningsByPersonnelId(int personnelId);
 
     List<Planning> getAllPlannings(); // Nécessaire pour IdManager
+    
+    
+    void rechargerDonnees();
+
 }

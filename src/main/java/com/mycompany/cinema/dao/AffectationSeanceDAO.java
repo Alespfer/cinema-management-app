@@ -11,4 +11,7 @@ public interface AffectationSeanceDAO {
     List<AffectationSeance> getAffectationsBySeanceId(int seanceId);
     List<AffectationSeance> getAffectationsByPersonnelId(int personnelId);
     void deleteAffectation(int seanceId, int personnelId);
+    
+    void rechargerDonnees();
+
 }

@@ -9,4 +9,7 @@ public interface EvaluationClientDAO {
     List<EvaluationClient> getEvaluationsByFilmId(int filmId);
     Optional<EvaluationClient> getEvaluationByClientAndFilm(int clientId, int filmId);
     List<EvaluationClient> getAllEvaluations();
+    
+    void rechargerDonnees();
+
 }
