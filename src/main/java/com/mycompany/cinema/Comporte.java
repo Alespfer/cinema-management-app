@@ -68,4 +68,6 @@ public class Comporte implements Serializable {
     public void setPrixUnitaire(double prixUnitaire) { 
         this.prixUnitaire = prixUnitaire; 
     }
+    
+    //Ceci est un test
 }
