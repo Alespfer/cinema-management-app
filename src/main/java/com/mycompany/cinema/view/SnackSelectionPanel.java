@@ -15,18 +15,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * C'est le dernier panneau du processus de commande.
+ * Il affiche la liste des produits de snacking disponibles et permet à l'utilisateur
+ * d'en ajouter à sa commande via des JSpinners (compteurs numériques).
+ * Il propose de finaliser la commande avec ou sans snacks.
+ */
 public class SnackSelectionPanel extends JPanel {
 
     private final ClientService clientService;
+    // Une Map qui lie chaque objet ProduitSnack à son JSpinner correspondant.
     private final Map<ProduitSnack, JSpinner> spinnerMap = new HashMap<>();
     private JLabel totalLabel;
     private static final DecimalFormat CURRENCY_FORMATTER = new DecimalFormat("#,##0.00 €");
 
+    // Interface pour notifier le parent que la sélection de snacks est terminée.
     public interface SnackSelectionListener {
         void onSnackSelectionCompleted(Map<ProduitSnack, Integer> cart);
     }
     private SnackSelectionListener listener;
 
+    // Interface pour gérer la navigation (retour ou "ignorer").
     public interface NavigationListener {
         void onRetourToSieges();
         void onSkip();
@@ -41,20 +50,23 @@ public class SnackSelectionPanel extends JPanel {
     }
 
     private void initComponents() {
+        // Le panneau central contiendra une liste verticale de produits.
         JPanel productListPanel = new JPanel();
         productListPanel.setLayout(new BoxLayout(productListPanel, BoxLayout.Y_AXIS));
         JScrollPane scrollPane = new JScrollPane(productListPanel);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        scrollPane.setBorder(new EmptyBorder(10, 10, 10, 10));
 
+        // On récupère tous les produits disponibles via le service.
         List<ProduitSnack> produits = clientService.getAllProduitsSnack();
         for (ProduitSnack produit : produits) {
+            // On n'affiche que les produits qui sont en stock.
             if (produit.getStock() > 0) {
+                // Pour chaque produit, on crée un petit panneau dédié et on l'ajoute à la liste.
                 productListPanel.add(createProductPanel(produit));
-                productListPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+                productListPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Petit espace vertical.
             }
         }
 
+        // --- Panneau du bas ---
         JPanel bottomPanel = new JPanel(new BorderLayout(10,10));
         totalLabel = new JLabel("Total Snacks: " + CURRENCY_FORMATTER.format(0.0));
         totalLabel.setFont(new Font("Arial", Font.BOLD, 16));
@@ -75,25 +87,17 @@ public class SnackSelectionPanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
 
-        retourButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (navigationListener != null) navigationListener.onRetourToSieges();
-            }
-        });
-
-        skipButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (navigationListener != null) navigationListener.onSkip();
-            }
-        });
-
-        validerButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (listener != null) listener.onSnackSelectionCompleted(getCart());
-            }
-        });
+        // --- Listeners ---
+        retourButton.addActionListener(e -> { if (navigationListener != null) navigationListener.onRetourToSieges(); });
+        skipButton.addActionListener(e -> { if (navigationListener != null) navigationListener.onSkip(); });
+        validerButton.addActionListener(e -> { if (listener != null) listener.onSnackSelectionCompleted(getCart()); });
     }
 
+    /**
+     * Crée un sous-panneau pour un seul produit, contenant son nom, son prix et un compteur (JSpinner).
+     * @param produit Le produit à afficher.
+     * @return Le JPanel configuré.
+     */
     private JPanel createProductPanel(final ProduitSnack produit) {
         JPanel panel = new JPanel(new BorderLayout(20, 0));
         panel.setBorder(BorderFactory.createCompoundBorder(
@@ -106,23 +110,22 @@ public class SnackSelectionPanel extends JPanel {
                 + "<font color='blue'>Prix: " + CURRENCY_FORMATTER.format(produit.getPrixVente()) + "</font></html>";
         JLabel productLabel = new JLabel(labelText);
         
+        // Le Spinner est configuré pour aller de 0 au stock maximum disponible.
         SpinnerModel spinnerModel = new SpinnerNumberModel(0, 0, produit.getStock(), 1);
         final JSpinner spinner = new JSpinner(spinnerModel);
-        spinner.setPreferredSize(new Dimension(60, (int)spinner.getPreferredSize().getHeight()));
         
-        // Listener conforme aux contraintes
-        spinner.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                updateTotal();
-            }
-        });
-        spinnerMap.put(produit, spinner);
+        // Chaque fois que la valeur du spinner change, on met à jour le total.
+        spinner.addChangeListener(e -> updateTotal());
+        spinnerMap.put(produit, spinner); // On stocke la référence au spinner.
 
         panel.add(productLabel, BorderLayout.CENTER);
         panel.add(spinner, BorderLayout.EAST);
         return panel;
     }
 
+    /**
+     * Calcule et met à jour le label du total en parcourant la map des spinners.
+     */
     private void updateTotal() {
         double total = 0.0;
         for (Map.Entry<ProduitSnack, JSpinner> entry : spinnerMap.entrySet()) {
@@ -133,6 +136,10 @@ public class SnackSelectionPanel extends JPanel {
         totalLabel.setText("Total Snacks: " + CURRENCY_FORMATTER.format(total));
     }
 
+    /**
+     * Construit le "panier" (une Map) à partir des valeurs actuelles des spinners.
+     * @return Une Map contenant uniquement les produits avec une quantité > 0.
+     */
     private Map<ProduitSnack, Integer> getCart() {
         Map<ProduitSnack, Integer> cart = new HashMap<>();
         for (Map.Entry<ProduitSnack, JSpinner> entry : spinnerMap.entrySet()) {
@@ -144,6 +151,9 @@ public class SnackSelectionPanel extends JPanel {
         return cart;
     }
 
+    /**
+     * Réinitialise tous les spinners à 0. Appelé quand on arrive sur ce panneau.
+     */
     public void resetPanel() {
         for (JSpinner spinner : spinnerMap.values()) {
             spinner.setValue(0);
@@ -151,6 +161,7 @@ public class SnackSelectionPanel extends JPanel {
         updateTotal();
     }
 
+    // Setters pour les listeners.
     public void setListener(SnackSelectionListener listener) { this.listener = listener; }
     public void setNavigationListener(NavigationListener navigationListener) { this.navigationListener = navigationListener; }
 }

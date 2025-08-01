@@ -5,6 +5,13 @@ import com.mycompany.cinema.service.ClientService;
 import javax.swing.*;
 import java.awt.*;
 
+
+
+/**
+ * C'est la fenêtre de dialogue modale qui s'ouvre lorsque
+ * l'utilisateur clique sur "S'inscrire" depuis la fenêtre de connexion.
+ * Elle contient un formulaire simple pour créer un nouveau compte client.
+ */
 public class RegisterDialog extends JDialog {
 
     private final ClientService clientService;

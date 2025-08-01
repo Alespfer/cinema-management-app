@@ -6,22 +6,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-// DAO pour gérer les employés du cinéma.
+/**
+ * Implémentation concrète pour la gestion des données des employés dans le fichier "personnel.dat".
+ * Cette classe contient toute la logique de bas niveau pour la persistance du personnel.
+ * 
+ * Pour le développeur de l'interface graphique : vous ne toucherez jamais à cette classe.
+ * Cependant, toutes les actions que vous implémenterez dans le panneau `GestionPersonnelPanel`
+ * (créer un nouvel employé, mettre à jour son rôle, le supprimer) feront appel au 'AdminService'
+ * qui, à son tour, utilisera les méthodes de cette classe pour effectuer les modifications
+ * dans la base de données de fichiers.
+ */
 public class PersonnelDAOImpl extends GenericDAOImpl<Personnel> implements PersonnelDAO {
 
-    // Initialise la DAO avec le fichier personnel.
     public PersonnelDAOImpl() {
         super("personnel.dat");
     }
 
-    // Ajoute un nouvel employé à la liste.
     @Override
     public void addPersonnel(Personnel personnel) {
         this.data.add(personnel);
         saveToFile();
     }
 
-    // Recherche un employé par identifiant.
     @Override
     public Optional<Personnel> getPersonnelById(int id) {
         for (Personnel p : this.data) {
@@ -32,15 +38,15 @@ public class PersonnelDAOImpl extends GenericDAOImpl<Personnel> implements Perso
         return Optional.empty();
     }
 
-    // Retourne la liste complète des membres du personnel.
     @Override
     public List<Personnel> getAllPersonnel() {
+        // Retourne une copie de la liste pour éviter des modifications accidentelles de l'extérieur.
         return new ArrayList<>(this.data);
     }
 
-    // Met à jour les informations d’un employé existant.
     @Override
     public void updatePersonnel(Personnel updatedPersonnel) {
+        // On cherche l'employé par son ID pour le remplacer par sa version mise à jour.
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getId() == updatedPersonnel.getId()) {
                 this.data.set(i, updatedPersonnel);
@@ -50,9 +56,9 @@ public class PersonnelDAOImpl extends GenericDAOImpl<Personnel> implements Perso
         }
     }
 
-    // Supprime un employé à partir de son identifiant.
     @Override
     public void deletePersonnel(int id) {
+        // On cherche l'employé par son ID pour le supprimer de la liste.
         boolean changed = false;
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getId() == id) {

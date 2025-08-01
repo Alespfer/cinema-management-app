@@ -16,7 +16,12 @@ public class InfosPersonnellesPanel extends JPanel {
 
     private final ClientService clientService;
     private final Client clientConnecte;
+    // Référence à la fenêtre de dialogue parente (EspaceClientDialog) pour pouvoir la fermer.
+
     private final JDialog parentDialog;
+
+    
+    // Champs du formulaire.
 
     private JTextField nomField;
     private JPasswordField passField;
@@ -37,6 +42,8 @@ public class InfosPersonnellesPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         
         nomField = new JTextField(20);
+        // On pré-remplit le champ "nom" avec le nom actuel du client.
+
         nomField.setText(clientConnecte.getNom()); // Pré-remplissage avec le nom actuel.
         passField = new JPasswordField(20);
         confirmPassField = new JPasswordField(20);
@@ -50,11 +57,15 @@ public class InfosPersonnellesPanel extends JPanel {
 
         add(formPanel, BorderLayout.NORTH);
         
-        // Panneau pour les boutons d'action.
+        // Panneau pour les boutons "Mettre à jour" et "Supprimer".
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton updateButton = new JButton("Mettre à jour");
         JButton deleteButton = new JButton("Supprimer mon compte");
-        deleteButton.setBackground(Color.RED); // Mise en évidence du danger.
+        
+        
+        // On met en rouge le bouton de suppression pour attirer l'attention sur son danger.
+
+        deleteButton.setBackground(Color.RED); 
         deleteButton.setForeground(Color.WHITE);
         
         buttonPanel.add(updateButton);
@@ -75,7 +86,11 @@ public class InfosPersonnellesPanel extends JPanel {
             }
         });
     }
-
+    
+    
+     /**
+     * Gère la mise à jour des informations du client.
+     */
     private void handleUpdate() {
         // Validation : Le nom ne doit pas être vide.
         if (nomField.getText().trim().isEmpty()) {
@@ -91,6 +106,9 @@ public class InfosPersonnellesPanel extends JPanel {
         char[] confirmPass = confirmPassField.getPassword();
         
         if (newPass.length > 0) {
+            
+            // Si un nouveau mot de passe est saisi, on vérifie que les deux champs correspondent.
+
             if (!Arrays.equals(newPass, confirmPass)) {
                 JOptionPane.showMessageDialog(this, "Les nouveaux mots de passe ne correspondent pas.", "Erreur de validation", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -106,8 +124,13 @@ public class InfosPersonnellesPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Erreur lors de la mise à jour : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    /**
+     * Gère la suppression du compte client.
+     */
     private void handleDelete() {
+        
+        // Affiche une boîte de dialogue de confirmation très explicite sur les risques.
+
         int response = JOptionPane.showConfirmDialog(this, 
                 "ATTENTION : Cette action est irréversible et supprimera votre compte\net tout votre historique de réservations.\nÊtes-vous absolument sûr de vouloir continuer ?",
                 "Confirmation de suppression de compte",

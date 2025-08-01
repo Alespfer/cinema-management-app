@@ -5,11 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Représente un film projeté au cinéma.
- * Contient toutes les informations descriptives d'un film.
+ * C'est l'un des objets les plus importants pour l'interface graphique.
+ * Il contient toutes les informations à afficher sur un film : son titre,
+ * son affiche, son résumé, etc.
  * 
- * Implémente Serializable pour la sauvegarde.
+ * Vous utiliserez un objet `Film` pour peupler :
+ * - Les lignes du tableau dans `ProgrammationPanel`.
+ * - L'intégralité du panneau de détails `FilmDetailPanel`.
+ * - Les formulaires de gestion dans `GestionFilmsPanel` pour l'administrateur.
  * 
+ * Notez la présence de la `List<Genre> genres`. C'est une liste d'objets `Genre`
+ * directement incluse dans le film, ce qui facilite l'affichage des catégories
+ * (Action, Aventure...) associées au film.
  */
 public class Film implements Serializable {
     
@@ -17,30 +24,24 @@ public class Film implements Serializable {
     private String titre;
     private String synopsis;
     private int dureeMinutes;
-    private String classification;
-    private String urlAffiche; // Le nom du fichier image (ex: "dune.jpg")
+    private String classification; // Ex: "Tous publics", "-12 ans"
+    private String urlAffiche;     // Le nom du fichier de l'affiche (ex: "dune.jpg")
+    private double notePresse;     // La note donnée par les critiques professionnels.
     
-    // Pour la relation Many-to-Many avec Genre, on inclut directement la liste des genres.
-    // C'est une façon plus "objet" de représenter ce lien que d'avoir une classe Film_Genre.
+    // Un film peut avoir plusieurs genres (ex: "Science-Fiction" ET "Aventure").
+    // On stocke donc une liste d'objets Genre directement ici.
     private List<Genre> genres;
-    
-    
-    private double notePresse; // Note de la presse, ex: 4.5 sur 5.
 
-
+    /**
+     * Constructeur vide. Important : on initialise la liste des genres
+     * pour éviter les erreurs de type `NullPointerException`.
+     */
     public Film() {
         this.genres = new ArrayList<>();
     }
 
     /**
-     * Constructeur principal pour créer un objet Film complet avec toutes ses informations.
-     * @param idFilm L'identifiant unique du film.
-     * @param titre Le titre du film.
-     * @param synopsis Le résumé du film.
-     * @param dureeMinutes La durée en minutes.
-     * @param classification La classification (ex: "Tous publics").
-     * @param urlAffiche Le nom du fichier de l'affiche.
-     * @param notePresse La note attribuée par la presse.
+     * Crée un objet Film complet.
      */
     public Film(int idFilm, String titre, String synopsis, int dureeMinutes, String classification, String urlAffiche, double notePresse) {
         this.idFilm = idFilm;
@@ -49,11 +50,11 @@ public class Film implements Serializable {
         this.dureeMinutes = dureeMinutes;
         this.classification = classification;
         this.urlAffiche = urlAffiche;
-        this.notePresse = notePresse; // Le nouvel attribut est maintenant initialisé.
-        this.genres = new ArrayList<>(); // Initialisation de la liste.
+        this.notePresse = notePresse;
+        this.genres = new ArrayList<>(); // Toujours initialiser les listes !
     }
 
-    // --- Getters and Setters ---
+    // --- ACCESSEURS (Getters and Setters) ---
 
     public int getId() { 
         return idFilm; 
@@ -104,11 +105,9 @@ public class Film implements Serializable {
         this.genres = genres; 
     }
     
-    
     public double getNotePresse() {
         return notePresse;
     }
-
     public void setNotePresse(double notePresse) {
         this.notePresse = notePresse;
     }

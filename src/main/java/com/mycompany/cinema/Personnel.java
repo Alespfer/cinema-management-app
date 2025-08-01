@@ -3,12 +3,16 @@ package com.mycompany.cinema;
 import java.io.Serializable;
 
 /**
- * Représente un membre du personnel du cinéma.
- * Chaque membre du personnel a un rôle (Administrateur, Vendeur, etc.)
- * qui détermine ses droits et fonctions.
+ * Représente un employé du cinéma (administrateur, vendeur, etc.).
  * 
- * Implémente Serializable pour la sauvegarde.
+ * Cette classe est cruciale pour la partie "back-office" de l'application.
+ * L'interface graphique utilisera un objet `Personnel` après une connexion réussie
+ * en mode "Personnel" pour :
+ * 1. Déterminer quelle interface afficher (Panneau Admin complet ou Point de Vente).
+ * 2. Afficher le nom de l'employé connecté.
+ * 3. Gérer les droits d'accès.
  * 
+ * L'interface client n'a pas besoin de connaître cette classe.
  */
 public class Personnel implements Serializable {
     
@@ -17,13 +21,16 @@ public class Personnel implements Serializable {
     private String prenom;
     private String motDePasse;
     
-    // Clé étrangère vers l'objet Role
+    // Fait le lien avec l'objet `Role` pour connaître ses permissions.
     private int idRole;
 
+    /**
+     * Constructeur vide (nécessité technique).
+     */
     public Personnel() {}
 
     /**
-     * Constructeur pour créer un nouvel employé.
+     * Crée un nouvel employé.
      */
     public Personnel(int idPersonnel, String nom, String prenom, String motDePasse, int idRole) {
         this.idPersonnel = idPersonnel;
@@ -33,7 +40,7 @@ public class Personnel implements Serializable {
         this.idRole = idRole;
     }
 
-    // --- Getters ---
+    // --- ACCESSEURS (Getters) ---
 
     public int getId() { 
         return idPersonnel; 
@@ -51,7 +58,7 @@ public class Personnel implements Serializable {
         return idRole;
     }
 
-    // --- Setters ---
+    // --- MUTATEURS (Setters) ---
 
     public void setId(int idPersonnel) { 
         this.idPersonnel = idPersonnel; 

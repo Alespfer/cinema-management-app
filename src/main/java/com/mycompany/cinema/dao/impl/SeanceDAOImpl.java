@@ -7,22 +7,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-// DAO pour la gestion des séances de projection.
+/**
+ * Implémentation concrète pour la gestion des séances de projection dans "seances.dat".
+ * 
+ * Pour le développeur de l'interface graphique : cette classe est le moteur de
+ * la programmation du cinéma.
+ * - Le `ProgrammationPanel` utilise massivement cette classe (via le service) pour filtrer
+ *   et afficher les séances disponibles selon les critères du client.
+ * - Le `FilmDetailPanel` l'utilise pour afficher les horaires d'un film pour un jour donné.
+ * - Le `GestionSeancesPanel` de l'administrateur s'en sert pour créer, modifier et
+ *   supprimer les séances.
+ */
 public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
 
-    // Initialise le DAO avec le fichier des séances.
     public SeanceDAOImpl() {
         super("seances.dat");
     }
 
-    // Ajoute une nouvelle séance.
     @Override
     public void addSeance(Seance seance) {
         this.data.add(seance);
         saveToFile();
     }
 
-    // Recherche une séance à partir de son identifiant.
     @Override
     public Optional<Seance> getSeanceById(int id) {
         for (Seance seance : this.data) {
@@ -33,16 +40,15 @@ public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
         return Optional.empty();
     }
 
-    // Retourne toutes les séances enregistrées.
     @Override
     public List<Seance> getAllSeances() {
         return new ArrayList<>(this.data);
     }
 
-    // Retourne toutes les séances associées à un film.
     @Override
     public List<Seance> getSeancesByFilmId(int filmId) {
         List<Seance> resultat = new ArrayList<>();
+        // Filtre les séances pour ne garder que celles d'un film spécifique.
         for (Seance seance : this.data) {
             if (seance.getIdFilm() == filmId) {
                 resultat.add(seance);
@@ -51,11 +57,12 @@ public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
         return resultat;
     }
 
-    // Retourne toutes les séances ayant lieu à une date donnée.
     @Override
     public List<Seance> getSeancesByDate(LocalDate date) {
         List<Seance> resultat = new ArrayList<>();
+        // Filtre les séances pour ne garder que celles d'un jour donné.
         for (Seance seance : this.data) {
+            // On compare uniquement la partie "date" de l'objet LocalDateTime.
             if (seance.getDateHeureDebut().toLocalDate().isEqual(date)) {
                 resultat.add(seance);
             }
@@ -63,7 +70,6 @@ public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
         return resultat;
     }
 
-    // Met à jour les informations d’une séance existante.
     @Override
     public void updateSeance(Seance updatedSeance) {
         for (int i = 0; i < this.data.size(); i++) {
@@ -75,7 +81,6 @@ public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
         }
     }
 
-    // Supprime une séance à partir de son identifiant.
     @Override
     public void deleteSeance(int id) {
         boolean changed = false;

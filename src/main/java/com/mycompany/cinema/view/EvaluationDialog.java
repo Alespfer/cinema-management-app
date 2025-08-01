@@ -10,8 +10,9 @@ import java.awt.event.ActionListener;
 import java.time.LocalDateTime;
 
 /**
- * Fenêtre de dialogue permettant à un client de noter un film et de laisser un commentaire.
- * Appelée depuis le FilmDetailPanel.
+ * Mon binôme : Fenêtre de dialogue modale qui permet au client de laisser un avis
+ * sur un film (une note de 1 à 5 et un commentaire).
+ * Elle est appelée depuis le panneau de détail d'un film.
  */
 public class EvaluationDialog extends JDialog {
 
@@ -19,15 +20,16 @@ public class EvaluationDialog extends JDialog {
     private final int clientId;
     private final int filmId;
 
-    private ButtonGroup ratingGroup;
-    private JTextArea commentaireArea;
+    // Composants de l'interface qu'on doit pouvoir accéder dans plusieurs méthodes.
+    private ButtonGroup ratingGroup; // Pour gérer les boutons radio de la note.
+    private JTextArea commentaireArea; // Pour récupérer le texte du commentaire.
 
     /**
-     * Constructeur de la fenêtre d'évaluation.
-     * @param owner La fenêtre parente (pour le comportement modal).
-     * @param clientService L'instance du service pour la logique métier.
-     * @param clientId L'ID du client qui évalue.
-     * @param filmId L'ID du film à évaluer.
+     * Constructeur de la fenêtre.
+     * @param owner Fenêtre parente.
+     * @param clientService Le service pour envoyer l'évaluation.
+     * @param clientId L'ID du client connecté.
+     * @param filmId L'ID du film concerné.
      */
     public EvaluationDialog(Frame owner, ClientService clientService, int clientId, int filmId) {
         super(owner, "Donner votre avis", true);
@@ -43,68 +45,68 @@ public class EvaluationDialog extends JDialog {
     }
 
     private void initComponents() {
-        // --- Panneau pour la note (étoiles) ---
+        // --- Panneau pour la note (boutons radio en forme d'étoiles) ---
         JPanel ratingPanel = new JPanel();
         ratingPanel.setBorder(BorderFactory.createTitledBorder("Votre note"));
-        ratingGroup = new ButtonGroup();
+        ratingGroup = new ButtonGroup(); // Garantit qu'un seul bouton radio peut être sélectionné à la fois.
         for (int i = 1; i <= 5; i++) {
             JRadioButton starButton = new JRadioButton(i + " ★");
-            starButton.setActionCommand(String.valueOf(i)); // Stocke la note (1, 2, 3...)
+            // setActionCommand est une astuce pour stocker une valeur simple (la note) dans le bouton.
+            starButton.setActionCommand(String.valueOf(i));
             ratingGroup.add(starButton);
             ratingPanel.add(starButton);
         }
 
-        // --- Panneau pour le commentaire ---
+        // --- Zone de texte pour le commentaire ---
         JPanel commentPanel = new JPanel(new BorderLayout());
         commentPanel.setBorder(BorderFactory.createTitledBorder("Votre commentaire (optionnel)"));
         commentaireArea = new JTextArea();
-        commentaireArea.setLineWrap(true);
-        commentaireArea.setWrapStyleWord(true);
+        commentaireArea.setLineWrap(true); // Le texte revient à la ligne automatiquement.
+        commentaireArea.setWrapStyleWord(true); // Coupe les lignes aux espaces.
         commentPanel.add(new JScrollPane(commentaireArea), BorderLayout.CENTER);
 
-        // --- Panneau des boutons d'action ---
+        // --- Panneau pour les boutons "Valider" et "Annuler" ---
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton validerButton = new JButton("Valider");
         JButton annulerButton = new JButton("Annuler");
         buttonPanel.add(validerButton);
         buttonPanel.add(annulerButton);
 
-        // --- Assemblage ---
+        // --- Assemblage final des panneaux dans la fenêtre ---
         add(ratingPanel, BorderLayout.NORTH);
         add(commentPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        // --- Listeners (conformes aux contraintes) ---
-        annulerButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dispose(); // Ferme la fenêtre.
-            }
-        });
+        // --- Ajout des écouteurs d'actions ---
+        annulerButton.addActionListener(e -> dispose()); // Ferme la fenêtre sans rien faire.
 
-        validerButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                handleValidation();
-            }
-        });
+        validerButton.addActionListener(e -> handleValidation()); // Appelle la méthode de validation.
     }
 
+    /**
+     * Gère la logique lorsque l'utilisateur clique sur "Valider".
+     */
     private void handleValidation() {
-        // Validation : une note doit être sélectionnée.
+        // On vérifie d'abord que l'utilisateur a bien sélectionné une note.
         if (ratingGroup.getSelection() == null) {
             JOptionPane.showMessageDialog(this, "Veuillez sélectionner une note.", "Erreur", JOptionPane.WARNING_MESSAGE);
-            return;
+            return; // On arrête l'exécution de la méthode.
         }
 
+        // On récupère les données saisies par l'utilisateur.
         int note = Integer.parseInt(ratingGroup.getSelection().getActionCommand());
         String commentaire = commentaireArea.getText();
 
+        // On crée un objet "modèle" EvaluationClient avec ces données.
         EvaluationClient evaluation = new EvaluationClient(clientId, filmId, note, commentaire, LocalDateTime.now());
 
         try {
+            // On passe cet objet au service pour qu'il l'enregistre.
             clientService.ajouterEvaluation(evaluation);
             JOptionPane.showMessageDialog(this, "Merci pour votre avis !", "Succès", JOptionPane.INFORMATION_MESSAGE);
-            dispose(); // Ferme la fenêtre après succès.
+            dispose(); // On ferme la fenêtre en cas de succès.
         } catch (Exception ex) {
+            // Si le service renvoie une erreur, on l'affiche.
             JOptionPane.showMessageDialog(this, "Erreur lors de l'enregistrement : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }

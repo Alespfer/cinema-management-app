@@ -6,22 +6,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-// DAO pour la gestion des films (ajout, recherche, modification, suppression).
+/**
+ * Implémentation concrète pour la gestion du catalogue de films dans le fichier "films.dat".
+ * C'est l'une des classes de gestion les plus importantes.
+ * 
+ * Pour le développeur de l'interface graphique : cette classe fournit toutes les données
+ * nécessaires pour les panneaux liés aux films.
+ * - `getAllFilms` et `findFilmsByTitre` alimentent le tableau du `ProgrammationPanel`.
+ * - `getFilmById` est crucial pour afficher toutes les informations dans le `FilmDetailPanel`.
+ * - Les autres méthodes (`add`, `update`, `delete`) sont les actions effectuées par
+ *   les boutons du `GestionFilmsPanel` de l'administrateur.
+ */
 public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
 
-    // Initialise le DAO avec le fichier associé aux films.
     public FilmDAOImpl() {
         super("films.dat");
     }
 
-    // Ajoute un nouveau film à la base de données.
     @Override
     public void addFilm(Film film) {
         this.data.add(film);
         saveToFile();
     }
 
-    // Recherche un film par son identifiant.
     @Override
     public Optional<Film> getFilmById(int id) {
         for (Film film : this.data) {
@@ -32,13 +39,11 @@ public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
         return Optional.empty();
     }
 
-    // Retourne l'ensemble des films enregistrés.
     @Override
     public List<Film> getAllFilms() {
         return new ArrayList<>(this.data);
     }
 
-    // Met à jour les informations d'un film existant.
     @Override
     public void updateFilm(Film updatedFilm) {
         for (int i = 0; i < this.data.size(); i++) {
@@ -50,7 +55,6 @@ public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
         }
     }
 
-    // Supprime un film selon son identifiant.
     @Override
     public void deleteFilm(int id) {
         boolean changed = false;
@@ -66,12 +70,13 @@ public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
         }
     }
 
-    // Recherche les films dont le titre contient un mot-clé donné (sans tenir compte de la casse).
     @Override
     public List<Film> findFilmsByTitre(String keyword) {
         List<Film> filmsTrouves = new ArrayList<>();
+        // On convertit le mot-clé en minuscules une seule fois pour l'efficacité.
         String motCleMinuscule = keyword.toLowerCase();
         for (Film film : this.data) {
+            // On compare les titres en minuscules pour que la recherche ne soit pas sensible à la casse.
             if (film.getTitre().toLowerCase().contains(motCleMinuscule)) {
                 filmsTrouves.add(film);
             }

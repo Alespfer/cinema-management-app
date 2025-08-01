@@ -6,22 +6,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-// DAO pour gérer les genres de films.
+/**
+ * Implémentation concrète pour gérer la sauvegarde des genres de films
+ * dans le fichier "genres.dat".
+ * 
+ * Pour le développeur de l'interface graphique : cette classe fournit les données
+ * pour tous les menus déroulants de sélection de genre, que ce soit dans le
+ * `ProgrammationPanel` pour le client ou dans les panneaux d'administration.
+ */
 public class GenreDAOImpl extends GenericDAOImpl<Genre> implements GenreDAO {
 
-    // Initialise la DAO avec le fichier de genres.
     public GenreDAOImpl() {
         super("genres.dat");
     }
 
-    // Ajoute un nouveau genre à la base de données.
     @Override
     public void addGenre(Genre genre) {
         this.data.add(genre);
         saveToFile();
     }
 
-    // Recherche un genre à partir de son identifiant.
     @Override
     public Optional<Genre> getGenreById(int id) {
         for (Genre g : this.data) {
@@ -32,9 +36,9 @@ public class GenreDAOImpl extends GenericDAOImpl<Genre> implements GenreDAO {
         return Optional.empty();
     }
 
-    // Retourne la liste complète des genres enregistrés.
     @Override
     public List<Genre> getAllGenres() {
+        // Retourne une copie de la liste pour la sécurité.
         return new ArrayList<>(this.data);
     }
 }

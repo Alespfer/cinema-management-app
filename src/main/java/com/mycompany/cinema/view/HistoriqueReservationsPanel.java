@@ -72,7 +72,7 @@ public class HistoriqueReservationsPanel extends JPanel {
     /**
      * Charge l'historique des réservations et peuple le tableau.
      */
-    private void loadHistorique() {
+    public void loadHistorique() {
         tableModel.setRowCount(0); // Vide le tableau avant de le remplir.
         List<Reservation> reservations = clientService.getHistoriqueReservationsClient(clientConnecte.getId());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");

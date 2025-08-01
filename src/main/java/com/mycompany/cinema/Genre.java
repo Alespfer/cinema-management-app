@@ -3,30 +3,33 @@ package com.mycompany.cinema;
 import java.io.Serializable;
 
 /**
- * Représente une catégorie de film (ex: "Action", "Drame", "SF").
- * Un film peut être associé à plusieurs genres.
+ * Représente une catégorie de film, comme "Action", "Drame", ou "Science-Fiction".
  * 
- * Implémente Serializable pour la sauvegarde.
- * 
+ * Dans l'interface graphique, vous utiliserez principalement une liste d'objets `Genre`
+ * pour peupler les menus déroulants de filtres (par exemple dans `ProgrammationPanel`).
+ * Vous pourrez aussi afficher les libellés des genres sur la page de détail d'un film.
  */
 public class Genre implements Serializable {
     
-    private int idGenre;
-    private String libelle;
+    private int idGenre;    // Le numéro unique du genre.
+    private String libelle; // Le nom du genre (ex: "Aventure").
 
+    /**
+     * Constructeur vide (nécessité technique).
+     */
     public Genre() {}
 
     /**
-     * Constructeur pour créer un nouveau genre.
-     * @param idGenre L'identifiant unique du genre.
-     * @param libelle Le nom du genre (ex: "Science-Fiction").
+     * Crée une nouvelle catégorie de film.
+     * @param idGenre L'identifiant unique.
+     * @param libelle Le nom de la catégorie.
      */
     public Genre(int idGenre, String libelle) {
         this.idGenre = idGenre;
         this.libelle = libelle;
     }
     
-    // --- Getters and Setters ---
+    // --- ACCESSEURS (Getters and Setters) ---
 
     public int getId() { 
         return idGenre; 

@@ -6,22 +6,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-// DAO pour la gestion des réservations faites par les clients.
+/**
+ * Implémentation concrète pour la gestion des réservations (commandes) dans "reservations.dat".
+ * 
+ * Pour le développeur de l'interface graphique : cette classe est le cœur de l'historique client.
+ * Le `HistoriqueReservationsPanel` dépend entièrement de `getReservationsByClientId` pour
+ * afficher la liste des commandes passées par l'utilisateur connecté. La méthode `deleteReservation`
+ * est appelée lorsque l'utilisateur décide d'annuler sa commande.
+ */
 public class ReservationDAOImpl extends GenericDAOImpl<Reservation> implements ReservationDAO {
 
-    // Initialise le DAO avec le fichier contenant les réservations.
     public ReservationDAOImpl() {
         super("reservations.dat");
     }
 
-    // Ajoute une réservation à la base de données.
     @Override
     public void addReservation(Reservation reservation) {
         this.data.add(reservation);
         saveToFile();
     }
 
-    // Recherche une réservation par son identifiant.
     @Override
     public Optional<Reservation> getReservationById(int id) {
         for (Reservation r : this.data) {
@@ -32,16 +36,15 @@ public class ReservationDAOImpl extends GenericDAOImpl<Reservation> implements R
         return Optional.empty();
     }
 
-    // Retourne toutes les réservations enregistrées.
     @Override
     public List<Reservation> getAllReservations() {
         return new ArrayList<>(this.data);
     }
 
-    // Retourne toutes les réservations faites par un client spécifique.
     @Override
     public List<Reservation> getReservationsByClientId(int clientId) {
         List<Reservation> resultat = new ArrayList<>();
+        // On filtre toutes les réservations pour ne garder que celles du client spécifié.
         for (Reservation r : this.data) {
             if (r.getIdClient() == clientId) {
                 resultat.add(r);
@@ -50,7 +53,6 @@ public class ReservationDAOImpl extends GenericDAOImpl<Reservation> implements R
         return resultat;
     }
 
-    // Supprime une réservation à partir de son identifiant.
     @Override
     public void deleteReservation(int id) {
         boolean changed = false;

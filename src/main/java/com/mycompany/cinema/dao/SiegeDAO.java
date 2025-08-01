@@ -1,18 +1,19 @@
+// Fichier : SiegeDAO.java
 package com.mycompany.cinema.dao;
 
 import com.mycompany.cinema.Siege;
 import java.util.List;
 
 /**
- * Contrat pour la gestion de la persistance des Sièges.
- * La principale utilité est de récupérer les sièges d'une salle spécifique.
+ * Définit le contrat pour la gestion des sièges.
+ * Sa fonction la plus importante est de pouvoir lister tous les sièges d'une salle.
+ * 
+ * L'interface graphique, via `SiegePanel`, dépend entièrement de `getSiegesBySalleId`
+ * pour pouvoir construire le plan de la salle et afficher les sièges.
  */
 public interface SiegeDAO {
     List<Siege> getSiegesBySalleId(int salleId);
     List<Siege> getAllSieges();
-    // Le CRUD individuel sur les sièges est rarement nécessaire, mais l'interface le permet.
     void addSiege(Siege siege);
-    
     void rechargerDonnees();
-
 }

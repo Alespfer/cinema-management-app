@@ -22,12 +22,18 @@ public class PointDeVenteFrame extends JFrame {
     private final AdminService adminService;
     private final Personnel vendeurConnecte;
     
+    // Composants pour la liste des produits à gauche.
+
     private JList<ProduitSnack> listeProduits;
     private DefaultListModel<ProduitSnack> listModel;
     
+    // Composants pour le panier à droite (le tableau).
     private JTable panierTable;
     private DefaultTableModel tableModel;
     private JLabel totalLabel;
+    
+    
+    // La structure de données qui contient le panier en mémoire (Produit -> Quantité).
 
     private Map<ProduitSnack, Integer> panier = new HashMap<>();
     private static final DecimalFormat CURRENCY_FORMATTER = new DecimalFormat("#,##0.00 €");
@@ -46,6 +52,8 @@ public class PointDeVenteFrame extends JFrame {
     }
 
     private void initComponents() {
+        // Un JSplitPane divise la fenêtre en deux parties redimensionnables.
+
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setResizeWeight(0.4);
 
@@ -100,6 +108,10 @@ public class PointDeVenteFrame extends JFrame {
         resetButton.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) { actionAnnuler(); } });
         validateButton.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) { actionValider(); } });
     }
+    
+     /**
+     * Appelle le service pour récupérer la liste de tous les produits et les affiche.
+     */
 
     private void chargerProduits() {
         try {
@@ -109,6 +121,12 @@ public class PointDeVenteFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Erreur au chargement des produits.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
+    
+    
+     /**
+     * Action déclenchée par le bouton "Ajouter au Panier".
+     * Ajoute le produit sélectionné au panier (la Map) et met à jour l'affichage.
+     */
 
     private void actionAjouter() {
         ProduitSnack selected = listeProduits.getSelectedValue();
@@ -117,11 +135,23 @@ public class PointDeVenteFrame extends JFrame {
         mettreAJourPanier();
     }
     
+    
+     /**
+     * Action déclenchée par le bouton "Annuler la Vente".
+     * Vide complètement le panier et met à jour l'affichage.
+     */
+    
     private void actionAnnuler() {
         panier.clear();
         mettreAJourPanier();
     }
     
+    
+    
+     /**
+     * Action déclenchée par le bouton "Valider la Vente".
+     * Appelle le service pour enregistrer la vente en base de données.
+     */
     private void actionValider() {
         if (panier.isEmpty()) return;
         try {
@@ -135,6 +165,11 @@ public class PointDeVenteFrame extends JFrame {
         }
     }
     
+    
+    /**
+     * Rafraîchit le contenu du JTable du panier et le label du total
+     * en se basant sur le contenu actuel de la Map 'panier'.
+     */
     private void mettreAJourPanier() {
         tableModel.setRowCount(0);
         double totalGeneral = 0.0;

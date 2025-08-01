@@ -4,30 +4,37 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * Représente une projection d'un film, à une date et une heure données,
- * dans une salle spécifique. C'est l'événement principal que les clients réservent.
+ * Représente un événement de projection unique : un film spécifique,
+ * dans une salle donnée, à une date et une heure précises.
+ * C'est l'entité centrale que les clients choisissent et réservent.
  * 
- * Implémente Serializable pour la sauvegarde.
- * 
- * @author [Mets ton nom ici]
+ * Dans l'interface graphique, vous afficherez des listes d'objets `Seance`.
+ * - Dans `ProgrammationPanel`, chaque ligne du tableau correspond à une séance.
+ * - Dans `FilmDetailPanel`, vous afficherez les horaires (qui sont des séances) pour un film.
+ * - Lorsqu'un client clique sur un horaire, vous stockerez l'objet `Seance` sélectionné
+ *   pour le passer à l'étape suivante, le `SiegePanel`, qui en a besoin pour savoir
+ *   quels sièges afficher et lesquels sont déjà occupés.
  */
 public class Seance implements Serializable {
     
     private int idSeance;
-    private LocalDateTime dateHeureDebut;
+    private LocalDateTime dateHeureDebut; // Date et heure exactes du début de la projection.
     
-    // Clés étrangères vers le film projeté et la salle de projection
-    private int idFilm;
-    private int idSalle;
+    // --- Clés de liaison ---
+    private int idFilm;  // Quel film est projeté ?
+    private int idSalle; // Dans quelle salle ?
 
+    /**
+     * Constructeur vide (nécessité technique pour la sauvegarde).
+     */
     public Seance() {}
 
     /**
-     * Constructeur pour créer une nouvelle séance.
+     * Crée une nouvelle séance de projection.
      * @param idSeance L'ID unique de la séance.
-     * @param dateHeureDebut La date et l'heure précises du début du film.
-     * @param idSalle L'ID de la salle où le film est projeté.
-     * @param idFilm L'ID du film concerné.
+     * @param dateHeureDebut Le moment précis du début du film.
+     * @param idSalle L'ID de la salle où a lieu la projection.
+     * @param idFilm L'ID du film projeté.
      */
     public Seance(int idSeance, LocalDateTime dateHeureDebut, int idSalle, int idFilm) {
         this.idSeance = idSeance;
@@ -36,7 +43,7 @@ public class Seance implements Serializable {
         this.idFilm = idFilm;
     }
 
-    // --- Getters and Setters ---
+    // --- ACCESSEURS (Getters and Setters) ---
 
     public int getId() { 
         return idSeance; 

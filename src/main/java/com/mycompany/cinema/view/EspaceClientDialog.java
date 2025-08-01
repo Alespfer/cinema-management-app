@@ -13,25 +13,38 @@ import java.awt.*;
 public class EspaceClientDialog extends JDialog {
 
     public EspaceClientDialog(JFrame owner, ClientService clientService, Client clientConnecte) {
-        // Le constructeur JDialog prend la fenêtre "parente" et un booléen "modal"
-        // 'true' signifie que cette fenêtre bloque l'interaction avec la fenêtre parente.
         super(owner, "Mon Espace Client", true);
         
         setSize(800, 600);
-        setLocationRelativeTo(owner); // Centre la fenêtre par rapport à son parent.
+        setLocationRelativeTo(owner);
         
-        // Création du conteneur à onglets.
         JTabbedPane tabbedPane = new JTabbedPane();
         
-        // Création des deux panneaux qui serviront d'onglets.
+        // On crée les deux panneaux qui serviront d'onglets.
+        // On garde une référence au panneau de l'historique pour pouvoir le rafraîchir.
         JPanel infosPanel = new InfosPersonnellesPanel(clientService, clientConnecte, this);
-        JPanel historiquePanel = new HistoriqueReservationsPanel(clientService, clientConnecte);
+        HistoriqueReservationsPanel historiquePanel = new HistoriqueReservationsPanel(clientService, clientConnecte);
         
-        // Ajout des onglets au conteneur.
         tabbedPane.addTab("Mes Informations", infosPanel);
         tabbedPane.addTab("Historique des Réservations", historiquePanel);
         
-        // Ajout du conteneur à onglets à la fenêtre de dialogue.
+        // =====================================================================
+        // === DÉBUT DE LA CORRECTION : Ajout de l'écouteur de rafraîchissement ===
+        // =====================================================================
+        
+        tabbedPane.addChangeListener(e -> {
+            // On vérifie si l'onglet qui vient d'être sélectionné est bien celui de l'historique.
+            if (tabbedPane.getSelectedComponent() == historiquePanel) {
+                // Si c'est le cas, on appelle sa méthode publique 'loadHistorique()'
+                // pour forcer le rechargement des données depuis les fichiers.
+                historiquePanel.loadHistorique();
+            }
+        });
+
+        // =====================================================================
+        // === FIN DE LA CORRECTION                                          ===
+        // =====================================================================
+        
         add(tabbedPane);
     }
 }

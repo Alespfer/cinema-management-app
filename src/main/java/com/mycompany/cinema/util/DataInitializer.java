@@ -1,5 +1,6 @@
 package com.mycompany.cinema.util;
 
+// Importe toutes les classes du modèle (Film, Client, etc.) pour pouvoir créer des objets.
 import com.mycompany.cinema.*;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,51 +13,78 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Classe utilitaire responsable de la création et de la persistance
- * du jeu de données initial pour l'application.
- * NE DOIT ÊTRE APPELÉE QU'UNE SEULE FOIS, AU PREMIER DÉMARRAGE.
+ * ATTENTION : Classe utilitaire pour créer le tout premier jeu de données.
+ * Axelle : Tu n'auras jamais besoin de toucher ou d'appeler ce code. Il est
+ * exécuté une seule fois pour générer les fichiers "data/nom_fichier.dat"
+ * que le reste de l'application utilise comme une base de données.
+ * C'est la source de toutes les informations que tu afficheras au démarrage.
  */
 public final class DataInitializer {
 
+    /**
+     * Le constructeur est privé pour empêcher quiconque de créer une instance de cette classe.
+     * On ne l'utilise qu'à travers sa méthode statique 'seed()'.
+     */
     private DataInitializer() {}
 
     /**
-     * Méthode maîtresse qui orchestre la création de toutes les données de test.
+     * La méthode principale qui lance la création de toutes les données de test.
+     * Pense à elle comme un grand script qui remplit la base de données de zéro.
      */
     public static void seed() {
         System.out.println("Début de l'initialisation du jeu de données...");
 
-        // --- PHASE 1: Création des entités de référence (sans dépendances) ---
+        // --- PHASE 1: Création des données de base ---
+        // On crée d'abord les objets simples qui ne dépendent de rien d'autre.
+        // Par exemple, la liste des "Rôles" (Admin, Vendeur) pour les employés.
         List<Role> roles = createRoles();
+        // La liste des "Tarifs" (Plein, Étudiant) que le client pourra choisir.
         List<Tarif> tarifs = createTarifs();
+        // La liste des "Genres" (Action, Drame) qui seront affichés sur la fiche d'un film.
         List<Genre> genres = createGenres();
+        // La liste des "Salles" du cinéma avec leur capacité.
         List<Salle> salles = createSalles();
+        // La liste des "Produits" (Popcorn, Soda) que le client pourra acheter.
         List<ProduitSnack> produitsSnack = createProduitsSnack();
+        // Les "Caisses" où les ventes de snacks sont enregistrées.
         List<Caisse> caisses = createCaisses();
         
-        // --- PHASE 2: Création des entités avec dépendances de premier niveau ---
+        // --- PHASE 2: Création d'objets qui dépendent de la phase 1 ---
+        // On crée les sièges pour chaque salle créée juste avant.
         List<Siege> sieges = createSieges(salles);
+        // La liste des "Films" à l'affiche.
         List<Film> films = createFilms();
+        // Quelques "Clients" pour les tests.
         List<Client> clients = createClients();
+        // Quelques "Employés" avec leurs rôles.
         List<Personnel> personnel = createPersonnel(roles);
 
-        // --- PHASE 3: Création des liens et des entités complexes ---
+        // --- PHASE 3: On relie les objets entre eux ---
+        // On associe des genres à chaque film (ex: "Dune" est "SF" et "Aventure").
         linkFilmsToGenres(films, genres);
-        List<Seance> seances = createSeances(films, salles); // MÉTHODE CORRIGÉE POUR LA VISIBILITÉ
+        // On crée les "Séances" : on dit quel film joue, dans quelle salle, et à quelle heure.
+        List<Seance> seances = createSeances(films, salles);
+        // On affecte un employé à une séance.
         List<AffectationSeance> affectations = createAffectations(personnel, seances);
+        // On crée un "Planning" de travail pour un employé.
         List<Planning> plannings = createPlannings(personnel);
+        // On crée des "Évaluations" : un client donne une note et un avis sur un film.
         List<EvaluationClient> evaluations = createEvaluations(clients, films);
 
-        // --- PHASE 4: Simulation de scénarios transactionnels ---
+        // --- PHASE 4: Simulation de vraies actions utilisateur ---
         List<Reservation> reservations = new ArrayList<>();
         List<Billet> billets = new ArrayList<>();
+        // On simule un client qui fait une réservation pour plusieurs sièges.
         createScenarioReservation(clients, seances, sieges, tarifs, reservations, billets);
 
         List<VenteSnack> ventesSnack = new ArrayList<>();
         List<Comporte> lignesVente = new ArrayList<>();
+        // On simule une vente de snacks au comptoir.
         createScenarioVenteSnack(personnel, produitsSnack, caisses, clients, ventesSnack, lignesVente);
         
-        // --- PHASE 5: Persistance de toutes les données dans les fichiers .dat ---
+        // --- PHASE 5: Sauvegarde de tout dans des fichiers ---
+        // Une fois tous les objets créés en mémoire, on les sauvegarde un par un dans des fichiers.
+        // C'est ce qui assure que les données persistent même si on ferme l'application.
         System.out.println("Sauvegarde des données dans les fichiers...");
         saveList("roles.dat", roles);
         saveList("tarifs.dat", tarifs);
@@ -80,7 +108,9 @@ public final class DataInitializer {
         System.out.println("Initialisation du jeu de données terminée avec succès.");
     }
 
-    // --- Méthodes de création détaillées ---
+    // --- Ci-dessous, les méthodes de création de chaque type d'objet. ---
+    // Mon binôme : Le détail n'est pas important pour toi, c'est juste le "remplissage"
+    // de la base de données.
 
     private static List<Role> createRoles() {
         List<Role> items = new ArrayList<>();
@@ -118,9 +148,9 @@ public final class DataInitializer {
 
     private static List<Salle> createSalles() {
         List<Salle> items = new ArrayList<>();
-        items.add(new Salle(1, "Salle 1", 100)); // 10 rangées de 10
-        items.add(new Salle(2, "Salle 2", 150)); // 10 rangées de 15
-        items.add(new Salle(3, "Salle IMAX 3D", 240)); // 12 rangées de 20
+        items.add(new Salle(1, "Salle 1", 100));
+        items.add(new Salle(2, "Salle 2", 150));
+        items.add(new Salle(3, "Salle IMAX 3D", 240));
         return items;
     }
 
@@ -171,10 +201,6 @@ public final class DataInitializer {
         return items;
     }
 
-    /**
-     * CORRIGÉ : Crée un jeu de séances de test cohérent et toujours visible pour l'utilisateur.
-     * Génère des séances pour hier, aujourd'hui (à des heures futures), demain et après-demain.
-     */
     private static List<Seance> createSeances(List<Film> films, List<Salle> salles) {
         List<Seance> items = new ArrayList<>();
         LocalDate aujourdhui = LocalDate.now();
@@ -184,10 +210,7 @@ public final class DataInitializer {
 
         int seanceIdCounter = 1;
 
-        // --- Séance d'hier (pour l'historique des réservations) ---
         items.add(new Seance(seanceIdCounter++, LocalDateTime.of(hier, LocalTime.of(20, 0)), salles.get(0).getId(), films.get(0).getId()));
-
-        // --- Séances d'aujourd'hui (visibles si l'heure actuelle est antérieure) ---
         if (LocalTime.now().isBefore(LocalTime.of(14, 0))) {
             items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(14, 0)), salles.get(1).getId(), films.get(1).getId()));
         }
@@ -200,13 +223,9 @@ public final class DataInitializer {
         if (LocalTime.now().isBefore(LocalTime.of(21, 0))) {
             items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(21, 0)), salles.get(1).getId(), films.get(1).getId()));
         }
-
-        // --- Séances de demain ---
         items.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(14, 0)), salles.get(0).getId(), films.get(0).getId()));
         items.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(17, 0)), salles.get(1).getId(), films.get(2).getId()));
         items.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(20, 30)), salles.get(2).getId(), films.get(1).getId()));
-
-        // --- Séances d'après-demain ---
         items.add(new Seance(seanceIdCounter++, LocalDateTime.of(apresDemain, LocalTime.of(17, 30)), salles.get(0).getId(), films.get(2).getId()));
         items.add(new Seance(seanceIdCounter++, LocalDateTime.of(apresDemain, LocalTime.of(21, 0)), salles.get(2).getId(), films.get(0).getId()));
 
@@ -215,7 +234,6 @@ public final class DataInitializer {
 
     private static List<AffectationSeance> createAffectations(List<Personnel> personnel, List<Seance> seances) {
         List<AffectationSeance> items = new ArrayList<>();
-        // Affecte un projectionniste à la 3ème séance créée (qui est généralement celle d'aujourd'hui ou de demain)
         if (seances.size() >= 3) {
             items.add(new AffectationSeance(seances.get(2).getId(), personnel.get(1).getId()));
         }
@@ -249,18 +267,16 @@ public final class DataInitializer {
     }
 
     private static void createScenarioReservation(List<Client> clients, List<Seance> seances, List<Siege> sieges, List<Tarif> tarifs, List<Reservation> reservations, List<Billet> billets) {
-        // Crée une réservation pour la première séance de la liste (qui est celle d'hier).
         Reservation res = new Reservation(1, LocalDateTime.now().minusDays(1), clients.get(0).getId());
         reservations.add(res);
 
-        Siege siege1 = sieges.get(57); // Salle 1, rangée 6, siège 8
-        Siege siege2 = sieges.get(58); // Salle 1, rangée 6, siège 9
+        Siege siege1 = sieges.get(57); 
+        Siege siege2 = sieges.get(58);
         billets.add(new Billet(1, res.getId(), tarifs.get(0).getId(), siege1.getId(), seances.get(0).getId()));
         billets.add(new Billet(2, res.getId(), tarifs.get(0).getId(), siege2.getId(), seances.get(0).getId()));
     }
 
     private static void createScenarioVenteSnack(List<Personnel> personnel, List<ProduitSnack> produits, List<Caisse> caisses, List<Client> clients, List<VenteSnack> ventes, List<Comporte> lignes) {
-        // Vente au comptoir par John Smith. idReservation et idClient sont null.
         VenteSnack vente = new VenteSnack(1, LocalDateTime.now().minusHours(2), personnel.get(2).getId(), caisses.get(0).getId(), null);
         ventes.add(vente);
         
@@ -268,11 +284,22 @@ public final class DataInitializer {
         lignes.add(new Comporte(vente.getIdVente(), produits.get(1).getId(), 1, produits.get(1).getPrixVente()));
     }
 
+    /**
+     * Méthode générique qui prend n'importe quelle liste d'objets et la sauvegarde
+     * dans un fichier binaire. C'est le cœur de notre système de persistance simple.
+     * @param filename Le nom du fichier (ex: "films.dat").
+     * @param list La liste d'objets à sauvegarder.
+     * @param <T> Le type des objets dans la liste.
+     */
     private static <T> void saveList(String filename, List<T> list) {
+        // Crée le dossier "data" s'il n'existe pas.
         new File("data").mkdirs();
+        // Utilise un "try-with-resources" pour s'assurer que le fichier est bien fermé après l'écriture.
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("data/" + filename))) {
+            // La commande magique : écrit toute la liste d'un coup dans le fichier.
             oos.writeObject(list);
         } catch (IOException e) {
+            // Si une erreur se produit (disque plein, pas les droits...), on affiche un message clair.
             System.err.println("ERREUR fatale lors de la sauvegarde du fichier " + filename);
             e.printStackTrace();
         }

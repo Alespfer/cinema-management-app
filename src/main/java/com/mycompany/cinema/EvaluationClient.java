@@ -4,20 +4,40 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * Représente l'évaluation (note et commentaire) d'un film par un client.
- * La paire (idClient, idFilm) sert de clé primaire composite, garantissant
- * qu'un client ne peut évaluer un même film qu'une seule fois.
+ * Cet objet représente l'avis qu'un client a laissé sur un film.
+ * Il contient la note (sur 5), le commentaire écrit, et la date de l'avis.
+ * 
+ * Pour l'interface graphique, vous créerez un objet de ce type lorsque l'utilisateur
+ * validera le formulaire dans la fenêtre `EvaluationDialog`. Les informations (note,
+ * commentaire) proviendront des composants de cette fenêtre.
+ * 
+ * Vous afficherez également une liste de ces objets dans le `FilmDetailPanel` pour
+ * montrer aux autres utilisateurs les avis déjà postés.
  */
 public class EvaluationClient implements Serializable {
 
-    private int idClient;
-    private int idFilm;
-    private int note; // Note sur 5, par exemple.
-    private String commentaire;
-    private LocalDateTime dateEvaluation;
+    // --- Clés de liaison ---
+    private int idClient; // Qui a posté l'avis ?
+    private int idFilm;   // Pour quel film ?
 
+    // --- Contenu de l'avis ---
+    private int note;           // La note donnée (par exemple, de 1 à 5).
+    private String commentaire; // Le texte de l'avis.
+    private LocalDateTime dateEvaluation; // Quand l'avis a-t-il été posté ?
+
+    /**
+     * Constructeur vide (nécessité technique).
+     */
     public EvaluationClient() {}
 
+    /**
+     * Crée un nouvel avis.
+     * @param idClient L'ID du client.
+     * @param idFilm L'ID du film.
+     * @param note La note attribuée.
+     * @param commentaire Le commentaire laissé.
+     * @param dateEvaluation La date et l'heure de la soumission.
+     */
     public EvaluationClient(int idClient, int idFilm, int note, String commentaire, LocalDateTime dateEvaluation) {
         this.idClient = idClient;
         this.idFilm = idFilm;
@@ -26,7 +46,7 @@ public class EvaluationClient implements Serializable {
         this.dateEvaluation = dateEvaluation;
     }
 
-    // --- Getters and Setters ---
+    // --- ACCESSEURS (Getters and Setters) ---
     public int getIdClient() { return idClient; }
     public void setIdClient(int idClient) { this.idClient = idClient; }
     public int getIdFilm() { return idFilm; }

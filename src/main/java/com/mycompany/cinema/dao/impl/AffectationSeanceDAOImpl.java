@@ -6,29 +6,38 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-// Cette classe gère les opérations sur les affectations de personnel aux séances.
-// Elle hérite du comportement générique de lecture/écriture de fichiers.
+/**
+ * Implémentation concrète pour gérer la sauvegarde et la lecture des affectations du personnel.
+ * Cette classe s'occupe de lire et d'écrire dans le fichier "affectations_seances.dat".
+ * 
+ * Pour le développeur de l'interface graphique : vous n'interagirez JAMAIS directement avec cette classe.
+ * Vos panneaux (ex: gestion des séances) appelleront des méthodes du 'AdminService', qui lui,
+ * se chargera de faire appel à cette classe pour manipuler les données.
+ */
 public class AffectationSeanceDAOImpl extends GenericDAOImpl<AffectationSeance> implements AffectationSeanceDAO {
 
-    // Constructeur : précise le fichier dans lequel les données sont sauvegardées
+    /**
+     * Constructeur. Il indique à la classe parente 'GenericDAOImpl'
+     * le nom du fichier à utiliser pour la persistance.
+     */
     public AffectationSeanceDAOImpl() {
         super("affectations_seances.dat");
     }
 
     @Override
     public void addAffectation(AffectationSeance affectation) {
-        // Ajout direct dans la liste interne
+        // Ajoute l'objet 'affectation' à la liste en mémoire...
         this.data.add(affectation);
-        saveToFile(); // Sauvegarde après modification
+        // ...puis sauvegarde immédiatement la liste complète dans le fichier.
+        saveToFile();
     }
 
     @Override
     public List<AffectationSeance> getAffectationsBySeanceId(int seanceId) {
-        // On prépare une nouvelle liste vide
         List<AffectationSeance> resultat = new ArrayList<>();
-        // Parcours de toutes les affectations
+        // On parcourt toutes les affectations en mémoire...
         for (AffectationSeance aff : this.data) {
-            // On vérifie l'identifiant de séance
+            // ...et on ajoute à notre liste de résultats uniquement celles qui correspondent à l'ID de la séance recherchée.
             if (aff.getIdSeance() == seanceId) {
                 resultat.add(aff);
             }
@@ -39,7 +48,7 @@ public class AffectationSeanceDAOImpl extends GenericDAOImpl<AffectationSeance> 
     @Override
     public List<AffectationSeance> getAffectationsByPersonnelId(int personnelId) {
         List<AffectationSeance> resultat = new ArrayList<>();
-        // Même logique que la méthode précédente, mais on filtre sur l'identifiant du personnel
+        // Même logique que la méthode précédente, mais en filtrant par l'ID de l'employé.
         for (AffectationSeance aff : this.data) {
             if (aff.getIdPersonnel() == personnelId) {
                 resultat.add(aff);
@@ -50,19 +59,20 @@ public class AffectationSeanceDAOImpl extends GenericDAOImpl<AffectationSeance> 
 
     @Override
     public void deleteAffectation(int seanceId, int personnelId) {
-        // Utilisation d'un itérateur pour suppression sécurisée pendant l'itération
+        // On utilise un 'Iterator' pour parcourir la liste. C'est la seule façon
+        // sûre de supprimer un élément d'une collection pendant qu'on la parcourt.
         Iterator<AffectationSeance> iterator = this.data.iterator();
         boolean changed = false;
         while (iterator.hasNext()) {
             AffectationSeance aff = iterator.next();
-            // Suppression si les deux identifiants correspondent
+            // Si on trouve la correspondance exacte (même séance ET même employé)...
             if (aff.getIdSeance() == seanceId && aff.getIdPersonnel() == personnelId) {
-                iterator.remove(); // Ne jamais faire this.data.remove(...) en boucle
+                iterator.remove(); // ...on la supprime de la liste en mémoire.
                 changed = true;
-                break; // Une seule affectation à supprimer
+                break; // On sort de la boucle, car le lien est unique.
             }
         }
-        // Sauvegarde uniquement si une modification a eu lieu
+        // Pour optimiser, on ne réécrit le fichier que si une suppression a vraiment eu lieu.
         if (changed) {
             saveToFile();
         }

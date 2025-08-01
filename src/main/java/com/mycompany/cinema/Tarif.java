@@ -3,25 +3,33 @@ package com.mycompany.cinema;
 import java.io.Serializable;
 
 /**
- * Représente un type de tarif pour un billet de cinéma (ex: "Plein Tarif").
- * Chaque tarif a un libellé descriptif et un prix.
+ * Représente une catégorie de prix pour un billet de cinéma.
+ * Chaque tarif a un nom (ex: "Tarif Étudiant") et un prix associé en euros.
  * 
- * Implémente Serializable pour la sauvegarde.
+ * Dans l'interface client `SiegePanel`, vous afficherez une liste d'objets `Tarif`
+ * dans une JComboBox (un menu déroulant). Cela permettra à l'utilisateur de choisir
+ * le tarif qui s'applique à sa réservation (ex: il est étudiant, il vient avec un enfant).
+ * L'attribut `prix` sera ensuite utilisé pour calculer le coût total de la réservation.
  * 
+ * Dans la partie administration, `GestionTarifsPanel` permettra de créer,
+ * modifier ou supprimer ces tarifs.
  */
 public class Tarif implements Serializable {
     
     private int idTarif;
-    private String libelle;
-    private double prix;
+    private String libelle; // Le nom du tarif (ex: "Plein Tarif").
+    private double prix;    // Le prix en euros.
 
+    /**
+     * Constructeur vide (nécessité technique).
+     */
     public Tarif() {}
 
     /**
-     * Constructeur pour créer un nouveau tarif.
+     * Crée un nouveau type de tarif.
      * @param idTarif L'ID unique du tarif.
-     * @param libelle Le nom du tarif (ex: "Tarif Étudiant").
-     * @param prix Le prix en euros correspondant.
+     * @param libelle Le nom du tarif.
+     * @param prix Le prix correspondant.
      */
     public Tarif(int idTarif, String libelle, double prix) {
         this.idTarif = idTarif;
@@ -29,7 +37,7 @@ public class Tarif implements Serializable {
         this.prix = prix;
     }
 
-    // --- Getters and Setters ---
+    // --- ACCESSEURS (Getters and Setters) ---
 
     public int getId() { 
         return idTarif; 

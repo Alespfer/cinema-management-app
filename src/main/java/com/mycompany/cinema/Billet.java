@@ -3,31 +3,34 @@ package com.mycompany.cinema;
 import java.io.Serializable;
 
 /**
- * Classe représentant un billet de cinéma.
- * Un billet est l'entité qui connecte une réservation, une séance, un siège et un tarif.
- * C'est le cœur du système de réservation.
+ * Représente un ticket de cinéma numérique. C'est le cœur d'une réservation.
+ * Cet objet est la "colle" qui lie tout ensemble pour une place achetée :
+ * il sait à quelle réservation il appartient, pour quelle séance, quel siège exact,
+ * et à quel prix il a été vendu.
  * 
- * Comme les autres classes du modèle, elle doit être 'Serializable' pour être sauvegardée.
- * 
+ * Pour l'interface graphique, lorsque vous afficherez le détail d'une réservation
+ * d'un client, vous manipulerez une liste de ces objets 'Billet'. À partir d'un seul billet,
+ * vous pourrez, via ses identifiants (idSeance, idSiege...), demander au service de vous
+ * fournir les objets complets (Film, Salle, etc.) pour afficher toutes les informations.
  */
 public class Billet implements Serializable {
     
-    // La clé primaire du billet.
+    // Le numéro unique de ce ticket.
     private int idBillet;
     
-    // Les clés étrangères qui lient le billet aux autres objets.
-    private int idReservation;
-    private int idTarif;
-    private int idSiege;
-    private int idSeance;
+    // Chaque 'id' est un lien vers une autre information.
+    private int idReservation; // À quel "panier" appartient ce billet ?
+    private int idTarif;       // Quel tarif a été appliqué (plein, étudiant...) ?
+    private int idSiege;       // Quelle place exacte dans la salle ?
+    private int idSeance;      // Pour quelle projection (quel film, à quelle heure) ?
 
     /**
-     * Constructeur vide.
+     * Constructeur vide (nécessité technique).
      */
     public Billet() {}
 
     /**
-     * Constructeur pour créer un billet complet avec toutes ses informations.
+     * Crée un ticket complet avec tous ses liens.
      */
     public Billet(int idBillet, int idReservation, int idTarif, int idSiege, int idSeance) {
         this.idBillet = idBillet;
@@ -37,7 +40,7 @@ public class Billet implements Serializable {
         this.idSeance = idSeance;
     }
 
-    // --- Getters and Setters ---
+    // --- ACCESSEURS (Getters & Setters) ---
 
     public int getId() { 
         return idBillet; 

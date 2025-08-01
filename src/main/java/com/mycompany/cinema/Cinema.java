@@ -6,41 +6,40 @@ import java.io.File;
 import javax.swing.SwingUtilities;
 
 /**
- * Classe principale de l'application.
- * C'est le point d'entrée du programme, là où tout commence.
- * Son rôle est :
- * 1. Vérifier si les données de test existent, et les créer si ce n'est pas le cas.
- * 2. Lancer l'interface graphique de connexion.
- *
+ * C'est le point de départ de toute l'application.
+ * Quand le programme est lancé, c'est cette classe qui est exécutée en premier.
+ * 
+ * Pour le développeur de l'interface graphique, il n'y a rien à modifier ici.
+ * Son rôle est simple :
+ * 1. Préparer les données : Il vérifie si c'est la première fois que l'on lance
+ *    le programme. Si c'est le cas, il crée un jeu de données de test (films, salles...).
+ * 2. Lancer la première fenêtre : Il affiche la fenêtre de connexion (`LoginFrame`).
+ * 
+ * Votre travail sur l'interface commence donc dans le fichier `LoginFrame.java`.
  */
 public class Cinema {
 
     /**
-     * La méthode main, exécutée au lancement du programme.
+     * La méthode 'main' est le cœur du lancement.
      */
     public static void main(String[] args) {
         
-        // --- GESTION DE LA PERSISTANCE ---
-        // On vérifie si notre "base de données" (le dossier "data") existe.
+        // On vérifie si le dossier "data" qui nous sert de base de données existe.
         File dataDir = new File("data");
         if (!dataDir.exists() || dataDir.list() == null || dataDir.list().length == 0) {
-            // Si le dossier n'existe pas ou est vide, c'est le premier lancement.
+            // S'il n'existe pas, on le peuple avec des données de démonstration.
             System.out.println("Base de données de fichiers non trouvée. Création du jeu de données...");
-            
-            // On appelle notre classe utilitaire pour générer toutes les données de test.
             DataInitializer.seed();
-            
             System.out.println("Jeu de données créé.");
         } else {
-            // Si le dossier existe déjà, on ne fait rien pour ne pas écraser les données sauvegardées.
             System.out.println("Base de données de fichiers détectée.");
         }
 
-        // --- LANCEMENT DE L'INTERFACE GRAPHIQUE ---
-        // On lance l'interface dans le thread de gestion des événements Swing (EDT).
-        // C'est la manière correcte et sûre de démarrer une application Swing, comme vu en cours.
+        // On lance l'interface graphique de manière sécurisée, comme préconisé.
+        // Cela garantit que tous les composants Swing sont créés et modifiés
+        // dans le bon "thread" (le Event Dispatch Thread).
         SwingUtilities.invokeLater(() -> {
-            // On ne lance plus la fenêtre principale directement, mais la fenêtre de connexion.
+            // Création et affichage de la fenêtre de connexion.
             LoginFrame loginFrame = new LoginFrame();
             loginFrame.setVisible(true);
         });

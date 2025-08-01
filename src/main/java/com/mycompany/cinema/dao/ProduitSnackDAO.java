@@ -1,4 +1,4 @@
-// Fichier : src/main/java/com/mycompany/cinema/dao/ProduitSnackDAO.java
+// Fichier : ProduitSnackDAO.java
 package com.mycompany.cinema.dao;
 
 import com.mycompany.cinema.ProduitSnack;
@@ -6,33 +6,22 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * CONTRAT pour la gestion de la persistance des Produits Snack.
- * Ceci est une INTERFACE. Elle ne fait que définir les méthodes obligatoires.
+ * Définit le contrat pour la gestion du catalogue des produits de snacking.
+ * 
+ * Ce contrat est utilisé à la fois par l'interface client et l'interface admin :
+ * - `getAllProduits` est appelé par `SnackSelectionPanel` pour afficher la liste des
+ *   articles que le client peut acheter.
+ * - Toutes les méthodes CRUD (add, get, getAll, update) sont utilisées par le
+ *   panneau `GestionProduitsSnackPanel` de l'administrateur.
  */
 public interface ProduitSnackDAO {
-
-    /**
-     * Ajoute un nouveau produit à la source de données.
-     */
     void addProduit(ProduitSnack produit);
-
-    /**
-     * Récupère un produit par son identifiant.
-     * @return un Optional contenant le produit s'il est trouvé, sinon un Optional vide.
-     */
     Optional<ProduitSnack> getProduitById(int id);
-
-    /**
-     * Récupère la liste de tous les produits.
-     */
     List<ProduitSnack> getAllProduits();
-
-    /**
-     * Met à jour les informations d'un produit existant (notamment le stock).
-     */
     void updateProduit(ProduitSnack produit);
-    
-    
+    /**
+     * Supprime un produit de la source de données à partir de son identifiant.
+     */
+    void deleteProduit(int id);
     void rechargerDonnees();
-
 }

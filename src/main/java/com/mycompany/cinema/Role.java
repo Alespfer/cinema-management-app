@@ -3,30 +3,41 @@ package com.mycompany.cinema;
 import java.io.Serializable;
 
 /**
- * Représente le rôle ou le poste d'un membre du personnel (ex: "Administrateur").
- * Permet de gérer les droits et les permissions.
+ * Représente le poste ou le niveau de permission d'un membre du personnel.
+ * Exemples : "Administrateur", "Vendeur", "Projectionniste".
  * 
- * Implémente Serializable pour la sauvegarde.
+ * Cette classe est fondamentale pour la sécurité et la logique de l'interface
+ * du personnel.
  * 
+ * Dans `LoginFrame`, après une connexion réussie d'un employé, vous récupérerez
+ * son objet `Role` pour décider quelle fenêtre principale ouvrir :
+ * - Si le `libelle` est "Vendeur", vous ouvrez `PointDeVenteFrame`.
+ * - Pour tout autre rôle ("Administrateur"), vous ouvrez `AdminMainFrame`.
+ * 
+ * Dans le panneau `GestionPersonnelPanel`, vous utiliserez une liste de `Role`s
+ * pour peupler la JComboBox qui permet d'assigner un rôle à un employé.
  */
 public class Role implements Serializable {
     
     private int idRole;
-    private String libelle;
+    private String libelle; // Le nom du rôle, ex: "Administrateur"
 
+    /**
+     * Constructeur vide (nécessité technique).
+     */
     public Role() {}
 
     /**
-     * Constructeur pour créer un nouveau rôle.
+     * Crée un nouveau rôle dans le système.
      * @param idRole L'ID unique du rôle.
-     * @param libelle Le nom du rôle (ex: "Vendeur", "Projectionniste").
+     * @param libelle Le nom du rôle.
      */
     public Role(int idRole, String libelle) {
         this.idRole = idRole;
         this.libelle = libelle;
     }
 
-    // --- Getters and Setters ---
+    // --- ACCESSEURS (Getters and Setters) ---
 
     public int getId() { 
         return idRole; 

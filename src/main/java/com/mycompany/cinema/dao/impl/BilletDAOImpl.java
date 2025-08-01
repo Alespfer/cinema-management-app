@@ -6,65 +6,75 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-// Classe DAO pour gérer les billets (accès fichier, filtrage)
+/**
+ * Implémentation concrète pour gérer la sauvegarde et la lecture des billets de cinéma.
+ * Cette classe s'occupe du fichier "billets.dat".
+ * 
+ * Pour le développeur de l'interface graphique : cette classe est le pilier de la réservation.
+ * - Le `SiegePanel` l'utilisera (via le service) pour savoir quels sièges sont déjà vendus
+ *   pour une séance donnée (`getBilletsBySeanceId`).
+ * - Le `HistoriqueReservationsPanel` s'en servira pour afficher les détails d'une
+ *   commande passée (`getBilletsByReservationId`).
+ */
 public class BilletDAOImpl extends GenericDAOImpl<Billet> implements BilletDAO {
 
-    // Constructeur : nom du fichier pour la persistance
     public BilletDAOImpl() {
         super("billets.dat");
     }
 
-    // Ajoute un nouveau billet à la liste et sauvegarde les données.
     @Override
     public void addBillet(Billet billet) {
-        this.data.add(billet); // Ajout direct à la liste
-        saveToFile(); // Sauvegarde immédiate
+        this.data.add(billet);
+        saveToFile();
     }
-    // Retourne tous les billets liés à une réservation donnée.
+
     @Override
     public List<Billet> getBilletsByReservationId(int reservationId) {
         List<Billet> resultat = new ArrayList<>();
+        // On parcourt tous les billets pour trouver ceux qui appartiennent à la même commande.
         for (Billet b : this.data) {
             if (b.getIdReservation() == reservationId) {
                 resultat.add(b);
             }
         }
-        return resultat; //liste des billets
+        return resultat;
     }
-    // Retourne tous les billets associés à une séance donnée.
+    
     @Override
     public List<Billet> getBilletsBySeanceId(int seanceId) {
         List<Billet> resultat = new ArrayList<>();
+        // On parcourt tous les billets pour trouver ceux qui ont été vendus pour une séance précise.
         for (Billet b : this.data) {
             if (b.getIdSeance() == seanceId) {
                 resultat.add(b);
             }
         }
-        return resultat; //liste des billets
+        return resultat;
     }
 
-    // Retourne une copie complète de tous les billets enregistrés.
     @Override
     public List<Billet> getAllBillets() {
-        // Retourne une copie de la liste (sécurité contre modifications externes)
+        // On retourne une COPIE de la liste pour protéger les données internes.
+        // Ainsi, si l'interface modifie cette liste, elle ne modifie pas nos données sources.
         return new ArrayList<>(this.data);
     }
 
-    // Supprime tous les billets associés à une réservation spécifique.
     @Override
     public void deleteBilletsByReservationId(int reservationId) {
-        // Suppression sécurisée avec un Iterator
         Iterator<Billet> iterator = this.data.iterator();
         boolean changed = false;
+        // On parcourt la liste de manière sécurisée...
         while (iterator.hasNext()) {
             Billet b = iterator.next();
             if (b.getIdReservation() == reservationId) {
-                iterator.remove(); // suppression élément par élément
+                // ...et on supprime tous les billets liés à la réservation annulée.
+                iterator.remove();
                 changed = true;
             }
         }
+        // On sauvegarde le fichier uniquement si des billets ont été supprimés.
         if (changed) {
-            saveToFile(); // Sauvegarde uniquement si nécessaire
+            saveToFile();
         }
     }
 }

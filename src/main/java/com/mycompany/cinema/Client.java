@@ -4,24 +4,31 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
- * Représente un client du cinéma, avec ses informations personnelles.
- * Un client peut faire des réservations.
+ * Cet objet représente un client enregistré dans notre système.
+ * Il contient toutes ses informations de compte.
  * 
- * Implémente Serializable pour la sauvegarde dans des fichiers.
+ * Du point de vue de l'interface, vous recevrez un objet de ce type juste après
+ * une connexion réussie. Vous pourrez alors utiliser ses méthodes "get" pour,
+ * par exemple, afficher un message de bienvenue personnalisé : "Bonjour, " + client.getNom().
  * 
+ * Les informations de cet objet seront affichées et modifiées dans le panneau
+ * "Mes Informations" de l'espace client.
  */
 public class Client implements Serializable {
     
-    private int idClient;
-    private String nom;
-    private String email;
-    private String motDePasse;
-    private LocalDate dateCreation; // On garde une trace de la date d'inscription
+    private int idClient;           // Le numéro unique du client.
+    private String nom;             // Son nom complet.
+    private String email;           // Son email, qui sert aussi d'identifiant de connexion.
+    private String motDePasse;      // Son mot de passe.
+    private LocalDate dateCreation; // La date à laquelle il a créé son compte.
 
+    /**
+     * Constructeur vide (nécessité technique).
+     */
     public Client() {}
 
     /**
-     * Constructeur pour créer un nouvel objet Client.
+     * Crée un nouvel objet Client avec toutes ses informations.
      */
     public Client(int idClient, String nom, String email, String motDePasse, LocalDate dateCreation) {
         this.idClient = idClient;
@@ -31,7 +38,7 @@ public class Client implements Serializable {
         this.dateCreation = dateCreation;
     }
 
-    // --- Getters and Setters ---
+    // --- ACCESSEURS (Getters & Setters) ---
     
     public int getId() { 
         return idClient; 

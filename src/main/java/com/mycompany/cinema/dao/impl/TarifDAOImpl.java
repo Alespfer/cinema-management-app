@@ -6,22 +6,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-// DAO pour gérer les tarifs appliqués aux billets.
+/**
+ * Implémentation concrète pour la gestion des tarifs dans le fichier "tarifs.dat".
+ * 
+ * Pour le développeur de l'interface graphique : cette classe fournit les données pour :
+ * - Le menu déroulant de sélection du tarif dans le `SiegePanel` (via `getAllTarifs`).
+ * - Le panneau de gestion des tarifs de l'administrateur, `GestionTarifsPanel`, qui
+ *   utilise l'ensemble des méthodes CRUD pour la maintenance.
+ */
 public class TarifDAOImpl extends GenericDAOImpl<Tarif> implements TarifDAO {
 
-    // Initialise le DAO avec le fichier des tarifs.
     public TarifDAOImpl() {
         super("tarifs.dat");
     }
 
-    // Ajoute un nouveau tarif.
     @Override
     public void addTarif(Tarif tarif) {
         this.data.add(tarif);
         saveToFile();
     }
 
-    // Recherche un tarif selon son identifiant.
     @Override
     public Optional<Tarif> getTarifById(int id) {
         for (Tarif tarif : this.data) {
@@ -32,13 +36,11 @@ public class TarifDAOImpl extends GenericDAOImpl<Tarif> implements TarifDAO {
         return Optional.empty();
     }
 
-    // Retourne tous les tarifs enregistrés.
     @Override
     public List<Tarif> getAllTarifs() {
         return new ArrayList<>(this.data);
     }
 
-    // Met à jour un tarif existant.
     @Override
     public void updateTarif(Tarif updatedTarif) {
         for (int i = 0; i < this.data.size(); i++) {
@@ -50,7 +52,6 @@ public class TarifDAOImpl extends GenericDAOImpl<Tarif> implements TarifDAO {
         }
     }
 
-    // Supprime un tarif en fonction de son identifiant.
     @Override
     public void deleteTarif(int id) {
         boolean changed = false;

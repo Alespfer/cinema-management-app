@@ -3,34 +3,38 @@ package com.mycompany.cinema;
 import java.io.Serializable;
 
 /**
- * Représente une ligne d'une vente de snack. C'est une table de liaison du MLD
- * entre VENTE_SNACK et PRODUIT_SNACK.
+ * Représente une seule ligne sur un ticket de caisse de snacks.
+ * Par exemple : "2 Popcorns à 6.50€ l'unité".
  * 
- * Elle contient des informations propres à la transaction, comme la quantité
- * vendue et le prix unitaire au moment de la vente (important, car le prix
- * du produit peut changer plus tard).
+ * Son rôle est de lier une vente globale (`VenteSnack`) avec un produit spécifique
+ * (`ProduitSnack`) tout en ajoutant des informations propres à cette transaction :
+ * la quantité et le prix au moment de l'achat.
  * 
- * Implémente Serializable pour la sauvegarde.
- * 
+ * L'interface graphique n'interagira pas directement avec cette classe.
+ * Elle sera utilisée en coulisses, notamment par le panneau de reporting
+ * de l'administrateur pour calculer le total d'une vente ou afficher son détail.
  */
 public class Comporte implements Serializable {
     
-    // Clés étrangères vers VenteSnack et ProduitSnack
-    private int idVente;
-    private int idProduit;
+    // --- Clés de liaison ---
+    private int idVente;      // Fait référence au ticket de caisse global.
+    private int idProduit;    // Fait référence au produit acheté (ex: Popcorn).
     
-    // Attributs spécifiques à cette ligne de vente
-    private int quantite;
-    private double prixUnitaire;
+    // --- Données de la transaction ---
+    private int quantite;         // Combien d'unités de ce produit ont été achetées ?
+    private double prixUnitaire;  // Quel était le prix d'une unité à ce moment précis ?
 
+    /**
+     * Constructeur vide (nécessité technique pour la sauvegarde).
+     */
     public Comporte() {}
 
     /**
-     * Constructeur pour créer une ligne de vente.
-     * @param idVente L'ID de la vente à laquelle cette ligne appartient.
+     * Crée une nouvelle ligne de vente.
+     * @param idVente L'ID du ticket de caisse parent.
      * @param idProduit L'ID du produit vendu.
-     * @param quantite Le nombre d'unités vendues.
-     * @param prixUnitaire Le prix du produit au moment de la vente.
+     * @param quantite Le nombre d'articles.
+     * @param prixUnitaire Le prix d'un article au moment de la vente.
      */
     public Comporte(int idVente, int idProduit, int quantite, double prixUnitaire) {
         this.idVente = idVente;
@@ -39,7 +43,7 @@ public class Comporte implements Serializable {
         this.prixUnitaire = prixUnitaire;
     }
 
-    // --- Getters & Setters ---
+    // --- ACCESSEURS (Getters & Setters) ---
 
     public int getIdVente() { 
         return idVente; 
