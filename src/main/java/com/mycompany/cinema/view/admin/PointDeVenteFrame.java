@@ -1,4 +1,4 @@
-package com.mycompany.cinema.view;
+package com.mycompany.cinema.view.admin;
 
 import com.mycompany.cinema.Personnel;
 import com.mycompany.cinema.ProduitSnack;

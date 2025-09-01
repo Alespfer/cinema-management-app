@@ -35,13 +35,8 @@ public class Cinema {
             System.out.println("Base de données de fichiers détectée.");
         }
 
-        // On lance l'interface graphique de manière sécurisée, comme préconisé.
-        // Cela garantit que tous les composants Swing sont créés et modifiés
-        // dans le bon "thread" (le Event Dispatch Thread).
-        SwingUtilities.invokeLater(() -> {
             // Création et affichage de la fenêtre de connexion.
             LoginFrame loginFrame = new LoginFrame();
             loginFrame.setVisible(true);
-        });
     }
 }

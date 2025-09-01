@@ -1,11 +1,14 @@
 package com.mycompany.cinema.view;
 
+import com.mycompany.cinema.view.admin.AdminMainFrame;
+import com.mycompany.cinema.view.admin.PointDeVenteFrame;
 import com.mycompany.cinema.Client;
 import com.mycompany.cinema.Personnel;
 import com.mycompany.cinema.Role; // Importation nécessaire pour la redirection par rôle.
 import com.mycompany.cinema.service.AdminService;
 import com.mycompany.cinema.service.ClientService;
 import com.mycompany.cinema.service.impl.CinemaServiceImpl;
+import com.mycompany.cinema.view.admin.PointDeVente;
 
 import javax.swing.*;
 import java.awt.*;
@@ -126,7 +129,7 @@ public class LoginFrame extends JFrame {
             
             if (clientOpt.isPresent()) {
                 this.dispose(); // Ferme la fenêtre de login.
-                new ClientMainFrame(clientService, clientOpt.get()).setVisible(true); // Ouvre l'interface client.
+                new ClientMain(clientService, clientOpt.get()).setVisible(true); // Ouvre l'interface client.
             } else {
                 JOptionPane.showMessageDialog(this, "Email ou mot de passe client incorrect.", "Erreur d'authentification", JOptionPane.ERROR_MESSAGE);
             }
@@ -152,7 +155,7 @@ public class LoginFrame extends JFrame {
                 // Redirection conditionnelle basée sur le libellé du rôle.
                 if (role != null && role.getLibelle().equalsIgnoreCase("Vendeur")) {
                     // Si le rôle est "Vendeur", on lance le Point de Vente.
-                    new PointDeVenteFrame(adminService, personnel).setVisible(true);
+                    new PointDeVente(adminService, personnel).setVisible(true);
                 } else {
                     // Pour tous les autres rôles (ex: Administrateur), on lance le panneau d'administration complet.
                     new AdminMainFrame(adminService, personnel).setVisible(true);

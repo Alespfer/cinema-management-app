@@ -1,4 +1,4 @@
-package com.mycompany.cinema.view;
+package com.mycompany.cinema.view.admin;
 
 import com.mycompany.cinema.Personnel;
 import com.mycompany.cinema.service.AdminService;
@@ -54,13 +54,13 @@ public class AdminMainFrame extends JFrame {
         // Chaque onglet est un 'JPanel' spécialisé que tu as créé.
         // On passe l'instance du 'adminService' à chaque panneau pour qu'il puisse
         // communiquer avec la logique métier.
-        tabbedPane.addTab("Gestion Films", new GestionFilmsPanel(this.adminService));
+        tabbedPane.addTab("Gestion Films", new GestionFilms(this.adminService));
         tabbedPane.addTab("Gestion Séances", new GestionSeancesPanel(this.adminService));
-        tabbedPane.addTab("Gestion Salles", new GestionSallesPanel(this.adminService));
-        tabbedPane.addTab("Gestion Personnel", new GestionPersonnelPanel(this.adminService));
-        tabbedPane.addTab("Gestion Tarifs", new GestionTarifsPanel(this.adminService));
-        tabbedPane.addTab("Gestion Snacking", new GestionProduitsSnackPanel(adminService));
-        tabbedPane.addTab("Rapports de Ventes", new ReportingPanel(this.adminService));
+        tabbedPane.addTab("Gestion Salles", new GestionSalles(this.adminService));
+        tabbedPane.addTab("Gestion Personnel", new GestionPersonnel(this.adminService));
+        tabbedPane.addTab("Gestion Tarifs", new GestionTarifs(this.adminService));
+        tabbedPane.addTab("Gestion Snacking", new GestionProduitsSnack(adminService));
+        tabbedPane.addTab("Rapports de Ventes", new RapportVentes(this.adminService));
         
         // --- Protocole de Rafraîchissement Automatique ---
         // Mon binôme : Ce bloc est important. Il met en place un "écouteur" qui

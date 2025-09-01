@@ -8,6 +8,7 @@ import java.awt.*;
 import java.util.List;
 
 public class GestionFilmsPanel extends JPanel {
+
     private final AdminService adminService;
 
     // Composants de l'interface
@@ -19,9 +20,27 @@ public class GestionFilmsPanel extends JPanel {
 
     public GestionFilmsPanel(AdminService adminService) {
         this.adminService = adminService;
-        setLayout(new BorderLayout(10, 10));
-        initComponents();
-        loadFilms();
+        initComponents();        // 1. L'IDE construit les composants (et initialise filmListModel).
+        configureListRenderer(); // 2. Nous configurons les composants qui viennent d'être créés.
+        loadFilms();             // 3. Nous chargeons les données dans les composants prêts.
+    }
+    
+        /**
+     * Configure l'affichage des objets Film dans la JList.
+     * Cette logique est extraite ici pour garder le code généré propre.
+     */
+    private void configureListRenderer() {
+        filmJList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                // Cette logique est la nôtre, pas celle de l'IDE.
+                Component component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Film) {
+                    setText(((Film) value).getTitre());
+                }
+                return component;
+            }
+        });
     }
 
     private void initComponents() {
@@ -29,9 +48,9 @@ public class GestionFilmsPanel extends JPanel {
         filmListModel = new DefaultListModel<>();
         filmJList = new JList<>(filmListModel);
         filmJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
+
         // Rendu pour n'afficher que le titre
-            filmJList.setCellRenderer(new DefaultListCellRenderer() {
+        filmJList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 // ON STOCKE LE COMPOSANT DANS UNE VARIABLE 'component'

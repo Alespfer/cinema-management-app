@@ -1,0 +1,246 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
+ */
+package com.mycompany.cinema.view;
+
+// ========================================================================
+// --- PARTIE 1 : VOTRE CODE (CELUI QUE VOUS ÉCRIVEZ ET MODIFIEZ) ---
+// ========================================================================
+
+// Imports nécessaires
+import com.mycompany.cinema.Client;
+import com.mycompany.cinema.service.ClientService;
+import java.awt.Color;
+import java.util.Arrays;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+
+/**
+ *
+ * @author albertoesperon
+ */
+public class InfosPersonnelles extends javax.swing.JPanel {
+
+    // --- VOS VARIABLES D'INSTANCE ---
+    private final ClientService clientService;
+    private final Client clientConnecte;
+    private final JDialog parentDialog;
+
+    /**
+     * CONSTRUCTEUR MODIFIÉ
+     * Remplacez le constructeur par défaut par celui-ci.
+     */
+    public InfosPersonnelles(ClientService clientService, Client clientConnecte, JDialog parentDialog) {
+        // Initialisation de nos variables métier
+        this.clientService = clientService;
+        this.clientConnecte = clientConnecte;
+        this.parentDialog = parentDialog;
+
+        // Appel au code généré par NetBeans pour construire l'interface
+        initComponents();
+        
+         // --- AJOUT POUR FORCER LA COULEUR DU BOUTON ---
+        supprimerButton.setOpaque(true);
+        // La ligne suivante est souvent nécessaire sur macOS
+        // Elle dit au bouton de ne pas dessiner le contour natif, ce qui libère le fond.
+        supprimerButton.setBorderPainted(false); 
+        supprimerButton.setBackground(Color.RED);
+        supprimerButton.setForeground(Color.WHITE); // Pour que le texte soit lisible
+        
+        // --- Notre logique ajoutée après la construction ---
+        
+        // 1. Pré-remplir le champ "nom" avec le nom actuel du client.
+        //    On vide aussi les champs de mot de passe qui ont du texte par défaut.
+        nomField.setText(clientConnecte.getNom());
+        passField.setText("");
+        confirmPassField.setText("");
+    }
+    
+    // --- VOS MÉTHODES DE LOGIQUE (copiées de l'original) ---
+
+    /**
+     * Gère la mise à jour des informations du client.
+     */
+    private void gererMiseAJour() {
+        if (nomField.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Le nom ne peut pas être vide.", "Erreur de validation", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        clientConnecte.setNom(nomField.getText().trim());
+
+        char[] newPass = passField.getPassword();
+        char[] confirmPass = confirmPassField.getPassword();
+        
+        if (newPass.length > 0) {
+            if (!Arrays.equals(newPass, confirmPass)) {
+                JOptionPane.showMessageDialog(this, "Les nouveaux mots de passe ne correspondent pas.", "Erreur de validation", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            clientConnecte.setMotDePasse(new String(newPass));
+        }
+
+        try {
+            clientService.modifierCompteClient(clientConnecte);
+            JOptionPane.showMessageDialog(this, "Informations mises à jour avec succès !", "Succès", JOptionPane.INFORMATION_MESSAGE);
+            parentDialog.dispose();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erreur lors de la mise à jour : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    /**
+     * Gère la suppression du compte client.
+     */
+    private void gererSuppression() {
+        int response = JOptionPane.showConfirmDialog(this, 
+                "ATTENTION : Cette action est irréversible et supprimera votre compte\net tout votre historique de réservations.\nÊtes-vous absolument sûr de vouloir continuer ?",
+                "Confirmation de suppression de compte",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+                
+        if (response == JOptionPane.YES_OPTION) {
+            try {
+                clientService.supprimerCompteClient(clientConnecte.getId());
+                JOptionPane.showMessageDialog(null, "Votre compte a été supprimé. L'application va maintenant se fermer.", "Compte supprimé", JOptionPane.INFORMATION_MESSAGE);
+                System.exit(0);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erreur lors de la suppression : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    /** This method is called from within the constructor to
+     * initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is
+     * always regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        nomField = new javax.swing.JTextField();
+        passField = new javax.swing.JPasswordField();
+        confirmPassField = new javax.swing.JPasswordField();
+        jPanel2 = new javax.swing.JPanel();
+        majButton = new javax.swing.JButton();
+        supprimerButton = new javax.swing.JButton();
+
+        setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setLayout(new java.awt.BorderLayout());
+
+        jPanel1.setLayout(new java.awt.GridBagLayout());
+
+        jLabel1.setText("Nom :");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 94;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
+        jPanel1.add(jLabel1, gridBagConstraints);
+
+        jLabel2.setText("Nouveau mot de passe :");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(15, 12, 0, 0);
+        jPanel1.add(jLabel2, gridBagConstraints);
+
+        jLabel3.setText("Confirmer le mot de passe :");
+        jLabel3.setPreferredSize(new java.awt.Dimension(180, 17));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.ipadx = 10;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(15, 12, 0, 0);
+        jPanel1.add(jLabel3, gridBagConstraints);
+
+        nomField.setText("jTextField1");
+        nomField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nomFieldActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.ipadx = 97;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 12);
+        jPanel1.add(nomField, gridBagConstraints);
+
+        passField.setText("jPasswordField1");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.ipadx = 97;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(12, 6, 0, 12);
+        jPanel1.add(passField, gridBagConstraints);
+
+        confirmPassField.setText("jPasswordField2");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.ipadx = 97;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(12, 6, 235, 12);
+        jPanel1.add(confirmPassField, gridBagConstraints);
+
+        add(jPanel1, java.awt.BorderLayout.CENTER);
+
+        jPanel2.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+
+        majButton.setText("Mettre à jour");
+        jPanel2.add(majButton);
+
+        supprimerButton.setBackground(new java.awt.Color(255, 102, 102));
+        supprimerButton.setForeground(new java.awt.Color(255, 255, 255));
+        supprimerButton.setText("Supprimer mon compte ");
+        supprimerButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        supprimerButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                supprimerButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(supprimerButton);
+
+        add(jPanel2, java.awt.BorderLayout.PAGE_END);
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void nomFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nomFieldActionPerformed
+        gererMiseAJour();// TODO add your handling code here:
+    }//GEN-LAST:event_nomFieldActionPerformed
+
+    private void supprimerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supprimerButtonActionPerformed
+        gererSuppression();// TODO add your handling code here:
+    }//GEN-LAST:event_supprimerButtonActionPerformed
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPasswordField confirmPassField;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JButton majButton;
+    private javax.swing.JTextField nomField;
+    private javax.swing.JPasswordField passField;
+    private javax.swing.JButton supprimerButton;
+    // End of variables declaration//GEN-END:variables
+
+}

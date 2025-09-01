@@ -73,5 +73,4 @@ public class Comporte implements Serializable {
         this.prixUnitaire = prixUnitaire; 
     }
     
-    //Ceci est un test
 }
