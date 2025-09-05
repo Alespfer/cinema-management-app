@@ -38,6 +38,20 @@ public class VenteSnackDAOImpl extends GenericDAOImpl<VenteSnack> implements Ven
         }
         return null;
     }
+    
+    // --- DEBUT DE L'AJOUT ---
+    @Override
+    public VenteSnack getVenteByReservationId(int reservationId) {
+        // Parcours de toutes les ventes de snacks
+        for (VenteSnack vente : this.data) {
+            // L'ID de réservation peut être null, il faut le vérifier avant de comparer.
+            if (vente.getIdReservation() != null && vente.getIdReservation() == reservationId) {
+                return vente; // On retourne la première vente trouvée
+            }
+        }
+        return null; // Aucune vente trouvée pour cette réservation
+    }
+    //
 
     @Override
     public List<VenteSnack> getAllVentesSnack() {

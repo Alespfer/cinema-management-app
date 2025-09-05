@@ -23,6 +23,9 @@ public interface ClientService extends CinemaService {
      */
     Client authentifierClient(String email, String motDePasse);
 
+    
+    Client getClientByEmail(String email);
+
     /** Modifie les informations d’un compte client.
      * @throws Exception si l’opération échoue (ex : conflit).
      */
@@ -116,7 +119,21 @@ public interface ClientService extends CinemaService {
     /** Retourne l’historique des réservations du client. */
     List<Reservation> getHistoriqueReservationsClient(int clientId);
     
-    
+     // --- DEBUT DE L'AJOUT ---
+    /**
+     * Récupère la vente de snacks associée à une réservation.
+     * @param reservationId L'ID de la réservation.
+     * @return La VenteSnack ou null si inexistante.
+     */
+    VenteSnack getVenteSnackForReservation(int reservationId);
+
+    /**
+     * Récupère les lignes de détail (produit, quantité) pour une vente de snack.
+     * @param venteId L'ID de la vente de snack.
+     * @return Une liste d'objets Comporte.
+     */
+    List<Comporte> getLignesVenteForVente(int venteId);
+    // --- FIN DE L'AJOUT ---
     
     /**
      * Enregistre une nouvelle évaluation pour un film par le client connecté.

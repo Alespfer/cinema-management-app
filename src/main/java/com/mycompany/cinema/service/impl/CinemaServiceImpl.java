@@ -102,6 +102,19 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         clientDAO.addClient(nouveauClient);
         return nouveauClient;
     }
+    
+     // --- DEBUT DE L'AJOUT ---
+    @Override
+    public VenteSnack getVenteSnackForReservation(int reservationId) {
+        // Le service délègue simplement l'appel au DAO compétent.
+        return venteSnackDAO.getVenteByReservationId(reservationId);
+    }
+
+    @Override
+    public List<Comporte> getLignesVenteForVente(int venteId) {
+        // Le service délègue l'appel au DAO qui gère les lignes de vente.
+        return comporteDAO.getLignesByVenteId(venteId);
+    }
 
     @Override
     public Client authentifierClient(String email, String motDePasse) {
@@ -310,6 +323,33 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     public Tarif getTarifById(int tarifId) {
         // Le service délègue simplement l'appel au DAO compétent.
         return tarifDAO.getTarifById(tarifId);
+    }
+
+    // Dans le fichier CinemaServiceImpl.java
+    @Override
+    public Client getClientByEmail(String email) {
+        // 1. Récupérer la liste de TOUS les clients via le DAO.
+        //    Le service n'a pas les données lui-même, il les demande à la couche d'accès aux données.
+        List<Client> tousLesClients = clientDAO.getAllClients();
+
+        // 2. Parcourir chaque client dans la liste.
+        //    On utilise une boucle "for-each", comme vu dans le cours sur les Collections (p. 214).
+        for (Client client : tousLesClients) {
+
+            // 3. Comparer l'e-mail du client courant avec celui recherché.
+            //    On utilise equalsIgnoreCase pour que la recherche ne soit pas sensible à la casse (ex: "Test@a.com" sera égal à "test@a.com").
+            //    C'est une bonne pratique pour les identifiants de type e-mail.
+            if (client.getEmail().equalsIgnoreCase(email)) {
+
+                // 4. Si on trouve une correspondance, on retourne immédiatement cet objet Client.
+                //    La recherche s'arrête ici.
+                return client;
+            }
+        }
+
+        // 5. Si la boucle se termine sans avoir trouvé de client, cela signifie qu'aucun compte ne correspond.
+        //    On retourne 'null' pour signaler que le client n'a pas été trouvé.
+        return null;
     }
 
     @Override

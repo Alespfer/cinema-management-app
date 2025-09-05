@@ -18,5 +18,8 @@ public interface VenteSnackDAO {
     VenteSnack getVenteSnackById(int id);
     List<VenteSnack> getAllVentesSnack();
     List<VenteSnack> getVentesByDate(LocalDate date);
+    VenteSnack getVenteByReservationId(int reservationId);
     void rechargerDonnees();
+
+
 }

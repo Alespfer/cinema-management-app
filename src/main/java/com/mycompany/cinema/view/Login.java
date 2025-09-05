@@ -8,7 +8,7 @@ import com.mycompany.cinema.service.ClientService;
 import com.mycompany.cinema.service.impl.CinemaServiceImpl;
 import com.mycompany.cinema.view.admin.AdminMain;
 import com.mycompany.cinema.view.admin.PointDeVente;
-import java.util.Optional;
+import javax.swing.JOptionPane;
 
 public class Login extends javax.swing.JFrame {
 
@@ -87,6 +87,39 @@ public class Login extends javax.swing.JFrame {
         this.setVisible(true);
     }
 
+    // Copiez cette méthode (de la réponse précédente) dans votre classe Login.java
+    private void handleForgotPassword() {
+        String email = JOptionPane.showInputDialog(
+                this,
+                "Veuillez saisir votre adresse e-mail :",
+                "Récupération de mot de passe",
+                JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (email == null || email.trim().isEmpty()) {
+            return;
+        }
+
+        // Assurez-vous d'avoir une variable 'clientService' dans votre classe Login
+        Client client = clientService.getClientByEmail(email.trim());
+
+        if (client != null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Un e-mail de réinitialisation a été simulé.\nVotre mot de passe est : " + client.getMotDePasse(),
+                    "Mot de passe récupéré",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        } else {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Aucun compte n'est associé à cette adresse e-mail.",
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -99,6 +132,7 @@ public class Login extends javax.swing.JFrame {
         buttonGroup1 = new javax.swing.ButtonGroup();
         panneauPrincipal = new javax.swing.JPanel();
         buttonPanel = new javax.swing.JPanel();
+        forgotPassWordButton = new javax.swing.JButton();
         inscriptionButton = new javax.swing.JButton();
         connexionButton = new javax.swing.JButton();
         formPanel = new javax.swing.JPanel();
@@ -116,6 +150,14 @@ public class Login extends javax.swing.JFrame {
 
         panneauPrincipal.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panneauPrincipal.setLayout(new java.awt.BorderLayout());
+
+        forgotPassWordButton.setText("Mot de passe oublié ?");
+        forgotPassWordButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                forgotPassWordButtonActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(forgotPassWordButton);
 
         inscriptionButton.setText("S'inscrire");
         inscriptionButton.addActionListener(new java.awt.event.ActionListener() {
@@ -183,6 +225,10 @@ public class Login extends javax.swing.JFrame {
         actionConnexion();// TODO add your handling code here:
     }//GEN-LAST:event_connexionButtonActionPerformed
 
+    private void forgotPassWordButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_forgotPassWordButtonActionPerformed
+        handleForgotPassword();// TODO add your handling code here:
+    }//GEN-LAST:event_forgotPassWordButtonActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JRadioButton adminRadio;
@@ -191,6 +237,7 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JRadioButton clientRadio;
     private javax.swing.JButton connexionButton;
     private javax.swing.JPanel fieldsPanel;
+    private javax.swing.JButton forgotPassWordButton;
     private javax.swing.JPanel formPanel;
     private javax.swing.JButton inscriptionButton;
     private javax.swing.JLabel jLabel1;

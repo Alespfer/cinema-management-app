@@ -52,6 +52,14 @@
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout"/>
           <SubComponents>
+            <Component class="javax.swing.JButton" name="forgotPassWordButton">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mot de passe oubli&#xe9; ?"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="forgotPassWordButtonActionPerformed"/>
+              </Events>
+            </Component>
             <Component class="javax.swing.JButton" name="inscriptionButton">
               <Properties>
                 <Property name="text" type="java.lang.String" value="S&apos;inscrire"/>

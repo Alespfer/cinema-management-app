@@ -28,6 +28,10 @@ public class ClientMain extends javax.swing.JFrame {
     private List<Siege> siegesSelectionnes;
     private Tarif tarifSelectionne;
 
+    private PaiementPanel panneauPaiement;
+    private List<LignePanier> panierSnacksEnCours;  // <-- LIGNE MANQUANTE
+// <-- LIGNE MANQUANTE
+
     public ClientMain(ClientService clientService, Client clientConnecte) {
         this.clientService = clientService;
         this.clientConnecte = clientConnecte;
@@ -47,12 +51,22 @@ public class ClientMain extends javax.swing.JFrame {
         panneauProgrammation = new Programmation(clientService);
         panneauDetailFilm = new FilmDetail(clientService, this);
         panneauSieges = new AffichageSieges(clientService, clientConnecte);
-        panneauSnacks = new SnackSelection(clientService); // CORRECTION: Instanciation de la bonne classe
+        panneauSnacks = new SnackSelection(clientService);
+
+        // --- DEBUT DE LA CORRECTION ---
+        // Il manquait la ligne qui crée réellement l'objet PaiementPanel
+        panneauPaiement = new PaiementPanel();
+        // --- FIN DE LA CORRECTION ---
 
         mainPanel.add(panneauProgrammation, "PROGRAMMATION");
         mainPanel.add(panneauDetailFilm, "FILM_DETAIL");
         mainPanel.add(panneauSieges, "SIEGES");
         mainPanel.add(panneauSnacks, "SNACKS");
+
+        // --- DEBUT DE LA CORRECTION ---
+        // Il manquait la ligne qui ajoute le nouveau panneau au CardLayout
+        mainPanel.add(panneauPaiement, "PAIEMENT");
+        // --- FIN DE LA CORRECTION ---
     }
 
     private void attacherEcouteurs() {
@@ -89,13 +103,18 @@ public class ClientMain extends javax.swing.JFrame {
             }
 
             public void onSkip() {
-                finaliserCommande(new ArrayList<LignePanier>()); // Appel avec une liste vide
+                // APRÈS : On fait la même chose, mais en sauvegardant un panier vide.
+                panierSnacksEnCours = new ArrayList<>(); // Panier vide
+                procederAuPaiement();
             }
         });
 
         panneauSnacks.setListener(new SnackSelection.SnackSelectionListener() {
             public void onSnackSelectionCompleted(List<LignePanier> panier) {
-                finaliserCommande(panier); // Transmission directe de la liste
+                // APRÈS : On sauvegarde le panier dans une variable de la classe...
+                panierSnacksEnCours = panier;
+                // ...et on lance la nouvelle étape de paiement.
+                procederAuPaiement();
             }
         });
 
@@ -114,6 +133,36 @@ public class ClientMain extends javax.swing.JFrame {
                 gestionnaireDeCartes.show(mainPanel, "FILM_DETAIL");
             }
         });
+        panneauPaiement.setListener(new PaiementPanel.PaiementListener() {
+            @Override
+            public void onPaiementValide() {
+                // Le paiement est "OK", on peut finaliser la commande
+                finaliserCommande(panierSnacksEnCours);
+            }
+
+            // VOICI LA PARTIE À AJOUTER
+            @Override
+            public void onRetour() {
+                // L'utilisateur veut revenir en arrière, on affiche le panneau des snacks.
+                // On utilise le gestionnaire de cartes pour changer de vue.
+                gestionnaireDeCartes.show(mainPanel, "SNACKS");
+            }
+        });
+    }
+
+    // Nouvelle méthode pour gérer la transition vers le paiement
+    private void procederAuPaiement() {
+        // Calculer le montant total
+        double prixBillets = tarifSelectionne.getPrix() * siegesSelectionnes.size();
+        double prixSnacks = 0;
+        for (LignePanier ligne : panierSnacksEnCours) {
+            prixSnacks += ligne.produit.getPrixVente() * ligne.quantite;
+        }
+        double montantTotal = prixBillets + prixSnacks;
+
+        // Passer le montant au panneau de paiement et l'afficher
+        panneauPaiement.setMontantTotal(montantTotal);
+        gestionnaireDeCartes.show(mainPanel, "PAIEMENT");
     }
 
     private void finaliserCommande(List<LignePanier> panierSnacks) { // CONFORMITÉ ABSOLUE
