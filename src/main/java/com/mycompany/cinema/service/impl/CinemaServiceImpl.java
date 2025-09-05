@@ -307,6 +307,12 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     }
 
     @Override
+    public Tarif getTarifById(int tarifId) {
+        // Le service délègue simplement l'appel au DAO compétent.
+        return tarifDAO.getTarifById(tarifId);
+    }
+
+    @Override
     public List<Genre> getAllGenres() {
         return genreDAO.getAllGenres();
     }
@@ -602,7 +608,6 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     // mais elle n'est pas déclarée dans les interfaces. C'est un point à corriger dans
     // les interfaces de service pour une cohérence parfaite.
     // Pour l'instant, nous laissons la version avec List<LignePanier> comme méthode de support interne.
-
     @Override
     public VenteSnack enregistrerVenteSnack(int idPersonnel, int idCaisse, Map<ProduitSnack, Integer> panier) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody

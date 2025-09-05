@@ -54,6 +54,11 @@ public class GestionTarifs extends javax.swing.JPanel {
         }
     }
 
+    // Dans la classe GestionTarifs
+    public void rafraichirDonnees() {
+        chargerListeTarifs(); // Suppose que 'chargerTarifs()' est la méthode qui remplit ta JTable ou JList.
+    }
+
     private void mettreAJourChamps(Tarif tarif) {
         if (tarif != null) {
             idField.setText(String.valueOf(tarif.getId()));
@@ -270,4 +275,5 @@ public class GestionTarifs extends javax.swing.JPanel {
     private javax.swing.JTextField prixField;
     private javax.swing.JButton supprimerButton;
     // End of variables declaration//GEN-END:variables
+
 }

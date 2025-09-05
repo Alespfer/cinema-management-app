@@ -1,7 +1,9 @@
+// Dans Programmation.java
 package com.mycompany.cinema.view;
 
 import com.mycompany.cinema.Film;
 import com.mycompany.cinema.Genre;
+import com.mycompany.cinema.Salle;
 import com.mycompany.cinema.Seance;
 import com.mycompany.cinema.service.ClientService;
 import java.awt.Component;
@@ -9,43 +11,48 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+// Ajoute cet import pour l'événement
+import javax.swing.event.ListSelectionEvent;
 
 public class Programmation extends javax.swing.JPanel {
 
     private final ClientService clientService;
+    private DefaultTableModel tableModel;
+    private List<Seance> seancesAffichees;
+    private DefaultComboBoxModel<Genre> genreComboBoxModel;
     private SeanceSelectionListener selectionListener;
 
-    public interface SeanceSelectionListener {
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
+    public interface SeanceSelectionListener {
         void onSeanceSelected(Seance seance);
     }
 
     public Programmation(ClientService clientService) {
         this.clientService = clientService;
-
         initComponents();
-
-        // --- LIAISON MANUELLE DE L'ÉVÉNEMENT TABLE ---
-        seancesTable.getSelectionModel().addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
-                seancesTableValueChanged(evt);
-            }
-        });
-
-        loadGenres();
-        rechercher();
+        initCustomComponents();
+        rechercher(); 
     }
 
-    private void loadGenres() {
-        genreFilter.addItem(null);
-        List<Genre> genres = clientService.getAllGenres();
-        for (Genre g : genres) {
-            genreFilter.addItem(g);
-        }
+    private void initCustomComponents() {
+        String[] columnNames = {"Film", "Date", "Heure", "Salle", "Durée (min)"};
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        seancesTable.setModel(tableModel);
+
+        genreComboBoxModel = new DefaultComboBoxModel<>();
+        genreFilter.setModel(genreComboBoxModel);
         genreFilter.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -58,84 +65,59 @@ public class Programmation extends javax.swing.JPanel {
                 return this;
             }
         });
+        chargerGenres();
+    }
+
+    private void chargerGenres() {
+        genreComboBoxModel.removeAllElements();
+        genreComboBoxModel.addElement(null);
+        List<Genre> genres = clientService.getAllGenres();
+        for (Genre genre : genres) {
+            genreComboBoxModel.addElement(genre);
+        }
     }
 
     public void rechercher() {
         LocalDate date = null;
-        if (!dateFilter.getText().trim().isEmpty()) {
-            try {
-                date = LocalDate.parse(dateFilter.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            } catch (DateTimeParseException e) {
-                JOptionPane.showMessageDialog(this, "Format de date invalide. Utilisez jj/MM/yyyy.", "Erreur de Format", JOptionPane.ERROR_MESSAGE);
-                return;
+        try {
+            if (!dateFilter.getText().trim().isEmpty()) {
+                date = LocalDate.parse(dateFilter.getText().trim(), DATE_FORMATTER);
             }
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(this, "Format de date invalide. Utilisez jj/MM/aaaa.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-        String keyword = titreFilter.getText();
-        Genre genre = (Genre) genreFilter.getSelectedItem();
-        Integer genreId = (genre != null) ? genre.getId() : null;
-
-        List<Seance> seances = clientService.rechercherSeances(date, genreId, keyword);
-
-        SeanceTableModel newModel = new SeanceTableModel(seances, clientService);
-        seancesTable.setModel(newModel);
+        String titreKeyword = titreFilter.getText().trim();
+        Genre genreSelectionne = (Genre) genreFilter.getSelectedItem();
+        Integer genreId = (genreSelectionne != null) ? genreSelectionne.getId() : null;
+        seancesAffichees = clientService.rechercherSeances(date, genreId, titreKeyword);
+        mettreAJourTable();
     }
 
-    // --- CLASSE DE MODÈLE DE TABLE (INDISPENSABLE) ---
-    class SeanceTableModel extends DefaultTableModel {
+    private void reinitialiserFiltres() {
+        dateFilter.setText("");
+        titreFilter.setText("");
+        genreFilter.setSelectedIndex(0);
+        rechercher();
+    }
 
-        private final transient List<Seance> seances;
-        private final transient ClientService clientService;
-        private final String[] columnNames = {"Film", "Date", "Heure", "Salle", "Durée (min)"};
-        private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
-
-        public SeanceTableModel(List<Seance> seances, ClientService clientService) {
-            this.seances = seances;
-            this.clientService = clientService;
-        }
-
-        @Override
-        public int getRowCount() {
-            return (seances != null) ? seances.size() : 0;
-        }
-
-        @Override
-        public int getColumnCount() {
-            return columnNames.length;
-        }
-
-        @Override
-        public String getColumnName(int column) {
-            return columnNames[column];
-        }
-
-        @Override
-        public Object getValueAt(int row, int col) {
-            Seance seance = seances.get(row);
+    private void mettreAJourTable() {
+        tableModel.setRowCount(0);
+        for (Seance seance : seancesAffichees) {
             Film film = clientService.getFilmDetails(seance.getIdFilm());
-            switch (col) {
-                case 0:
-                    return (film != null) ? film.getTitre() : "Film inconnu";
-                case 1:
-                    return seance.getDateHeureDebut().format(DATE_FORMATTER);
-                case 2:
-                    return seance.getDateHeureDebut().format(TIME_FORMATTER);
-                case 3:
-                    return "Salle " + seance.getIdSalle();
-                case 4:
-                    return (film != null) ? film.getDureeMinutes() : "N/A";
-                default:
-                    return null;
+            Salle salle = null;
+            for (Salle s : clientService.getAllSalles()) {
+                if (s.getId() == seance.getIdSalle()) {
+                    salle = s;
+                    break;
+                }
             }
-        }
-
-        public Seance getSeanceAt(int row) {
-            return seances.get(row);
-        }
-
-        @Override
-        public boolean isCellEditable(int row, int column) {
-            return false;
+            String titreFilm = (film != null) ? film.getTitre() : "Film Inconnu";
+            String numeroSalle = (salle != null) ? salle.getNumero() : "Salle Inconnue";
+            int dureeFilm = (film != null) ? film.getDureeMinutes() : 0;
+            String dateSeance = seance.getDateHeureDebut().format(DATE_FORMATTER);
+            String heureSeance = seance.getDateHeureDebut().format(TIME_FORMATTER);
+            tableModel.addRow(new Object[]{ titreFilm, dateSeance, heureSeance, numeroSalle, dureeFilm });
         }
     }
 
@@ -205,19 +187,11 @@ public class Programmation extends javax.swing.JPanel {
 
         add(filterPanel, java.awt.BorderLayout.PAGE_START);
 
-        seancesTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+        seancesTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                seancesTableMouseClicked(evt);
             }
-        ));
-        seancesTable.setFillsViewportHeight(true);
-        seancesTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        });
         jScrollPane1.setViewportView(seancesTable);
 
         add(jScrollPane1, java.awt.BorderLayout.CENTER);
@@ -228,22 +202,22 @@ public class Programmation extends javax.swing.JPanel {
     }//GEN-LAST:event_rechercheButtonActionPerformed
 
     private void reinitialisationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reinitialisationButtonActionPerformed
-        dateFilter.setText("");
-        titreFilter.setText("");
-        genreFilter.setSelectedIndex(0);
-        rechercher();// TODO add your handling code here:
+        reinitialiserFiltres();
+// TODO add your handling code here:
     }//GEN-LAST:event_reinitialisationButtonActionPerformed
 
-    private void seancesTableValueChanged(javax.swing.event.ListSelectionEvent evt) {
-        if (!evt.getValueIsAdjusting() && seancesTable.getSelectedRow() != -1) {
-            if (selectionListener != null) {
-                int modelRow = seancesTable.convertRowIndexToModel(seancesTable.getSelectedRow());
-                // Important: On caste le modèle pour accéder à notre méthode personnalisée
-                Seance selectedSeance = ((SeanceTableModel) seancesTable.getModel()).getSeanceAt(modelRow);
+    private void seancesTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_seancesTableMouseClicked
+        if (selectionListener != null) {
+            int selectedRow = seancesTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                Seance selectedSeance = seancesAffichees.get(selectedRow);
+                System.out.println("DAN REPORT (Clic détecté): Programmation Panel a détecté la sélection de la séance ID: " + selectedSeance.getId());
                 selectionListener.onSeanceSelected(selectedSeance);
             }
-        }
-    }
+        }// TODO add your handling code here:
+    }//GEN-LAST:event_seancesTableMouseClicked
+
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField dateFilter;
     private javax.swing.JPanel filterPanel;

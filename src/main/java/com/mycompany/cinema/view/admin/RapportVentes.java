@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-// CORRECTION : L'import de 'Optional' a été supprimé. Il est interdit.
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -25,7 +24,7 @@ public class RapportVentes extends javax.swing.JPanel {
         this.adminService = adminService;
         initComponents();
         initModels();
-        loadAllTables();
+        loadAllTables(); // Ceci va maintenant charger les tables ET les totaux généraux.
     }
 
     private void initModels() {
@@ -52,34 +51,60 @@ public class RapportVentes extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Veuillez entrer une date pour le calcul.", "Date manquante", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
         try {
             LocalDate date = LocalDate.parse(dateText, DATE_FORMATTER);
             double caBillets = adminService.calculerChiffreAffairesPourJour(date);
             double caSnacks = adminService.calculerChiffreAffairesSnackPourJour(date);
-            resultatCaBilletsLabel.setText("Billets : " + CURRENCY_FORMATTER.format(caBillets));
-            resultatCaSnacksLabel.setText("Snacks : " + CURRENCY_FORMATTER.format(caSnacks));
+            // Met à jour les labels pour le CA journalier
+            resultatCaBilletsLabel.setText("CA du jour (Billets) : " + CURRENCY_FORMATTER.format(caBillets));
+            resultatCaSnacksLabel.setText("CA du jour (Snacks) : " + CURRENCY_FORMATTER.format(caSnacks));
         } catch (DateTimeParseException ex) {
             JOptionPane.showMessageDialog(this, "Format de date invalide. Utilisez jj/MM/yyyy.", "Erreur de Format", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void loadAllTables() {
+    // CORRECTION : Le nom de la méthode est plus clair. Elle fait plus que charger les tables.
+    public void loadAllTables() {
         loadReservationsTable();
         loadVentesSnackTable();
+        calculerEtAfficherTotauxGeneraux(); // NOUVEL APPEL
+    }
+
+    // CORRECTION : NOUVELLE MÉTHODE POUR LES TOTAUX GLOBAUX
+    private void calculerEtAfficherTotauxGeneraux() {
+        double caTotalBillets = 0;
+        List<Reservation> reservations = adminService.getAllReservations();
+        for (Reservation reservation : reservations) {
+            List<Billet> billets = adminService.getBilletsByReservationId(reservation.getId());
+            for (Billet billet : billets) {
+                Tarif tarif = adminService.getTarifById(billet.getIdTarif());
+                if (tarif != null) {
+                    caTotalBillets += tarif.getPrix();
+                }
+            }
+        }
+
+        double caTotalSnacks = 0;
+        List<VenteSnack> ventes = adminService.getAllVentesSnack();
+        for (VenteSnack vente : ventes) {
+            caTotalSnacks += adminService.calculerTotalPourVenteSnack(vente);
+        }
+
+        // Met à jour les nouveaux JLabels pour les totaux généraux
+        totalCaBilletsLabel.setText("CA TOTAL (Billets) : " + CURRENCY_FORMATTER.format(caTotalBillets));
+        totalCaSnacksLabel.setText("CA TOTAL (Snacks) : " + CURRENCY_FORMATTER.format(caTotalSnacks));
+
+        // Initialise les labels journaliers
+        resultatCaBilletsLabel.setText("CA du jour (Billets) : --,-- €");
+        resultatCaSnacksLabel.setText("CA du jour (Snacks) : --,-- €");
     }
 
     private void loadReservationsTable() {
         reservationsTableModel.setRowCount(0);
         List<Reservation> reservations = adminService.getAllReservations();
-
         for (Reservation reservation : reservations) {
-            // CORRECTION : Appel direct et vérification de nullité.
             Client client = adminService.getClientById(reservation.getIdClient());
-            String clientNom = "Client inconnu";
-            if (client != null) {
-                clientNom = client.getNom();
-            }
+            String clientNom = (client != null) ? client.getNom() : "Client inconnu";
 
             List<Billet> billets = adminService.getBilletsByReservationId(reservation.getId());
             if (billets.isEmpty()) {
@@ -87,7 +112,6 @@ public class RapportVentes extends javax.swing.JPanel {
             }
 
             Billet premierBillet = billets.get(0);
-            // CORRECTION : Appel direct et vérification de nullité.
             Seance seance = adminService.getSeanceById(premierBillet.getIdSeance());
 
             String filmTitre = "Film inconnu";
@@ -102,25 +126,13 @@ public class RapportVentes extends javax.swing.JPanel {
 
             double prixTotal = 0;
             for (Billet b : billets) {
-                final int tarifId = b.getIdTarif();
-
-                // CORRECTION : Boucle de recherche simplifiée et conforme.
-                Tarif tarif = null;
-                for (Tarif t : adminService.getAllTarifs()) {
-                    if (t.getId() == tarifId) {
-                        tarif = t;
-                        break;
-                    }
-                }
-
+                Tarif tarif = adminService.getTarifById(b.getIdTarif());
                 if (tarif != null) {
                     prixTotal += tarif.getPrix();
                 }
             }
 
-            Object[] rowData = {
-                reservation.getId(), clientNom, filmTitre, seanceDate, CURRENCY_FORMATTER.format(prixTotal)
-            };
+            Object[] rowData = {reservation.getId(), clientNom, filmTitre, seanceDate, CURRENCY_FORMATTER.format(prixTotal)};
             reservationsTableModel.addRow(rowData);
         }
     }
@@ -128,33 +140,24 @@ public class RapportVentes extends javax.swing.JPanel {
     private void loadVentesSnackTable() {
         ventesSnackTableModel.setRowCount(0);
         List<VenteSnack> ventes = adminService.getAllVentesSnack();
-
         for (VenteSnack vente : ventes) {
             String canalDeVente, vendeur, clientAssocie;
-
-            if (vente.getIdPersonnel() >= 0) { // Hypothèse : idPersonnel < 0 signifie vente en ligne
-                // CORRECTION : Appel direct et vérification de nullité.
+            if (vente.getIdPersonnel() > 0) { // On suppose que 0 n'est pas un ID valide
                 Personnel p = adminService.getPersonnelById(vente.getIdPersonnel());
                 vendeur = (p != null) ? p.getPrenom() + " " + p.getNom() : "ID " + vente.getIdPersonnel();
-
-                // CORRECTION : Appel direct et vérification de nullité.
                 Caisse c = adminService.getCaisseById(vente.getIdCaisse());
                 canalDeVente = (c != null) ? c.getNom() : "Caisse ID " + vente.getIdCaisse();
             } else {
                 vendeur = "N/A";
                 canalDeVente = "Achat en Ligne";
             }
-
             if (vente.getIdClient() != null) {
-                // CORRECTION : Appel direct et vérification de nullité.
                 Client c = adminService.getClientById(vente.getIdClient());
                 clientAssocie = (c != null) ? c.getNom() : "Client ID " + vente.getIdClient();
             } else {
                 clientAssocie = "Vente Anonyme";
             }
-
             double totalVente = adminService.calculerTotalPourVenteSnack(vente);
-
             Object[] rowData = {vente.getIdVente(), vente.getDateVente().format(DATETIME_FORMATTER), canalDeVente, vendeur, clientAssocie, CURRENCY_FORMATTER.format(totalVente)};
             ventesSnackTableModel.addRow(rowData);
         }
@@ -177,6 +180,8 @@ public class RapportVentes extends javax.swing.JPanel {
         summaryPanel = new javax.swing.JPanel();
         resultatCaBilletsLabel = new javax.swing.JLabel();
         resultatCaSnacksLabel = new javax.swing.JLabel();
+        totalCaBilletsLabel = new javax.swing.JLabel();
+        totalCaSnacksLabel = new javax.swing.JLabel();
         jTabbedPane2 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -226,14 +231,20 @@ public class RapportVentes extends javax.swing.JPanel {
 
         topPanel.add(filterPanel, java.awt.BorderLayout.PAGE_START);
 
-        summaryPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Chiffre d'affaires du jour"));
-        summaryPanel.setLayout(new java.awt.GridLayout(2, 1));
+        summaryPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Résumé des ventes"));
+        summaryPanel.setLayout(new java.awt.GridLayout(4, 1));
 
         resultatCaBilletsLabel.setText("Billets : 0,00 €");
         summaryPanel.add(resultatCaBilletsLabel);
 
         resultatCaSnacksLabel.setText("Snacks : 0,00 €");
         summaryPanel.add(resultatCaSnacksLabel);
+
+        totalCaBilletsLabel.setText("CA TOTAL (Billets) : 0,00 €");
+        summaryPanel.add(totalCaBilletsLabel);
+
+        totalCaSnacksLabel.setText("CA TOTAL (Snacks) : 0,00 €");
+        summaryPanel.add(totalCaSnacksLabel);
 
         topPanel.add(summaryPanel, java.awt.BorderLayout.CENTER);
 
@@ -263,7 +274,7 @@ public class RapportVentes extends javax.swing.JPanel {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE)
         );
 
         jTabbedPane2.addTab("Détail des réservations", jPanel1);
@@ -292,7 +303,7 @@ public class RapportVentes extends javax.swing.JPanel {
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 162, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE)
         );
 
         jTabbedPane2.addTab("Détail des ventes de snacks", jPanel2);
@@ -320,6 +331,8 @@ public class RapportVentes extends javax.swing.JPanel {
     private javax.swing.JLabel resultatCaSnacksLabel;
     private javax.swing.JPanel summaryPanel;
     private javax.swing.JPanel topPanel;
+    private javax.swing.JLabel totalCaBilletsLabel;
+    private javax.swing.JLabel totalCaSnacksLabel;
     private javax.swing.JTable ventesSnackTable;
     // End of variables declaration//GEN-END:variables
 }

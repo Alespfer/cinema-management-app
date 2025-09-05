@@ -15,21 +15,24 @@ import java.util.List;
 /**
  * ATTENTION : Classe utilitaire pour créer le tout premier jeu de données.
  * Axelle : Tu n'auras jamais besoin de toucher ou d'appeler ce code. Il est
- * exécuté une seule fois pour générer les fichiers "data/nom_fichier.dat"
- * que le reste de l'application utilise comme une base de données.
- * C'est la source de toutes les informations que tu afficheras au démarrage.
+ * exécuté une seule fois pour générer les fichiers "data/nom_fichier.dat" que
+ * le reste de l'application utilise comme une base de données. C'est la source
+ * de toutes les informations que tu afficheras au démarrage.
  */
 public final class DataInitializer {
 
     /**
-     * Le constructeur est privé pour empêcher quiconque de créer une instance de cette classe.
-     * On ne l'utilise qu'à travers sa méthode statique 'seed()'.
+     * Le constructeur est privé pour empêcher quiconque de créer une instance
+     * de cette classe. On ne l'utilise qu'à travers sa méthode statique
+     * 'seed()'.
      */
-    private DataInitializer() {}
+    private DataInitializer() {
+    }
 
     /**
-     * La méthode principale qui lance la création de toutes les données de test.
-     * Pense à elle comme un grand script qui remplit la base de données de zéro.
+     * La méthode principale qui lance la création de toutes les données de
+     * test. Pense à elle comme un grand script qui remplit la base de données
+     * de zéro.
      */
     public static void seed() {
         System.out.println("Début de l'initialisation du jeu de données...");
@@ -48,7 +51,7 @@ public final class DataInitializer {
         List<ProduitSnack> produitsSnack = createProduitsSnack();
         // Les "Caisses" où les ventes de snacks sont enregistrées.
         List<Caisse> caisses = createCaisses();
-        
+
         // --- PHASE 2: Création d'objets qui dépendent de la phase 1 ---
         // On crée les sièges pour chaque salle créée juste avant.
         List<Siege> sieges = createSieges(salles);
@@ -81,7 +84,7 @@ public final class DataInitializer {
         List<Comporte> lignesVente = new ArrayList<>();
         // On simule une vente de snacks au comptoir.
         createScenarioVenteSnack(personnel, produitsSnack, caisses, clients, ventesSnack, lignesVente);
-        
+
         // --- PHASE 5: Sauvegarde de tout dans des fichiers ---
         // Une fois tous les objets créés en mémoire, on les sauvegarde un par un dans des fichiers.
         // C'est ce qui assure que les données persistent même si on ferme l'application.
@@ -111,7 +114,6 @@ public final class DataInitializer {
     // --- Ci-dessous, les méthodes de création de chaque type d'objet. ---
     // Mon binôme : Le détail n'est pas important pour toi, c'est juste le "remplissage"
     // de la base de données.
-
     private static List<Role> createRoles() {
         List<Role> items = new ArrayList<>();
         items.add(new Role(1, "Administrateur"));
@@ -138,7 +140,7 @@ public final class DataInitializer {
         items.add(new Genre(6, "Animation"));
         return items;
     }
-    
+
     private static List<Caisse> createCaisses() {
         List<Caisse> items = new ArrayList<>();
         items.add(new Caisse(1, "Comptoir Principal", "Hall d'entrée"));
@@ -203,31 +205,36 @@ public final class DataInitializer {
 
     private static List<Seance> createSeances(List<Film> films, List<Salle> salles) {
         List<Seance> items = new ArrayList<>();
+
+        // Logique dynamique : on calcule les dates par rapport à AUJOURD'HUI.
         LocalDate aujourdhui = LocalDate.now();
-        LocalDate hier = aujourdhui.minusDays(1);
         LocalDate demain = aujourdhui.plusDays(1);
         LocalDate apresDemain = aujourdhui.plusDays(2);
 
         int seanceIdCounter = 1;
 
-        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(hier, LocalTime.of(20, 0)), salles.get(0).getId(), films.get(0).getId()));
+        // --- Séances pour AUJOURD'HUI (uniquement si elles n'ont pas encore eu lieu) ---
         if (LocalTime.now().isBefore(LocalTime.of(14, 0))) {
-            items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(14, 0)), salles.get(1).getId(), films.get(1).getId()));
+            items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(14, 0)), salles.get(1).getId(), films.get(1).getId())); // Oppenheimer
         }
         if (LocalTime.now().isBefore(LocalTime.of(17, 30))) {
-            items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(17, 30)), salles.get(2).getId(), films.get(2).getId()));
+            items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(17, 30)), salles.get(2).getId(), films.get(2).getId())); // Spider-Man
         }
         if (LocalTime.now().isBefore(LocalTime.of(20, 15))) {
-            items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(20, 15)), salles.get(0).getId(), films.get(0).getId()));
+            items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(20, 15)), salles.get(0).getId(), films.get(0).getId())); // Dune
         }
         if (LocalTime.now().isBefore(LocalTime.of(21, 0))) {
-            items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(21, 0)), salles.get(1).getId(), films.get(1).getId()));
+            items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(21, 0)), salles.get(1).getId(), films.get(1).getId())); // Oppenheimer
         }
-        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(14, 0)), salles.get(0).getId(), films.get(0).getId()));
-        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(17, 0)), salles.get(1).getId(), films.get(2).getId()));
-        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(20, 30)), salles.get(2).getId(), films.get(1).getId()));
-        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(apresDemain, LocalTime.of(17, 30)), salles.get(0).getId(), films.get(2).getId()));
-        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(apresDemain, LocalTime.of(21, 0)), salles.get(2).getId(), films.get(0).getId()));
+
+        // --- Séances pour DEMAIN ---
+        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(14, 0)), salles.get(0).getId(), films.get(0).getId())); // Dune
+        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(17, 0)), salles.get(1).getId(), films.get(2).getId())); // Spider-Man
+        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(20, 30)), salles.get(2).getId(), films.get(1).getId())); // Oppenheimer
+
+        // --- Séances pour APRÈS-DEMAIN ---
+        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(apresDemain, LocalTime.of(17, 30)), salles.get(0).getId(), films.get(2).getId())); // Spider-Man
+        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(apresDemain, LocalTime.of(21, 0)), salles.get(2).getId(), films.get(0).getId())); // Dune
 
         return items;
     }
@@ -246,7 +253,7 @@ public final class DataInitializer {
         items.add(new Planning(1, now.withHour(18), now.withHour(23), "Vente Snacking", personnel.get(2).getId()));
         return items;
     }
-    
+
     private static List<ProduitSnack> createProduitsSnack() {
         List<ProduitSnack> items = new ArrayList<>();
         items.add(new ProduitSnack(1, "Popcorn Salé Grand", "Maïs éclaté salé, 250g", 6.50, 100));
@@ -257,7 +264,7 @@ public final class DataInitializer {
         items.add(new ProduitSnack(6, "Nachos & Fromage", "Tortilla chips avec sauce fromage", 7.00, 50));
         return items;
     }
-    
+
     private static List<EvaluationClient> createEvaluations(List<Client> clients, List<Film> films) {
         List<EvaluationClient> items = new ArrayList<>();
         items.add(new EvaluationClient(clients.get(0).getId(), films.get(0).getId(), 5, "Visuellement incroyable, une pure merveille !", LocalDateTime.now().minusDays(1)));
@@ -270,7 +277,7 @@ public final class DataInitializer {
         Reservation res = new Reservation(1, LocalDateTime.now().minusDays(1), clients.get(0).getId());
         reservations.add(res);
 
-        Siege siege1 = sieges.get(57); 
+        Siege siege1 = sieges.get(57);
         Siege siege2 = sieges.get(58);
         billets.add(new Billet(1, res.getId(), tarifs.get(0).getId(), siege1.getId(), seances.get(0).getId()));
         billets.add(new Billet(2, res.getId(), tarifs.get(0).getId(), siege2.getId(), seances.get(0).getId()));
@@ -279,14 +286,16 @@ public final class DataInitializer {
     private static void createScenarioVenteSnack(List<Personnel> personnel, List<ProduitSnack> produits, List<Caisse> caisses, List<Client> clients, List<VenteSnack> ventes, List<Comporte> lignes) {
         VenteSnack vente = new VenteSnack(1, LocalDateTime.now().minusHours(2), personnel.get(2).getId(), caisses.get(0).getId(), null);
         ventes.add(vente);
-        
+
         lignes.add(new Comporte(vente.getIdVente(), produits.get(0).getId(), 1, produits.get(0).getPrixVente()));
         lignes.add(new Comporte(vente.getIdVente(), produits.get(1).getId(), 1, produits.get(1).getPrixVente()));
     }
 
     /**
-     * Méthode générique qui prend n'importe quelle liste d'objets et la sauvegarde
-     * dans un fichier binaire. C'est le cœur de notre système de persistance simple.
+     * Méthode générique qui prend n'importe quelle liste d'objets et la
+     * sauvegarde dans un fichier binaire. C'est le cœur de notre système de
+     * persistance simple.
+     *
      * @param filename Le nom du fichier (ex: "films.dat").
      * @param list La liste d'objets à sauvegarder.
      * @param <T> Le type des objets dans la liste.

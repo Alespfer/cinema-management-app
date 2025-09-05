@@ -4,116 +4,102 @@
  */
 package com.mycompany.cinema.view;
 
-// ========================================================================
-// --- PARTIE 1 : VOTRE CODE (CELUI QUE VOUS ÉCRIVEZ ET MODIFIEZ) ---
-// ========================================================================
-
-// Imports nécessaires
 import com.mycompany.cinema.Client;
 import com.mycompany.cinema.service.ClientService;
 import java.awt.Color;
 import java.util.Arrays;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
-/**
- *
- * @author albertoesperon
- */
 public class InfosPersonnelles extends javax.swing.JPanel {
 
-    // --- VOS VARIABLES D'INSTANCE ---
     private final ClientService clientService;
     private final Client clientConnecte;
     private final JDialog parentDialog;
 
-    /**
-     * CONSTRUCTEUR MODIFIÉ
-     * Remplacez le constructeur par défaut par celui-ci.
-     */
     public InfosPersonnelles(ClientService clientService, Client clientConnecte, JDialog parentDialog) {
-        // Initialisation de nos variables métier
         this.clientService = clientService;
         this.clientConnecte = clientConnecte;
         this.parentDialog = parentDialog;
-
-        // Appel au code généré par NetBeans pour construire l'interface
         initComponents();
-        
-         // --- AJOUT POUR FORCER LA COULEUR DU BOUTON ---
-        supprimerButton.setOpaque(true);
-        // La ligne suivante est souvent nécessaire sur macOS
-        // Elle dit au bouton de ne pas dessiner le contour natif, ce qui libère le fond.
-        supprimerButton.setBorderPainted(false); 
-        supprimerButton.setBackground(Color.RED);
-        supprimerButton.setForeground(Color.WHITE); // Pour que le texte soit lisible
-        
-        // --- Notre logique ajoutée après la construction ---
-        
-        // 1. Pré-remplir le champ "nom" avec le nom actuel du client.
-        //    On vide aussi les champs de mot de passe qui ont du texte par défaut.
-        nomField.setText(clientConnecte.getNom());
-        passField.setText("");
-        confirmPassField.setText("");
+        chargerInfosClient();
     }
-    
-    // --- VOS MÉTHODES DE LOGIQUE (copiées de l'original) ---
 
-    /**
-     * Gère la mise à jour des informations du client.
-     */
-    private void gererMiseAJour() {
-        if (nomField.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Le nom ne peut pas être vide.", "Erreur de validation", JOptionPane.ERROR_MESSAGE);
+    private void chargerInfosClient() {
+        nomField.setText(clientConnecte.getNom());
+    }
+
+    private void actionMettreAJour() {
+        // 1. Validation du nom
+        String nom = nomField.getText().trim();
+        if (nom.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Le nom ne peut pas être vide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
-        clientConnecte.setNom(nomField.getText().trim());
 
-        char[] newPass = passField.getPassword();
-        char[] confirmPass = confirmPassField.getPassword();
-        
-        if (newPass.length > 0) {
-            if (!Arrays.equals(newPass, confirmPass)) {
-                JOptionPane.showMessageDialog(this, "Les nouveaux mots de passe ne correspondent pas.", "Erreur de validation", JOptionPane.ERROR_MESSAGE);
+        // 2. Logique de mise à jour du mot de passe
+        char[] nouveauMdp = passField.getPassword();
+        char[] confirmationMdp = confirmPassField.getPassword();
+
+        boolean motDePasseChange = nouveauMdp.length > 0;
+
+        if (motDePasseChange) {
+            if (!Arrays.equals(nouveauMdp, confirmationMdp)) {
+                JOptionPane.showMessageDialog(this, "Les mots de passe ne correspondent pas.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
+                // On vide les champs de mot de passe pour la sécurité
+                passField.setText("");
+                confirmPassField.setText("");
                 return;
             }
-            clientConnecte.setMotDePasse(new String(newPass));
+            // Si les mots de passe correspondent, on met à jour l'objet client
+            clientConnecte.setMotDePasse(new String(nouveauMdp));
         }
 
+        // 3. Mise à jour du nom
+        clientConnecte.setNom(nom);
+
+        // 4. Appel au service pour sauvegarder
         try {
             clientService.modifierCompteClient(clientConnecte);
-            JOptionPane.showMessageDialog(this, "Informations mises à jour avec succès !", "Succès", JOptionPane.INFORMATION_MESSAGE);
-            parentDialog.dispose();
+            JOptionPane.showMessageDialog(this, "Vos informations ont été mises à jour avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
+            // On vide les champs de mot de passe après une mise à jour réussie
+            passField.setText("");
+            confirmPassField.setText("");
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erreur lors de la mise à jour : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
-    /**
-     * Gère la suppression du compte client.
-     */
-    private void gererSuppression() {
-        int response = JOptionPane.showConfirmDialog(this, 
-                "ATTENTION : Cette action est irréversible et supprimera votre compte\net tout votre historique de réservations.\nÊtes-vous absolument sûr de vouloir continuer ?",
-                "Confirmation de suppression de compte",
+
+    private void actionSupprimerCompte() {
+        int reponse = JOptionPane.showConfirmDialog(
+                this,
+                "Êtes-vous absolument sûr de vouloir supprimer votre compte ?\nCette action est irréversible et toutes vos réservations seront annulées.",
+                "Confirmation de Suppression",
                 JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE);
-                
-        if (response == JOptionPane.YES_OPTION) {
+                JOptionPane.WARNING_MESSAGE
+        );
+
+        if (reponse == JOptionPane.YES_OPTION) {
             try {
                 clientService.supprimerCompteClient(clientConnecte.getId());
-                JOptionPane.showMessageDialog(null, "Votre compte a été supprimé. L'application va maintenant se fermer.", "Compte supprimé", JOptionPane.INFORMATION_MESSAGE);
-                System.exit(0);
+                JOptionPane.showMessageDialog(this, "Votre compte a été supprimé avec succès.", "Compte Supprimé", JOptionPane.INFORMATION_MESSAGE);
+
+                // Fermer toutes les fenêtres et retourner à la fenêtre de connexion
+                SwingUtilities.getWindowAncestor(this).dispose(); // Ferme EspaceClient
+                parentDialog.getOwner().dispose(); // Ferme ClientMain
+                new Login().setVisible(true);
+
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Erreur lors de la suppression : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Erreur lors de la suppression du compte : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -165,7 +151,6 @@ public class InfosPersonnelles extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(15, 12, 0, 0);
         jPanel1.add(jLabel3, gridBagConstraints);
 
-        nomField.setText("jTextField1");
         nomField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 nomFieldActionPerformed(evt);
@@ -179,8 +164,6 @@ public class InfosPersonnelles extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 12);
         jPanel1.add(nomField, gridBagConstraints);
-
-        passField.setText("jPasswordField1");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
@@ -189,8 +172,6 @@ public class InfosPersonnelles extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(12, 6, 0, 12);
         jPanel1.add(passField, gridBagConstraints);
-
-        confirmPassField.setText("jPasswordField2");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 4;
@@ -205,12 +186,18 @@ public class InfosPersonnelles extends javax.swing.JPanel {
         jPanel2.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
         majButton.setText("Mettre à jour");
+        majButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                majButtonActionPerformed(evt);
+            }
+        });
         jPanel2.add(majButton);
 
         supprimerButton.setBackground(new java.awt.Color(255, 102, 102));
         supprimerButton.setForeground(new java.awt.Color(255, 255, 255));
         supprimerButton.setText("Supprimer mon compte ");
         supprimerButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        supprimerButton.setOpaque(true);
         supprimerButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 supprimerButtonActionPerformed(evt);
@@ -222,12 +209,15 @@ public class InfosPersonnelles extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void nomFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nomFieldActionPerformed
-        gererMiseAJour();// TODO add your handling code here:
     }//GEN-LAST:event_nomFieldActionPerformed
 
     private void supprimerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supprimerButtonActionPerformed
-        gererSuppression();// TODO add your handling code here:
+        actionSupprimerCompte();// TODO add your handling code here:
     }//GEN-LAST:event_supprimerButtonActionPerformed
+
+    private void majButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_majButtonActionPerformed
+        actionMettreAJour();/// TODO add your handling code here:
+    }//GEN-LAST:event_majButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

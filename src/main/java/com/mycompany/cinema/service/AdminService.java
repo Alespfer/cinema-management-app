@@ -89,6 +89,8 @@ public interface AdminService extends CinemaService {
 
     /** Retourne tous les tarifs existants. */
     List<Tarif> getAllTarifs();
+    
+    Tarif getTarifById(int tarifId);
 
     // --- Gestion du Personnel et Planning ---
 

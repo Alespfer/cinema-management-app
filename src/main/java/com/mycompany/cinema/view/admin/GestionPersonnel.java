@@ -76,6 +76,11 @@ public class GestionPersonnel extends javax.swing.JPanel {
         }
     }
 
+    // Dans la classe GestionPersonnel
+    public void rafraichirDonnees() {
+        chargerListePersonnel(); // Suppose que 'chargerPersonnel()' est la méthode qui remplit ta JTable ou JList.
+    }
+
     private void chargerRoles() {
         try {
             comboBoxModel.removeAllElements();
@@ -348,4 +353,6 @@ public class GestionPersonnel extends javax.swing.JPanel {
     private javax.swing.JComboBox<com.mycompany.cinema.Role> roleComboBox;
     private javax.swing.JButton supprimerButton;
     // End of variables declaration//GEN-END:variables
+
+  
 }

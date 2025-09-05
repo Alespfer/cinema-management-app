@@ -52,6 +52,11 @@ public class GestionProduitsSnack extends javax.swing.JPanel {
         }
     }
 
+    // Dans la classe GestionProduitsSnack
+    public void rafraichirDonnees() {
+        chargerListeProduits(); // Suppose que 'chargerProduits()' est la méthode qui remplit ta JTable ou JList.
+    }
+
     private void mettreAJourChamps(ProduitSnack p) {
         if (p != null) {
             idField.setText(String.valueOf(p.getId()));
@@ -292,4 +297,6 @@ public class GestionProduitsSnack extends javax.swing.JPanel {
     private javax.swing.JTextField stockField;
     private javax.swing.JButton supprimerButton;
     // End of variables declaration//GEN-END:variables
+
+   
 }

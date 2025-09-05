@@ -94,6 +94,10 @@ public class GestionFilms extends javax.swing.JPanel {
         }
     }
 
+    public void rafraichirDonnees() {
+        loadFilms(); // Suppose que 'chargerFilms()' est la méthode qui remplit ta JTable ou JList.
+    }
+
     // --- LE RESTE DES MÉTHODES MÉTIER EST INCHANGÉ ---
     private void displayFilmDetails(Film film) {
         if (film != null) {
@@ -311,4 +315,6 @@ public class GestionFilms extends javax.swing.JPanel {
     private javax.swing.JTextField titreField;
     private javax.swing.JTextField urlAfficheField;
     // End of variables declaration//GEN-END:variables
+
+    // Dans la classe GestionFilms
 }

@@ -5,21 +5,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * C'est l'un des objets les plus importants pour l'interface graphique.
- * Il contient toutes les informations à afficher sur un film : son titre,
- * son affiche, son résumé, etc.
- * 
- * Vous utiliserez un objet `Film` pour peupler :
- * - Les lignes du tableau dans `ProgrammationPanel`.
- * - L'intégralité du panneau de détails `FilmDetailPanel`.
- * - Les formulaires de gestion dans `GestionFilmsPanel` pour l'administrateur.
- * 
- * Notez la présence de la `List<Genre> genres`. C'est une liste d'objets `Genre`
- * directement incluse dans le film, ce qui facilite l'affichage des catégories
- * (Action, Aventure...) associées au film.
+ * C'est l'un des objets les plus importants pour l'interface graphique. Il
+ * contient toutes les informations à afficher sur un film : son titre, son
+ * affiche, son résumé, etc.
+ *
+ * Vous utiliserez un objet `Film` pour peupler : - Les lignes du tableau dans
+ * `ProgrammationPanel`. - L'intégralité du panneau de détails
+ * `FilmDetailPanel`. - Les formulaires de gestion dans `GestionFilmsPanel` pour
+ * l'administrateur.
+ *
+ * Notez la présence de la `List<Genre> genres`. C'est une liste d'objets
+ * `Genre` directement incluse dans le film, ce qui facilite l'affichage des
+ * catégories (Action, Aventure...) associées au film.
  */
 public class Film implements Serializable {
-    
+
     private int idFilm;
     private String titre;
     private String synopsis;
@@ -27,14 +27,14 @@ public class Film implements Serializable {
     private String classification; // Ex: "Tous publics", "-12 ans"
     private String urlAffiche;     // Le nom du fichier de l'affiche (ex: "dune.jpg")
     private double notePresse;     // La note donnée par les critiques professionnels.
-    
+
     // Un film peut avoir plusieurs genres (ex: "Science-Fiction" ET "Aventure").
     // On stocke donc une liste d'objets Genre directement ici.
     private List<Genre> genres;
 
     /**
-     * Constructeur vide. Important : on initialise la liste des genres
-     * pour éviter les erreurs de type `NullPointerException`.
+     * Constructeur vide. Important : on initialise la liste des genres pour
+     * éviter les erreurs de type `NullPointerException`.
      */
     public Film() {
         this.genres = new ArrayList<>();
@@ -55,60 +55,79 @@ public class Film implements Serializable {
     }
 
     // --- ACCESSEURS (Getters and Setters) ---
-
-    public int getId() { 
-        return idFilm; 
-    }
-    public void setId(int idFilm) { 
-        this.idFilm = idFilm; 
+    public int getId() {
+        return idFilm;
     }
 
-    public String getTitre() { 
-        return titre; 
-    }
-    public void setTitre(String titre) { 
-        this.titre = titre; 
+    public void setId(int idFilm) {
+        this.idFilm = idFilm;
     }
 
-    public String getSynopsis() { 
-        return synopsis; 
-    }
-    public void setSynopsis(String synopsis) { 
-        this.synopsis = synopsis; 
+    public String getTitre() {
+        return titre;
     }
 
-    public int getDureeMinutes() { 
-        return dureeMinutes; 
-    }
-    public void setDureeMinutes(int dureeMinutes) { 
-        this.dureeMinutes = dureeMinutes; 
+    public void setTitre(String titre) {
+        this.titre = titre;
     }
 
-    public String getClassification() { 
-        return classification; 
-    }
-    public void setClassification(String classification) { 
-        this.classification = classification; 
+    public String getSynopsis() {
+        return synopsis;
     }
 
-    public String getUrlAffiche() { 
-        return urlAffiche; 
-    }
-    public void setUrlAffiche(String urlAffiche) { 
-        this.urlAffiche = urlAffiche; 
+    public void setSynopsis(String synopsis) {
+        this.synopsis = synopsis;
     }
 
-    public List<Genre> getGenres() { 
-        return genres; 
+    public int getDureeMinutes() {
+        return dureeMinutes;
     }
-    public void setGenres(List<Genre> genres) { 
-        this.genres = genres; 
+
+    public void setDureeMinutes(int dureeMinutes) {
+        this.dureeMinutes = dureeMinutes;
     }
-    
+
+    public String getClassification() {
+        return classification;
+    }
+
+    public void setClassification(String classification) {
+        this.classification = classification;
+    }
+
+    public String getUrlAffiche() {
+        return urlAffiche;
+    }
+
+    public void setUrlAffiche(String urlAffiche) {
+        this.urlAffiche = urlAffiche;
+    }
+
+    public List<Genre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<Genre> genres) {
+        this.genres = genres;
+    }
+
     public double getNotePresse() {
         return notePresse;
     }
+
     public void setNotePresse(double notePresse) {
         this.notePresse = notePresse;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Film film = (Film) obj;
+        return idFilm == film.idFilm;
     }
 }

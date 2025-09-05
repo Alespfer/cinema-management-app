@@ -17,18 +17,12 @@ public class AdminMain extends javax.swing.JFrame {
         this.adminService = adminService;
         this.personnelConnecte = personnelConnecte;
 
-        initComponents(); // Construit les composants visuels (le JTabbedPane)
+        initComponents();
 
-        // Configuration de la fenêtre (placée ici pour la clarté)
         setTitle("Panneau d'Administration - " + personnelConnecte.getPrenom() + " " + personnelConnecte.getNom());
-// --- SÉQUENCE DE DÉPLOIEMENT ---
-        // 1. Définir une taille fixe et confortable
         setSize(1280, 720);
-
-        // 2. Centrer la fenêtre maintenant qu'elle a une taille
         setLocationRelativeTo(null);
 
-        // L'assemblage des onglets vient ensuite
         setupTabs();
     }
 
@@ -36,23 +30,37 @@ public class AdminMain extends javax.swing.JFrame {
      * Crée et ajoute tous les panneaux de gestion aux onglets.
      */
     private void setupTabs() {
-        // CORRECTION DES NOMS DE CLASSE : Appel à vos nouvelles unités.
         tabbedPane.addTab("Gestion Films", new GestionFilms(this.adminService));
-        tabbedPane.addTab("Gestion Séances", new GestionSeances(this.adminService)); // Reste à convertir
+        tabbedPane.addTab("Gestion Séances", new GestionSeances(this.adminService));
         tabbedPane.addTab("Gestion Salles", new GestionSalles(this.adminService));
         tabbedPane.addTab("Gestion Personnel", new GestionPersonnel(this.adminService));
-        tabbedPane.addTab("Gestion Tarifs", new GestionTarifs(this.adminService)); // Reste à convertir
+        tabbedPane.addTab("Gestion Tarifs", new GestionTarifs(this.adminService));
         tabbedPane.addTab("Gestion Snacking", new GestionProduitsSnack(this.adminService));
         tabbedPane.addTab("Rapports de Ventes", new RapportVentes(this.adminService));
 
-        // Ajout du listener pour le rafraîchissement automatique.
+        // CORRECTION : Le ChangeListener est maintenant actif et complet.
+        // Il garantit que les données sont toujours à jour lorsque l'admin change d'onglet.
         tabbedPane.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 Component selectedComponent = tabbedPane.getSelectedComponent();
 
-                // Exemple pour un futur panneau nécessitant un rafraîchissement.
-                if (selectedComponent instanceof GestionSeances) {
-                    // ((GestionSeancesPanel) selectedComponent).rafraichirDonnees();
+                // On vérifie le type du panneau sélectionné et on appelle sa méthode de rafraîchissement.
+                // Cela rend l'interface dynamique et fiable.
+                if (selectedComponent instanceof GestionFilms) {
+                    ((GestionFilms) selectedComponent).rafraichirDonnees();
+                } else if (selectedComponent instanceof GestionSeances) {
+                    ((GestionSeances) selectedComponent).rafraichirDonnees();
+                } else if (selectedComponent instanceof GestionSalles) {
+                    ((GestionSalles) selectedComponent).rafraichirDonnees();
+                } else if (selectedComponent instanceof GestionPersonnel) {
+                    ((GestionPersonnel) selectedComponent).rafraichirDonnees();
+                } else if (selectedComponent instanceof GestionTarifs) {
+                    ((GestionTarifs) selectedComponent).rafraichirDonnees();
+                } else if (selectedComponent instanceof GestionProduitsSnack) {
+                    ((GestionProduitsSnack) selectedComponent).rafraichirDonnees();
+                } else if (selectedComponent instanceof RapportVentes) {
+                    // Les rapports aussi doivent être rafraîchis pour refléter les dernières ventes.
+                    ((RapportVentes) selectedComponent).loadAllTables();
                 }
             }
         });

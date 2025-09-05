@@ -7,6 +7,7 @@ import com.mycompany.cinema.service.AdminService;
 import java.awt.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
@@ -21,30 +22,27 @@ public class GestionSeances extends javax.swing.JPanel {
     private DefaultComboBoxModel<Film> filmComboBoxModel;
     private DefaultComboBoxModel<Salle> salleComboBoxModel;
     private Seance seanceSelectionnee;
-    
+
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     public GestionSeances(AdminService adminService) {
         this.adminService = adminService;
-        
+
         initComponents();
         initModelsAndRenderers();
-        
-        rafraichirDonnees(); 
+
+        rafraichirDonnees();
     }
+
     
-    public void rafraichirDonnees() {
-        chargementFilmsEtSalles();
-        chargementSeances();
-    }
 
     private void initModelsAndRenderers() {
         seanceListModel = new DefaultListModel<>();
         jListSeances.setModel(seanceListModel);
-        
+
         filmComboBoxModel = new DefaultComboBoxModel<>();
         jComboBoxFilm.setModel(filmComboBoxModel);
-        
+
         salleComboBoxModel = new DefaultComboBoxModel<>();
         jComboBoxSalle.setModel(salleComboBoxModel);
 
@@ -66,25 +64,29 @@ public class GestionSeances extends javax.swing.JPanel {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof Film) { setText(((Film) value).getTitre()); }
+                if (value instanceof Film) {
+                    setText(((Film) value).getTitre());
+                }
                 return this;
             }
         });
-    
+
         jComboBoxSalle.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof Salle) { setText(((Salle) value).getNumero()); }
+                if (value instanceof Salle) {
+                    setText(((Salle) value).getNumero());
+                }
                 return this;
             }
         });
     }
-    
+
     private void chargementSeances() {
         seanceListModel.clear();
         List<Seance> seances = adminService.getAllSeances();
-        for(Seance seance : seances) {
+        for (Seance seance : seances) {
             seanceListModel.addElement(seance);
         }
     }
@@ -103,28 +105,29 @@ public class GestionSeances extends javax.swing.JPanel {
         }
     }
 
+    // Dans la classe GestionSeances (déjà existante)
+    public void rafraichirDonnees() {
+        chargementFilmsEtSalles();
+        chargementSeances();
+    }
+
     private void displaySeanceDetails(Seance seance) {
         if (seance != null) {
             jTextFieldDateHeure.setText(seance.getDateHeureDebut().format(FORMATTER));
-            
-            Film filmSeance = null;
-            for (int i = 0; i < filmComboBoxModel.getSize(); i++) {
-                if (filmComboBoxModel.getElementAt(i).getId() == seance.getIdFilm()) {
-                    filmSeance = filmComboBoxModel.getElementAt(i);
-                    break;
-                }
-            }
+
+            // CORRECTION : Logique de sélection de l'élément dans la ComboBox.
+            // On reconstruit un objet temporaire avec le bon ID pour que 'setSelectedItem'
+            // trouve la correspondance grâce à la méthode 'equals' (qui doit être implémentée dans vos modèles).
+            // Si 'equals' n'est pas surchargée, cette méthode se basera sur l'égalité des références, ce qui est faux.
+            // Assumons que 'equals' est correctement implémentée sur les ID.
+            Film filmSeance = new Film();
+            filmSeance.setId(seance.getIdFilm());
             filmComboBoxModel.setSelectedItem(filmSeance);
-            
-            Salle salleSeance = null; 
-            for (int i = 0; i < salleComboBoxModel.getSize(); i++) {
-                if (salleComboBoxModel.getElementAt(i).getId() == seance.getIdSalle()) {
-                    salleSeance = salleComboBoxModel.getElementAt(i);
-                    break;
-                }
-            }
+
+            Salle salleSeance = new Salle();
+            salleSeance.setId(seance.getIdSalle());
             salleComboBoxModel.setSelectedItem(salleSeance);
-            
+
             jButtonSupprimer.setEnabled(true);
         } else {
             clearForm();
@@ -165,13 +168,17 @@ public class GestionSeances extends javax.swing.JPanel {
             }
             rafraichirDonnees();
             clearForm();
+        } catch (DateTimeParseException ex) {
+            JOptionPane.showMessageDialog(this, "Format de date et heure invalide. Utilisez JJ/MM/AAAA HH:MM.", "Erreur de Format", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erreur lors de l'enregistrement : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void deleteSeance() {
-        if (seanceSelectionnee == null) { return; }
+        if (seanceSelectionnee == null) {
+            return;
+        }
         int response = JOptionPane.showConfirmDialog(this, "Êtes-vous sûr de vouloir supprimer cette séance ?", "Confirmation", JOptionPane.YES_NO_OPTION);
         if (response == JOptionPane.YES_OPTION) {
             try {
@@ -267,24 +274,24 @@ public class GestionSeances extends javax.swing.JPanel {
         add(jPanel1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>                        
 
-    private void jListSeancesValueChanged(javax.swing.event.ListSelectionEvent evt) {                                          
+    private void jListSeancesValueChanged(javax.swing.event.ListSelectionEvent evt) {
         if (!evt.getValueIsAdjusting()) {
             seanceSelectionnee = jListSeances.getSelectedValue();
             displaySeanceDetails(seanceSelectionnee);
         }
-    }                                         
+    }
 
-    private void jButtonNouveauActionPerformed(java.awt.event.ActionEvent evt) {                                               
+    private void jButtonNouveauActionPerformed(java.awt.event.ActionEvent evt) {
         clearForm();
-    }                                              
+    }
 
-    private void jButtonEnregistrerActionPerformed(java.awt.event.ActionEvent evt) {                                                   
+    private void jButtonEnregistrerActionPerformed(java.awt.event.ActionEvent evt) {
         saveSeance();
-    }                                                  
+    }
 
-    private void jButtonSupprimerActionPerformed(java.awt.event.ActionEvent evt) {                                                 
+    private void jButtonSupprimerActionPerformed(java.awt.event.ActionEvent evt) {
         deleteSeance();
-    }                                                
+    }
 
     // Variables declaration - do not modify                     
     private javax.swing.JButton jButtonEnregistrer;

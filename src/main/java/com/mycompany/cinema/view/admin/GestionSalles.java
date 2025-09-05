@@ -53,6 +53,11 @@ public class GestionSalles extends javax.swing.JPanel {
         }
     }
 
+    // Dans la classe GestionSalles
+    public void rafraichirDonnees() {
+        chargerListeSalles(); // Suppose que 'chargerSalles()' est la méthode qui remplit ta JTable ou JList.
+    }
+
     private void mettreAJourChamps(Salle salle) {
         if (salle != null) {
             idField.setText(String.valueOf(salle.getId()));
@@ -279,4 +284,6 @@ public class GestionSalles extends javax.swing.JPanel {
     private javax.swing.JPanel panneauGauche;
     private javax.swing.JButton supprimerButton;
     // End of variables declaration//GEN-END:variables
+
+    
 }
