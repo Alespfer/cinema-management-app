@@ -1,4 +1,4 @@
-package com.mycompany.cinema.view;
+package com.mycompany.cinema;
 
 import com.mycompany.cinema.ProduitSnack;
 

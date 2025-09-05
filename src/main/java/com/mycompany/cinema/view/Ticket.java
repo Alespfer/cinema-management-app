@@ -1,6 +1,7 @@
+// Contenu complet et corrigé pour Ticket.java
 package com.mycompany.cinema.view;
 
-import com.mycompany.cinema.ProduitSnack;
+import com.mycompany.cinema.LignePanier;
 import com.mycompany.cinema.Siege;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,7 +20,7 @@ class BilletInfo {
     int reservationId;
     String tarifLibelle;
     String prixTotal;
-    List<LignePanier> panierSnacks; // CORRECTION: Map remplacée par List<LignePanier>
+    List<LignePanier> panierSnacks; // CORRECTION: List<LignePanier>
 }
 
 public class Ticket extends javax.swing.JDialog {
@@ -36,43 +37,44 @@ public class Ticket extends javax.swing.JDialog {
     }
 
     private String buildContenuBillet(BilletInfo infos) {
-        // StringBuilder est plus efficace pour la concaténation de chaînes
-        StringBuilder sb = new StringBuilder();
-        sb.append("****************************************\n");
-        sb.append("*             PISE CINEMA              *\n");
-        sb.append("****************************************\n\n");
-        sb.append("RÉCAPITULATIF DE COMMANDE\n");
-        sb.append("----------------------------------------\n");
-        sb.append("Client: ").append(infos.clientNom).append("\n");
-        sb.append("Réservation N°: ").append(infos.reservationId).append("\n\n");
-        sb.append("--- BILLETS ---\n");
-        sb.append("Film: ").append(infos.filmTitre).append("\n");
-        sb.append("Séance: ").append(infos.seanceDateHeure).append("\n");
-        sb.append("Salle: ").append(infos.salleNumero).append("\n");
-        sb.append("Sièges Réservés:\n");
+        String contenu = ""; // Initialisation d'une chaîne de caractères vide.
 
-        // Boucle FOR conforme à la Doctrine
+        contenu += "****************************************\n";
+        contenu += "*             PISE CINEMA              *\n";
+        contenu += "****************************************\n\n";
+        contenu += "RÉCAPITULATIF DE COMMANDE\n";
+        contenu += "----------------------------------------\n";
+        contenu += "Client: " + infos.clientNom + "\n";
+        contenu += "Réservation N°: " + infos.reservationId + "\n\n";
+        contenu += "--- BILLETS ---\n";
+        contenu += "Film: " + infos.filmTitre + "\n";
+        contenu += "Séance: " + infos.seanceDateHeure + "\n";
+        contenu += "Salle: " + infos.salleNumero + "\n";
+        contenu += "Sièges Réservés:\n";
+
+        // Boucle FOR classique, conforme à la Doctrine.
         for (int i = 0; i < infos.sieges.size(); i++) {
             Siege siege = infos.sieges.get(i);
-            sb.append("  - Rangée ").append(siege.getNumeroRangee()).append(", Siège ").append(siege.getNumeroSiege()).append("\n");
+            contenu += "  - Rangée " + siege.getNumeroRangee() + ", Siège " + siege.getNumeroSiege() + "\n";
         }
 
-        sb.append("Tarif Appliqué: ").append(infos.tarifLibelle).append("\n");
+        contenu += "Tarif Appliqué: " + infos.tarifLibelle + "\n";
 
         if (infos.panierSnacks != null && !infos.panierSnacks.isEmpty()) {
-            sb.append("\n--- SNACKS ---\n");
-            // CORRECTION: Boucle sur List<LignePanier>
+            contenu += "\n--- SNACKS ---\n";
+            // Boucle FOR classique, conforme à la Doctrine.
             for (int i = 0; i < infos.panierSnacks.size(); i++) {
                 LignePanier ligne = infos.panierSnacks.get(i);
-                sb.append("  - ").append(ligne.quantite).append("x ").append(ligne.produit.getNomProduit()).append("\n");
+                contenu += "  - " + ligne.quantite + "x " + ligne.produit.getNomProduit() + "\n";
             }
         }
 
-        sb.append("\n----------------------------------------\n");
-        sb.append("PRIX TOTAL: ").append(infos.prixTotal).append("\n");
-        sb.append("----------------------------------------\n\n");
-        sb.append("Merci de votre visite et bonne séance !\n");
-        return sb.toString();
+        contenu += "\n----------------------------------------\n";
+        contenu += "PRIX TOTAL: " + infos.prixTotal + "\n";
+        contenu += "----------------------------------------\n\n";
+        contenu += "Merci de votre visite et bonne séance !\n";
+
+        return contenu; // Retourne la chaîne de caractères finale.
     }
 
     private void exportTxt() {
@@ -153,7 +155,6 @@ public class Ticket extends javax.swing.JDialog {
 
     }//GEN-LAST:event_closeButtonActionPerformed
 
-    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea BilletsTextArea;

@@ -6,7 +6,7 @@ import com.mycompany.cinema.dao.impl.*;
 import com.mycompany.cinema.service.AdminService;
 import com.mycompany.cinema.service.ClientService;
 import com.mycompany.cinema.util.IdManager;
-import com.mycompany.cinema.view.LignePanier;
+import com.mycompany.cinema.LignePanier;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -301,24 +301,15 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return evaluationClientDAO.getEvaluationsByFilmId(filmId);
     }
 
+    @Override
     public Reservation finaliserCommandeComplete(int clientId, int seanceId, List<Integer> siegeIds, int tarifId, List<LignePanier> panierSnacks) throws Exception {
-        // Étape 1 : Effectuer la réservation des billets
         Reservation reservation = effectuerReservation(clientId, seanceId, siegeIds, tarifId);
 
-        // Étape 2 : Si il y a des snacks, les enregistrer
         if (panierSnacks != null && !panierSnacks.isEmpty()) {
-            // NOTE: On assume qu'une vente de snack au comptoir est faite par un employé par défaut (ID 3) sur la caisse principale (ID 1)
-            // C'est une simplification, en situation réelle on choisirait un employé/caisse disponible.
             VenteSnack venteSnack = enregistrerVenteSnack(3, 1, panierSnacks, clientId);
-
-            // Étape 3 : Lier la vente de snacks à la réservation
             venteSnack.setIdReservation(reservation.getId());
-
-            // Il faudrait idéalement une méthode venteSnackDAO.updateVente(venteSnack) ici,
-            // mais pour l'instant, la liaison est faite en mémoire.
+            // Il faudrait ici une méthode venteSnackDAO.updateVente(venteSnack) pour sauvegarder la liaison.
         }
-
-        // Étape 4 : Retourner la réservation, qui n'est plus nulle.
         return reservation;
     }
 
@@ -500,6 +491,7 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         /* ... */ }
 
     // AJOUTEZ CETTE NOUVELLE MÉTHODE DANS CinemaServiceImpl.java (version acceptant List<LignePanier>)
+    // CORRECTION FINALE : Nouvelle méthode de support utilisant List<LignePanier>
     public VenteSnack enregistrerVenteSnack(int idPersonnel, int idCaisse, List<LignePanier> panier, Integer idClient) throws Exception {
         int venteId = IdManager.getNextVenteSnackId();
         VenteSnack nouvelleVente = new VenteSnack(venteId, LocalDateTime.now(), idPersonnel, idCaisse, idClient);
@@ -618,7 +610,6 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     public void ajouterSalle(Salle salle) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-
 
     @Override
     public VenteSnack enregistrerVenteSnack(int idPersonnel, int idCaisse, Map<ProduitSnack, Integer> panier) throws Exception {

@@ -1,7 +1,7 @@
 package com.mycompany.cinema.service;
 
 import com.mycompany.cinema.*;
-import com.mycompany.cinema.view.LignePanier;
+import com.mycompany.cinema.LignePanier;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -156,7 +156,6 @@ public interface ClientService extends CinemaService {
      * @throws Exception en cas d'erreur (siège non dispo, stock insuffisant...).
      */
     Reservation finaliserCommandeComplete(int clientId, int seanceId, List<Integer> siegeIds, int tarifId, List<LignePanier> panierSnacks) throws Exception;
-
     /**
      * Force le service à recharger toutes ses données depuis la source de persistance.
      * C'est la méthode à appeler pour garantir la fraîcheur des données.

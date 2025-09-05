@@ -2,20 +2,15 @@
  * Fichier ClientMainFrame.java
  * Version finale en français, adaptée pour NetBeans et conforme au cours.
  */
+// Contenu complet et corrigé pour ClientMain.java
 package com.mycompany.cinema.view;
 
-import com.mycompany.cinema.Client;
-import com.mycompany.cinema.Film;
-import com.mycompany.cinema.Reservation;
-import com.mycompany.cinema.Salle;
-import com.mycompany.cinema.Seance;
-import com.mycompany.cinema.Siege;
-import com.mycompany.cinema.Tarif;
+import com.mycompany.cinema.LignePanier;
+import com.mycompany.cinema.*;
 import com.mycompany.cinema.service.ClientService;
 import java.awt.CardLayout;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -94,13 +89,13 @@ public class ClientMain extends javax.swing.JFrame {
             }
 
             public void onSkip() {
-                finaliserCommande(new ArrayList<LignePanier>()); // CORRECTION: Envoi d'une liste vide
+                finaliserCommande(new ArrayList<LignePanier>()); // Appel avec une liste vide
             }
         });
 
         panneauSnacks.setListener(new SnackSelection.SnackSelectionListener() {
             public void onSnackSelectionCompleted(List<LignePanier> panier) {
-                finaliserCommande(panier);
+                finaliserCommande(panier); // Transmission directe de la liste
             }
         });
 
@@ -121,22 +116,19 @@ public class ClientMain extends javax.swing.JFrame {
         });
     }
 
-    private void finaliserCommande(List<LignePanier> panierSnacks) { // CORRECTION: Signature
+    private void finaliserCommande(List<LignePanier> panierSnacks) { // CONFORMITÉ ABSOLUE
         if (seanceEnCours == null || siegesSelectionnes == null || siegesSelectionnes.isEmpty() || tarifSelectionne == null) {
-            JOptionPane.showMessageDialog(this, "Une erreur est survenue lors de la récupération de votre sélection.", "Erreur Critique", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Une erreur est survenue.", "Erreur Critique", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
         try {
             List<Integer> idsSieges = new ArrayList<>();
             for (int i = 0; i < siegesSelectionnes.size(); i++) {
                 idsSieges.add(siegesSelectionnes.get(i).getId());
             }
 
-            // Note: finaliserCommandeComplete doit être adaptée pour accepter List<LignePanier>
-            // Nous supposons que cette adaptation est faite dans la couche Service.
             Reservation reservation = clientService.finaliserCommandeComplete(
-                    clientConnecte.getId(), seanceEnCours.getId(), idsSieges, tarifSelectionne.getId(), panierSnacks // <<< PASSER LE PANIER, PAS NULL
+                    clientConnecte.getId(), seanceEnCours.getId(), idsSieges, tarifSelectionne.getId(), panierSnacks
             );
 
             BilletInfo infos = new BilletInfo();
@@ -175,7 +167,6 @@ public class ClientMain extends javax.swing.JFrame {
 
             gestionnaireDeCartes.show(mainPanel, "PROGRAMMATION");
             panneauProgrammation.rechercher();
-
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erreur lors de la finalisation : \n" + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();

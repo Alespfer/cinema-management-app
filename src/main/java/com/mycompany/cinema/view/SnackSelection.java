@@ -1,5 +1,6 @@
 package com.mycompany.cinema.view;
 
+import com.mycompany.cinema.LignePanier;
 import com.mycompany.cinema.ProduitSnack;
 import com.mycompany.cinema.service.ClientService;
 import java.awt.BorderLayout;
