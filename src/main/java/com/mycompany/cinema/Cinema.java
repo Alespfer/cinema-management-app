@@ -1,7 +1,7 @@
 package com.mycompany.cinema;
 
 import com.mycompany.cinema.util.DataInitializer;
-import com.mycompany.cinema.view.LoginFrame;
+import com.mycompany.cinema.view.Login;
 import java.io.File;
 import javax.swing.SwingUtilities;
 
@@ -36,7 +36,7 @@ public class Cinema {
         }
 
             // Création et affichage de la fenêtre de connexion.
-            LoginFrame loginFrame = new LoginFrame();
+            Login loginFrame = new Login();
             loginFrame.setVisible(true);
     }
 }

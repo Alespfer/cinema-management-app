@@ -36,7 +36,7 @@ public class ClientMain extends javax.swing.JFrame {
     // --- VOS VARIABLES D'INSTANCE ---
     private final ClientService clientService;
     private final Client clientConnecte;
-    private ProgrammationPanel panneauProgrammation;
+    private Programmation panneauProgrammation;
     private FilmDetail panneauDetailFilm;
     private AffichageSieges panneauSieges;
     private SnackSelectionPanel panneauSnacks;
@@ -76,7 +76,7 @@ public class ClientMain extends javax.swing.JFrame {
      * Crée les panneaux personnalisés et les ajoute au CardLayout du mainPanel.
      */
     private void configurerPanneaux() {
-        panneauProgrammation = new ProgrammationPanel(clientService);
+        panneauProgrammation = new Programmation(clientService);
         panneauDetailFilm = new FilmDetail(clientService, this);
         panneauSieges = new AffichageSieges(clientService, clientConnecte);
         panneauSnacks = new SnackSelectionPanel(clientService);
@@ -95,7 +95,7 @@ public class ClientMain extends javax.swing.JFrame {
 
        
 
-        panneauProgrammation.setSeanceSelectionListener(new ProgrammationPanel.SeanceSelectionListener() {
+        panneauProgrammation.setSeanceSelectionListener(new Programmation.SeanceSelectionListener() {
             public void onSeanceSelected(Seance seance) {
                 if (seance != null) {
                     Film film = clientService.getFilmDetails(seance.getIdFilm());
@@ -266,9 +266,13 @@ public class ClientMain extends javax.swing.JFrame {
         int reponse = JOptionPane.showConfirmDialog(
                 this, "Êtes-vous sûr de vouloir vous déconnecter ?",
                 "Confirmation de déconnexion", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        
         if (reponse == JOptionPane.YES_OPTION) {
+            // 1. On ferme la fenêtre actuelle.
             dispose();
-            SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
+            
+            // 2. CORRECTION : On crée ET affiche la nouvelle fenêtre de connexion directement.
+            new Login().setVisible(true);
         }// TODO add your handling code here:
     }//GEN-LAST:event_deconnexionButtonActionPerformed
 

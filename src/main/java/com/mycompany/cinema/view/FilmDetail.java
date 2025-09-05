@@ -1,9 +1,6 @@
-/*
- * Fichier adapté pour être 100% conforme aux notions du cours.
- */
 package com.mycompany.cinema.view;
 
-// Imports nécessaires
+import com.mycompany.cinema.Client; // Importation nécessaire
 import com.mycompany.cinema.EvaluationClient;
 import com.mycompany.cinema.Film;
 import com.mycompany.cinema.Seance;
@@ -14,25 +11,17 @@ import java.awt.Frame;
 import java.awt.Image;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-// 'Collections' n'est plus nécessaire
 import java.util.List;
+import java.util.Optional; // Importation nécessaire
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
-// 'SwingUtilities' n'est plus nécessaire
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
-/**
- * Panneau affichant les détails d'un film.
- *
- * @author albertoesperon
- */
 public class FilmDetail extends javax.swing.JPanel {
 
     private final ClientService clientService;
-    private final Frame parentFrame; // On stocke la référence à la fenêtre parente
+    private final Frame parentFrame;
     private int clientId;
     private Film filmActuel;
     private LocalDate dateActuelle;
@@ -51,43 +40,18 @@ public class FilmDetail extends javax.swing.JPanel {
         void onRetourClicked();
     }
 
-    /**
-     * CONSTRUCTEUR MODIFIÉ pour recevoir la Frame parente.
-     */
     public FilmDetail(ClientService clientService, Frame parentFrame) {
         this.clientService = clientService;
-        this.parentFrame = parentFrame; // On sauvegarde la référence
+        this.parentFrame = parentFrame;
         initComponents();
-        setupCustomComponents();
+        setupModelsAndRenderers();
     }
 
-    // ... setupCustomComponents reste identique ...
-    private void setupCustomComponents() {
+    private void setupModelsAndRenderers() {
         seanceListModel = new DefaultListModel<>();
         seanceJList.setModel(seanceListModel);
         evaluationsListModel = new DefaultListModel<>();
         evaluationsJList.setModel(evaluationsListModel);
-
-        seanceJList.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting() && seanceJList.getSelectedValue() != null && seanceSelectionListener != null) {
-                    seanceSelectionListener.onSeanceSelected(seanceJList.getSelectedValue());
-                }
-            }
-        });
-
-        evaluationsJList.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof EvaluationClient) {
-                    EvaluationClient eval = (EvaluationClient) value;
-                    String commentaire = eval.getCommentaire().isEmpty() ? "<i>(pas de commentaire)</i>" : eval.getCommentaire();
-                    setText("<html><b>" + eval.getNote() + "/5 ★</b> - " + commentaire + "</html>");
-                }
-                return this;
-            }
-        });
 
         seanceJList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
@@ -96,6 +60,30 @@ public class FilmDetail extends javax.swing.JPanel {
                 if (value instanceof Seance) {
                     Seance seance = (Seance) value;
                     setText("Horaire : " + seance.getDateHeureDebut().format(DateTimeFormatter.ofPattern("HH:mm")) + " - Salle " + seance.getIdSalle());
+                }
+                return this;
+            }
+        });
+
+        // --- NOUVEAU CELL RENDERER AMÉLIORÉ ---
+        evaluationsJList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof EvaluationClient) {
+                    EvaluationClient eval = (EvaluationClient) value;
+
+                    // 1. Récupérer le client via le service
+                    Optional<Client> clientOpt = clientService.getClientById(eval.getIdClient());
+                    String nomClient = "Utilisateur anonyme";
+                    if (clientOpt.isPresent()) {
+                        nomClient = clientOpt.get().getNom();
+                    }
+
+                    String commentaire = eval.getCommentaire().isEmpty() ? "<i>(pas de commentaire)</i>" : eval.getCommentaire();
+
+                    // 2. Affichage mis à jour avec le nom
+                    setText("<html><b>" + nomClient + "</b> (" + eval.getNote() + "/5 ★)<br>" + commentaire + "</html>");
                 }
                 return this;
             }
@@ -112,33 +100,31 @@ public class FilmDetail extends javax.swing.JPanel {
             infoLabel.setText("Durée: " + film.getDureeMinutes() + " min | Classification: " + film.getClassification());
             synopsisArea.setText(film.getSynopsis());
 
-            // Le cours ne montrant pas le redimensionnement, on pourrait simplement faire :
-            // ImageIcon posterIcon = new ImageIcon("images/" + film.getUrlAffiche());
-            // Mais pour garder un affichage correct, on garde cette ligne "bonus"
+            // 1. Créer l'icône directement depuis le chemin du fichier.
             ImageIcon posterIcon = new ImageIcon("images/" + film.getUrlAffiche());
             Image image = posterIcon.getImage().getScaledInstance(300, 450, Image.SCALE_SMOOTH);
             posterLabel.setIcon(new ImageIcon(image));
 
-            // REMPLACEMENT de String.format par une concaténation simple
-            notePresseLabel.setText("Presse: " + film.getNotePresse() + " / 5");
+            notePresseLabel.setText("Presse: " + String.format("%.1f", film.getNotePresse()) + " / 5");
             double moyenneSpectateurs = clientService.getNoteMoyenneSpectateurs(film.getId());
-            noteSpectateursLabel.setText("Spectateurs: " + (moyenneSpectateurs > 0 ? (moyenneSpectateurs + " / 5") : "N/A"));
+            noteSpectateursLabel.setText("Spectateurs: " + (moyenneSpectateurs > 0 ? String.format("%.1f", moyenneSpectateurs) + " / 5" : "N/A"));
 
             evaluationsListModel.clear();
             List<EvaluationClient> evaluations = clientService.getEvaluationsByFilmId(film.getId());
-
-            // REMPLACEMENT de Collections.reverse par une boucle for classique
             for (int i = evaluations.size() - 1; i >= 0; i--) {
                 evaluationsListModel.addElement(evaluations.get(i));
             }
 
+            // --- NOUVELLE LOGIQUE POUR LE BOUTON "NOTER" ---
             boolean aEvalue = clientService.aDejaEvalue(this.clientId, film.getId());
-            noterButton.setEnabled(!aEvalue);
-            noterButton.setToolTipText(aEvalue ? "Vous avez déjà noté ce film." : "Donnez votre avis sur ce film.");
+            noterButton.setText(aEvalue ? "Modifier mon avis" : "Donner un avis");
+            noterButton.setEnabled(true); // Le bouton est toujours actif
 
             seanceListModel.clear();
             List<Seance> seances = clientService.getSeancesPourFilmEtDate(film.getId(), date);
-            seanceListModel.addAll(seances);
+            for (Seance seance : seances) {
+                seanceListModel.addElement(seance);
+            }
         } else {
             clearPanel();
         }
@@ -153,9 +139,11 @@ public class FilmDetail extends javax.swing.JPanel {
         notePresseLabel.setText("Presse: N/A");
         noteSpectateursLabel.setText("Spectateurs: N/A");
         evaluationsListModel.clear();
+        noterButton.setText("Donner un avis");
         noterButton.setEnabled(false);
     }
 
+    // ... (setters inchangés) ...
     public void setSeanceSelectionListener(SeanceSelectionListener listener) {
         this.seanceSelectionListener = listener;
     }
@@ -195,6 +183,7 @@ public class FilmDetail extends javax.swing.JPanel {
         setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setLayout(new java.awt.BorderLayout(15, 15));
 
+        jPanel1.setPreferredSize(new java.awt.Dimension(300, 450));
         jPanel1.setLayout(new java.awt.BorderLayout(10, 10));
 
         posterLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -247,6 +236,11 @@ public class FilmDetail extends javax.swing.JPanel {
 
         seanceScrollPane.setBorder(javax.swing.BorderFactory.createTitledBorder("Choisissez un horaire pour ce film"));
 
+        seanceJList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                seanceJListValueChanged(evt);
+            }
+        });
         seanceScrollPane.setViewportView(seanceJList);
 
         middleContentPanel.add(seanceScrollPane, java.awt.BorderLayout.CENTER);
@@ -279,17 +273,29 @@ public class FilmDetail extends javax.swing.JPanel {
 
     private void noterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_noterButtonActionPerformed
         if (filmActuel != null) {
-            // REMPLACEMENT de SwingUtilities par l'utilisation de la variable 'parentFrame'
-            EvaluationDialog dialog = new EvaluationDialog(
-                    this.parentFrame,
-                    clientService,
-                    clientId,
-                    filmActuel.getId()
-            );
-            dialog.setVisible(true);
+            boolean aEvalue = clientService.aDejaEvalue(this.clientId, filmActuel.getId());
+
+            if (aEvalue) {
+                // Mode MODIFICATION
+                Optional<EvaluationClient> evalOpt = clientService.getEvaluation(clientId, filmActuel.getId());
+                if (evalOpt.isPresent()) {
+                    Evaluation dialog = new Evaluation(this.parentFrame, clientService, evalOpt.get());
+                    dialog.setVisible(true);
+                }
+            } else {
+                // Mode CRÉATION
+                Evaluation dialog = new Evaluation(this.parentFrame, clientService, clientId, filmActuel.getId());
+                dialog.setVisible(true);
+            }
             displayFilmAndSeances(filmActuel, dateActuelle, clientId);
         }
     }//GEN-LAST:event_noterButtonActionPerformed
+
+    private void seanceJListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_seanceJListValueChanged
+        if (!evt.getValueIsAdjusting() && seanceJList.getSelectedValue() != null && seanceSelectionListener != null) {
+            seanceSelectionListener.onSeanceSelected(seanceJList.getSelectedValue());
+        }// TODO add your handling code here:
+    }//GEN-LAST:event_seanceJListValueChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

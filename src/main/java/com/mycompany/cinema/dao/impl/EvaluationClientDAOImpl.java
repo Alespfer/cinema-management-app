@@ -28,6 +28,24 @@ public class EvaluationClientDAOImpl extends GenericDAOImpl<EvaluationClient> im
         this.data.add(evaluation);
         saveToFile();
     }
+    
+    
+     // --- NOUVELLE MÉTHODE À IMPLÉMENTER ---
+    public void updateEvaluation(EvaluationClient updatedEvaluation) {
+        // On parcourt la liste pour trouver l'évaluation à remplacer.
+        for (int i = 0; i < this.data.size(); i++) {
+            EvaluationClient eval = this.data.get(i);
+            // La clé unique d'une évaluation est la combinaison client + film.
+            if (eval.getIdClient() == updatedEvaluation.getIdClient() && eval.getIdFilm() == updatedEvaluation.getIdFilm()) {
+                // On remplace l'ancien objet par le nouveau à la même position.
+                this.data.set(i, updatedEvaluation);
+                // On sauvegarde immédiatement les changements.
+                saveToFile();
+                // La mission est accomplie, on peut quitter la méthode.
+                return;
+            }
+        }
+    }
 
     @Override
     public List<EvaluationClient> getEvaluationsByFilmId(int filmId) {

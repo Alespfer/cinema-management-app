@@ -2,7 +2,9 @@ package com.mycompany.cinema.view.admin;
 
 import com.mycompany.cinema.Personnel;
 import com.mycompany.cinema.service.AdminService;
-import java.awt.Component; // Importation nécessaire
+import com.mycompany.cinema.view.Login;
+import java.awt.Component;
+import javax.swing.JOptionPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -16,40 +18,46 @@ public class AdminMain extends javax.swing.JFrame {
         this.personnelConnecte = personnelConnecte;
 
         initComponents(); // Construit les composants visuels (le JTabbedPane)
-        
+
         // Configuration de la fenêtre (placée ici pour la clarté)
         setTitle("Panneau d'Administration - " + personnelConnecte.getPrenom() + " " + personnelConnecte.getNom());
-        setLocationRelativeTo(null); // Centrer après que la taille soit connue
+// --- SÉQUENCE DE DÉPLOIEMENT ---
+        // 1. Définir une taille fixe et confortable
+        setSize(1280, 720);
 
-        // --- Logique d'assemblage des onglets ---
+        // 2. Centrer la fenêtre maintenant qu'elle a une taille
+        setLocationRelativeTo(null);
+
+        // L'assemblage des onglets vient ensuite
         setupTabs();
     }
-    
+
     /**
      * Crée et ajoute tous les panneaux de gestion aux onglets.
      */
     private void setupTabs() {
         // CORRECTION DES NOMS DE CLASSE : Appel à vos nouvelles unités.
         tabbedPane.addTab("Gestion Films", new GestionFilms(this.adminService));
-        tabbedPane.addTab("Gestion Séances", new GestionSeancesPanel(this.adminService)); // Reste à convertir
+        tabbedPane.addTab("Gestion Séances", new GestionSeances(this.adminService)); // Reste à convertir
         tabbedPane.addTab("Gestion Salles", new GestionSalles(this.adminService));
         tabbedPane.addTab("Gestion Personnel", new GestionPersonnel(this.adminService));
         tabbedPane.addTab("Gestion Tarifs", new GestionTarifsPanel(this.adminService)); // Reste à convertir
         tabbedPane.addTab("Gestion Snacking", new GestionProduitsSnackPanel(this.adminService));
         tabbedPane.addTab("Rapports de Ventes", new ReportingPanel(this.adminService));
-        
+
         // Ajout du listener pour le rafraîchissement automatique.
         tabbedPane.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 Component selectedComponent = tabbedPane.getSelectedComponent();
-                
+
                 // Exemple pour un futur panneau nécessitant un rafraîchissement.
-                if (selectedComponent instanceof GestionSeancesPanel) {
+                if (selectedComponent instanceof GestionSeances) {
                     // ((GestionSeancesPanel) selectedComponent).rafraichirDonnees();
                 }
             }
         });
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -59,15 +67,52 @@ public class AdminMain extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
+        deconnexionButton = new javax.swing.JButton();
         tabbedPane = new javax.swing.JTabbedPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+
+        deconnexionButton.setText("Déconnexion");
+        deconnexionButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deconnexionButtonActionPerformed(evt);
+            }
+        });
+        jPanel1.add(deconnexionButton);
+
+        getContentPane().add(jPanel1, java.awt.BorderLayout.PAGE_END);
         getContentPane().add(tabbedPane, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void deconnexionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deconnexionButtonActionPerformed
+        // Étape 1 : Demander confirmation à l'utilisateur.
+        int reponse = JOptionPane.showConfirmDialog(
+                this,
+                "Êtes-vous sûr de vouloir vous déconnecter ?",
+                "Confirmation de déconnexion",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+
+        // Étape 2 : Si l'utilisateur confirme...
+        if (reponse == JOptionPane.YES_OPTION) {
+            // ...fermer la fenêtre d'administration actuelle.
+            this.dispose();
+
+            // ...et lancer une nouvelle fenêtre de connexion.
+            new Login().setVisible(true);
+        }// TODO add your handling code here:
+    }//GEN-LAST:event_deconnexionButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton deconnexionButton;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JTabbedPane tabbedPane;
     // End of variables declaration//GEN-END:variables
 }

@@ -142,7 +142,8 @@ public interface ClientService extends CinemaService {
     List<EvaluationClient> getEvaluationsByFilmId(int filmId);
     
     
-    
+    Optional<EvaluationClient> getEvaluation(int clientId, int filmId);
+
     /**
      * Finalise une commande complète incluant billets et snacks.
      * @param clientId L'ID du client.

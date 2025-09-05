@@ -16,6 +16,7 @@ import java.util.Optional;
  */
 public interface EvaluationClientDAO {
     void addEvaluation(EvaluationClient evaluation);
+    void updateEvaluation(EvaluationClient evaluation);
     List<EvaluationClient> getEvaluationsByFilmId(int filmId);
     Optional<EvaluationClient> getEvaluationByClientAndFilm(int clientId, int filmId);
     List<EvaluationClient> getAllEvaluations();
