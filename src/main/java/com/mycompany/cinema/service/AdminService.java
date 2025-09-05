@@ -181,6 +181,16 @@ public interface AdminService extends CinemaService {
 
     // --- Ventes Snacking ---
 
+    
+    
+    /**
+     * Modifie le stock d'un produit en ajoutant ou retirant une quantité.
+     * @param produitId L'ID du produit à modifier.
+     * @param quantiteAjustement La quantité à ajouter (peut être négative pour retirer).
+     * @throws Exception si le produit n'est pas trouvé ou si le stock final devient négatif.
+     */
+    void ajusterStockProduit(int produitId, int quantiteAjustement) throws Exception;
+    
     /** Retourne les ventes snack pour une journée. */
     List<VenteSnack> getVentesSnackParJour(LocalDate date);
 

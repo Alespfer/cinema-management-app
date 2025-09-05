@@ -102,8 +102,30 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         clientDAO.addClient(nouveauClient);
         return nouveauClient;
     }
-    
-     // --- DEBUT DE L'AJOUT ---
+
+    @Override
+    public void ajusterStockProduit(int produitId, int quantiteAjustement) throws Exception {
+        // 1. Récupérer l'objet ProduitSnack à partir de son ID.
+        ProduitSnack produit = produitSnackDAO.getProduitById(produitId);
+        if (produit == null) {
+            throw new Exception("Le produit avec l'ID " + produitId + " n'a pas été trouvé.");
+        }
+
+        // 2. Calculer le nouveau stock.
+        int stockActuel = produit.getStock();
+        int nouveauStock = stockActuel + quantiteAjustement;
+
+        // 3. Valider que le stock ne devient pas négatif.
+        if (nouveauStock < 0) {
+            throw new Exception("Opération impossible : le stock ne peut pas devenir négatif.");
+        }
+
+        // 4. Mettre à jour l'objet et le sauvegarder.
+        produit.setStock(nouveauStock);
+        produitSnackDAO.updateProduit(produit);
+    }
+
+    // --- DEBUT DE L'AJOUT ---
     @Override
     public VenteSnack getVenteSnackForReservation(int reservationId) {
         // Le service délègue simplement l'appel au DAO compétent.
