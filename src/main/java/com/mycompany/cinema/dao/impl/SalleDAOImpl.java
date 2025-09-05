@@ -8,21 +8,22 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion des salles de projection dans "salles.dat".
- * 
- * Pour le développeur de l'interface graphique : cette classe fournit les données
- * nécessaires pour tout ce qui concerne les salles.
- * - Le `SiegePanel` a besoin de `getSalleById` pour connaître la capacité de la salle
- *   afin de dessiner le plan des sièges.
- * - Le `GestionSallesPanel` de l'administrateur utilise toutes les méthodes CRUD
- *   de cette classe pour permettre la gestion complète des salles.
+ * Implémentation concrète pour la gestion des salles de projection dans
+ * "salles.dat".
+ *
+ * Pour le développeur de l'interface graphique : cette classe fournit les
+ * données nécessaires pour tout ce qui concerne les salles. - Le `SiegePanel` a
+ * besoin de `getSalleById` pour connaître la capacité de la salle afin de
+ * dessiner le plan des sièges. - Le `GestionSallesPanel` de l'administrateur
+ * utilise toutes les méthodes CRUD de cette classe pour permettre la gestion
+ * complète des salles.
  */
 public class SalleDAOImpl extends GenericDAOImpl<Salle> implements SalleDAO {
 
     public SalleDAOImpl() {
         super("salles.dat");
     }
-    
+
     @Override
     public void addSalle(Salle salle) {
         this.data.add(salle);
@@ -30,13 +31,13 @@ public class SalleDAOImpl extends GenericDAOImpl<Salle> implements SalleDAO {
     }
 
     @Override
-    public Optional<Salle> getSalleById(int id) {
+    public Salle getSalleById(int id) {
         for (Salle salle : this.data) {
             if (salle.getId() == id) {
-                return Optional.of(salle);
+                return salle;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override
@@ -54,7 +55,7 @@ public class SalleDAOImpl extends GenericDAOImpl<Salle> implements SalleDAO {
             }
         }
     }
-    
+
     @Override
     public void deleteSalle(int id) {
         boolean changed = false;

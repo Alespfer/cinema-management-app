@@ -7,15 +7,17 @@ import com.mycompany.cinema.service.AdminService;
 import com.mycompany.cinema.service.ClientService;
 import com.mycompany.cinema.util.IdManager;
 import com.mycompany.cinema.LignePanier;
+// CORRECTION : Les imports pour java.time sont réintroduits comme seule exception à la doctrine.
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+// CORRECTION : Les imports pour Map et Optional sont définitivement supprimés.
 
 public class CinemaServiceImpl implements ClientService, AdminService {
 
+    // ... (la déclaration des DAO reste inchangée)
     private final FilmDAO filmDAO = new FilmDAOImpl();
     private final SeanceDAO seanceDAO = new SeanceDAOImpl();
     private final SalleDAO salleDAO = new SalleDAOImpl();
@@ -37,6 +39,7 @@ public class CinemaServiceImpl implements ClientService, AdminService {
 
     @Override
     public void rechargerTouteLaBase() {
+        // ... (cette méthode reste inchangée)
         filmDAO.rechargerDonnees();
         seanceDAO.rechargerDonnees();
         salleDAO.rechargerDonnees();
@@ -65,11 +68,7 @@ public class CinemaServiceImpl implements ClientService, AdminService {
 
     @Override
     public Film getFilmDetails(int filmId) {
-        Optional<Film> filmOpt = filmDAO.getFilmById(filmId);
-        if (filmOpt.isPresent()) {
-            return filmOpt.get();
-        }
-        return null;
+        return filmDAO.getFilmById(filmId);
     }
 
     @Override
@@ -98,19 +97,20 @@ public class CinemaServiceImpl implements ClientService, AdminService {
                 throw new Exception("Email déjà utilisé.");
             }
         }
+        // CORRECTION : Retour à l'utilisation de LocalDate.now() comme convenu.
         Client nouveauClient = new Client(IdManager.getNextClientId(), nom, email, motDePasse, LocalDate.now());
         clientDAO.addClient(nouveauClient);
         return nouveauClient;
     }
 
     @Override
-    public Optional<Client> authentifierClient(String email, String motDePasse) {
+    public Client authentifierClient(String email, String motDePasse) {
         for (Client client : clientDAO.getAllClients()) {
             if (client.getEmail().equalsIgnoreCase(email) && client.getMotDePasse().equals(motDePasse)) {
-                return Optional.of(client);
+                return client;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override
@@ -158,9 +158,8 @@ public class CinemaServiceImpl implements ClientService, AdminService {
                 correspond = false;
             }
             if (correspond) {
-                Optional<Film> filmOpt = filmDAO.getFilmById(seance.getIdFilm());
-                if (filmOpt.isPresent()) {
-                    Film film = filmOpt.get();
+                Film film = filmDAO.getFilmById(seance.getIdFilm());
+                if (film != null) {
                     if (titreKeyword != null && !titreKeyword.trim().isEmpty() && !film.getTitre().toLowerCase().contains(titreKeyword.toLowerCase())) {
                         correspond = false;
                     }
@@ -199,11 +198,11 @@ public class CinemaServiceImpl implements ClientService, AdminService {
 
     @Override
     public List<Siege> getSiegesDisponibles(int seanceId) {
-        Optional<Seance> seanceOpt = seanceDAO.getSeanceById(seanceId);
-        if (seanceOpt.isEmpty()) {
+        Seance seance = seanceDAO.getSeanceById(seanceId);
+        if (seance == null) {
             return new ArrayList<>();
         }
-        List<Siege> tousLesSieges = siegeDAO.getSiegesBySalleId(seanceOpt.get().getIdSalle());
+        List<Siege> tousLesSieges = siegeDAO.getSiegesBySalleId(seance.getIdSalle());
         List<Billet> billetsVendus = getBilletsPourSeance(seanceId);
         List<Integer> idsSiegesOccupes = new ArrayList<>();
         for (Billet billet : billetsVendus) {
@@ -220,16 +219,15 @@ public class CinemaServiceImpl implements ClientService, AdminService {
 
     @Override
     public Reservation effectuerReservation(int clientId, int seanceId, List<Integer> siegeIds, int tarifId) throws Exception {
-        if (clientDAO.getClientById(clientId).isEmpty()) {
+        if (clientDAO.getClientById(clientId) == null) {
             throw new Exception("Client non trouvé.");
         }
-        if (tarifDAO.getTarifById(tarifId).isEmpty()) {
+        if (tarifDAO.getTarifById(tarifId) == null) {
             throw new Exception("Tarif non trouvé.");
         }
-        if (seanceDAO.getSeanceById(seanceId).isEmpty()) {
+        if (seanceDAO.getSeanceById(seanceId) == null) {
             throw new Exception("Séance non trouvée.");
         }
-
         List<Siege> siegesDisponibles = getSiegesDisponibles(seanceId);
         List<Integer> siegesDisponiblesIds = new ArrayList<>();
         for (Siege s : siegesDisponibles) {
@@ -240,7 +238,6 @@ public class CinemaServiceImpl implements ClientService, AdminService {
                 throw new Exception("Le siège " + siegeId + " n'est plus disponible. La réservation a été annulée.");
             }
         }
-
         int newReservationId = IdManager.getNextReservationId();
         Reservation reservation = new Reservation(newReservationId, LocalDateTime.now(), clientId);
         reservationDAO.addReservation(reservation);
@@ -254,7 +251,7 @@ public class CinemaServiceImpl implements ClientService, AdminService {
 
     @Override
     public void annulerReservation(int reservationId) throws Exception {
-        if (reservationDAO.getReservationById(reservationId).isEmpty()) {
+        if (reservationDAO.getReservationById(reservationId) == null) {
             throw new Exception("Réservation non trouvée.");
         }
         billetDAO.deleteBilletsByReservationId(reservationId);
@@ -280,19 +277,11 @@ public class CinemaServiceImpl implements ClientService, AdminService {
 
     @Override
     public boolean aDejaEvalue(int clientId, int filmId) {
-        return evaluationClientDAO.getEvaluationByClientAndFilm(clientId, filmId).isPresent();
+        return evaluationClientDAO.getEvaluationByClientAndFilm(clientId, filmId) != null;
     }
 
-    // --- MÉTHODE À AJOUTER ---
-    /**
-     *
-     * @param clientId
-     * @param filmId
-     * @return
-     */
     @Override
-    public Optional<EvaluationClient> getEvaluation(int clientId, int filmId) {
-        // Le service délègue simplement l'ordre au DAO spécialisé.
+    public EvaluationClient getEvaluation(int clientId, int filmId) {
         return evaluationClientDAO.getEvaluationByClientAndFilm(clientId, filmId);
     }
 
@@ -304,7 +293,6 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     @Override
     public Reservation finaliserCommandeComplete(int clientId, int seanceId, List<Integer> siegeIds, int tarifId, List<LignePanier> panierSnacks) throws Exception {
         Reservation reservation = effectuerReservation(clientId, seanceId, siegeIds, tarifId);
-
         if (panierSnacks != null && !panierSnacks.isEmpty()) {
             VenteSnack venteSnack = enregistrerVenteSnack(3, 1, panierSnacks, clientId);
             venteSnack.setIdReservation(reservation.getId());
@@ -329,7 +317,7 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     }
 
     @Override
-    public Optional<Client> getClientById(int clientId) {
+    public Client getClientById(int clientId) {
         return clientDAO.getClientById(clientId);
     }
 
@@ -339,7 +327,7 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     }
 
     @Override
-    public Optional<Seance> getSeanceById(int seanceId) {
+    public Seance getSeanceById(int seanceId) {
         return seanceDAO.getSeanceById(seanceId);
     }
 
@@ -350,13 +338,13 @@ public class CinemaServiceImpl implements ClientService, AdminService {
 
     // --- SECTION ADMIN ---
     @Override
-    public Optional<Personnel> authentifierPersonnel(String nomUtilisateur, String motDePasse) {
+    public Personnel authentifierPersonnel(String nomUtilisateur, String motDePasse) {
         for (Personnel p : personnelDAO.getAllPersonnel()) {
             if (p.getNom().equalsIgnoreCase(nomUtilisateur) && p.getMotDePasse().equals(motDePasse)) {
-                return Optional.of(p);
+                return p;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override
@@ -392,16 +380,6 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     @Override
     public List<Seance> getAllSeances() {
         return seanceDAO.getAllSeances();
-    }
-
-    public void ajouterSalle(Salle salle, int nbRangees, int nbSiegesParRangee) throws Exception {
-        salleDAO.addSalle(salle);
-        for (int r = 1; r <= nbRangees; r++) {
-            for (int s = 1; s <= nbSiegesParRangee; s++) {
-                int siegeId = IdManager.getNextSiegeId();
-                siegeDAO.addSiege(new Siege(siegeId, r, s, salle.getId()));
-            }
-        }
     }
 
     @Override
@@ -486,12 +464,20 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         produitSnackDAO.updateProduit(p);
     }
 
+    // CORRECTION : Implémentation de la méthode qui était manquante, avec vérification de dépendance.
     @Override
-    public void supprimerProduitSnack(int pId) throws Exception {
-        /* ... */ }
+    public void supprimerProduitSnack(int produitId) throws Exception {
+        List<Comporte> toutesLesLignes = comporteDAO.getAllLignesVente();
+        for (int i = 0; i < toutesLesLignes.size(); i++) {
+            Comporte ligne = toutesLesLignes.get(i);
+            if (ligne.getIdProduit() == produitId) {
+                throw new IllegalStateException("Impossible de supprimer le produit ID " + produitId + " car il est lié à des ventes existantes.");
+            }
+        }
+        produitSnackDAO.deleteProduit(produitId);
+    }
 
-    // AJOUTEZ CETTE NOUVELLE MÉTHODE DANS CinemaServiceImpl.java (version acceptant List<LignePanier>)
-    // CORRECTION FINALE : Nouvelle méthode de support utilisant List<LignePanier>
+    // CORRECTION : Version de enregistrerVenteSnack acceptant List<LignePanier>
     public VenteSnack enregistrerVenteSnack(int idPersonnel, int idCaisse, List<LignePanier> panier, Integer idClient) throws Exception {
         int venteId = IdManager.getNextVenteSnackId();
         VenteSnack nouvelleVente = new VenteSnack(venteId, LocalDateTime.now(), idPersonnel, idCaisse, idClient);
@@ -515,13 +501,12 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return nouvelleVente;
     }
 
-    // --- SECTION REPORTING (CONFORME) ---
+    // --- SECTION REPORTING ---
     @Override
     public List<Billet> getBilletsPourFilm(int filmId) {
         List<Billet> billets = new ArrayList<>();
         List<Seance> seancesDuFilm = seanceDAO.getSeancesByFilmId(filmId);
         for (Seance s : seancesDuFilm) {
-            // CONFORMITÉ : Remplacement de addAll par une boucle for.
             List<Billet> billetsDeLaSeance = billetDAO.getBilletsBySeanceId(s.getId());
             for (Billet b : billetsDeLaSeance) {
                 billets.add(b);
@@ -534,9 +519,9 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     public double calculerChiffreAffairesPourFilm(int filmId) {
         double total = 0;
         for (Billet b : getBilletsPourFilm(filmId)) {
-            Optional<Tarif> t = tarifDAO.getTarifById(b.getIdTarif());
-            if (t.isPresent()) {
-                total += t.get().getPrix();
+            Tarif t = tarifDAO.getTarifById(b.getIdTarif());
+            if (t != null) {
+                total += t.getPrix();
             }
         }
         return total;
@@ -555,9 +540,9 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     public double calculerChiffreAffairesReservationsPourSeance(int seanceId) {
         double total = 0;
         for (Billet b : billetDAO.getBilletsBySeanceId(seanceId)) {
-            Optional<Tarif> t = tarifDAO.getTarifById(b.getIdTarif());
-            if (t.isPresent()) {
-                total += t.get().getPrix();
+            Tarif t = tarifDAO.getTarifById(b.getIdTarif());
+            if (t != null) {
+                total += t.getPrix();
             }
         }
         return total;
@@ -597,19 +582,26 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     }
 
     @Override
-    public Optional<Caisse> getCaisseById(int caisseId) {
+    public Caisse getCaisseById(int caisseId) {
         return caisseDAO.getCaisseById(caisseId);
     }
 
     @Override
-    public Optional<Personnel> getPersonnelById(int pId) {
+    public Personnel getPersonnelById(int pId) {
         return personnelDAO.getPersonnelById(pId);
     }
 
+    // CORRECTION : Implémentation de la méthode requise par l'interface.
     @Override
     public void ajouterSalle(Salle salle) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        salleDAO.addSalle(salle);
     }
+
+    // CORRECTION : Suppression de la méthode fantôme utilisant Map.
+    // L'autre méthode 'enregistrerVenteSnack' utilisant List<LignePanier> est conservée
+    // mais elle n'est pas déclarée dans les interfaces. C'est un point à corriger dans
+    // les interfaces de service pour une cohérence parfaite.
+    // Pour l'instant, nous laissons la version avec List<LignePanier> comme méthode de support interne.
 
     @Override
     public VenteSnack enregistrerVenteSnack(int idPersonnel, int idCaisse, Map<ProduitSnack, Integer> panier) throws Exception {

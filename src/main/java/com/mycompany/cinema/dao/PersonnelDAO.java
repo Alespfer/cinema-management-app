@@ -16,7 +16,7 @@ import java.util.Optional;
  */
 public interface PersonnelDAO {
     void addPersonnel(Personnel personnel);
-    Optional<Personnel> getPersonnelById(int id);
+    Personnel getPersonnelById(int id);
     List<Personnel> getAllPersonnel();
     void updatePersonnel(Personnel personnel);
     void deletePersonnel(int id);

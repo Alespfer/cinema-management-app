@@ -5,7 +5,6 @@ import com.mycompany.cinema.LignePanier;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Interface regroupant toutes les fonctionnalités accessibles aux clients.
@@ -22,7 +21,7 @@ public interface ClientService extends CinemaService {
     /** Authentifie un client à partir de son email et mot de passe.
      * @return un Optional contenant le client si trouvé, vide sinon.
      */
-    Optional<Client> authentifierClient(String email, String motDePasse);
+    Client authentifierClient(String email, String motDePasse);
 
     /** Modifie les informations d’un compte client.
      * @throws Exception si l’opération échoue (ex : conflit).
@@ -78,7 +77,7 @@ public interface ClientService extends CinemaService {
      * @param clientId L'ID du client.
      * @return Un Optional contenant le client.
      */
-    Optional<Client> getClientById(int clientId);
+    Client getClientById(int clientId);
 
     /**
      * Récupère tous les billets associés à un numéro de réservation spécifique.
@@ -94,7 +93,7 @@ public interface ClientService extends CinemaService {
      * @param seanceId L'ID de la séance.
      * @return Un Optional contenant la séance.
      */
-    Optional<Seance> getSeanceById(int seanceId);
+    Seance getSeanceById(int seanceId);
     
     
     List<ProduitSnack> getAllProduitsSnack(); 
@@ -143,7 +142,7 @@ public interface ClientService extends CinemaService {
     List<EvaluationClient> getEvaluationsByFilmId(int filmId);
     
     
-    Optional<EvaluationClient> getEvaluation(int clientId, int filmId);
+    EvaluationClient getEvaluation(int clientId, int filmId);
 
     /**
      * Finalise une commande complète incluant billets et snacks.

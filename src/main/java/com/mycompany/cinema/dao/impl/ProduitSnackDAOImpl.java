@@ -7,14 +7,15 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion du catalogue de snacks dans "produits_snack.dat".
- * 
- * Pour le développeur de l'interface graphique : cette classe est fondamentale pour
- * toute la partie "vente de snacks".
- * - Le `SnackSelectionPanel` (côté client) utilise `getAllProduits` pour afficher la liste
- *   des articles disponibles à l'achat.
- * - Le `GestionProduitsSnackPanel` (côté admin) utilise toutes les méthodes de cette classe
- *   (add, get, update) pour permettre à l'administrateur de gérer le catalogue et les stocks.
+ * Implémentation concrète pour la gestion du catalogue de snacks dans
+ * "produits_snack.dat".
+ *
+ * Pour le développeur de l'interface graphique : cette classe est fondamentale
+ * pour toute la partie "vente de snacks". - Le `SnackSelectionPanel` (côté
+ * client) utilise `getAllProduits` pour afficher la liste des articles
+ * disponibles à l'achat. - Le `GestionProduitsSnackPanel` (côté admin) utilise
+ * toutes les méthodes de cette classe (add, get, update) pour permettre à
+ * l'administrateur de gérer le catalogue et les stocks.
  */
 public class ProduitSnackDAOImpl extends GenericDAOImpl<ProduitSnack> implements ProduitSnackDAO {
 
@@ -28,14 +29,15 @@ public class ProduitSnackDAOImpl extends GenericDAOImpl<ProduitSnack> implements
         saveToFile();
     }
 
+    // Dans ProduitSnackDAOImpl.java
     @Override
-    public Optional<ProduitSnack> getProduitById(int id) {
+    public ProduitSnack getProduitById(int id) {
         for (ProduitSnack p : this.data) {
             if (p.getId() == id) {
-                return Optional.of(p);
+                return p;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override
@@ -55,9 +57,10 @@ public class ProduitSnackDAOImpl extends GenericDAOImpl<ProduitSnack> implements
             }
         }
     }
-    
-     /**
-     * Supprime un produit de la liste en mémoire et sauvegarde la modification dans le fichier.
+
+    /**
+     * Supprime un produit de la liste en mémoire et sauvegarde la modification
+     * dans le fichier.
      */
     @Override
     public void deleteProduit(int id) {

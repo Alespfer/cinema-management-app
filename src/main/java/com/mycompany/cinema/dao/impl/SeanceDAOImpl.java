@@ -8,15 +8,16 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion des séances de projection dans "seances.dat".
- * 
+ * Implémentation concrète pour la gestion des séances de projection dans
+ * "seances.dat".
+ *
  * Pour le développeur de l'interface graphique : cette classe est le moteur de
- * la programmation du cinéma.
- * - Le `ProgrammationPanel` utilise massivement cette classe (via le service) pour filtrer
- *   et afficher les séances disponibles selon les critères du client.
- * - Le `FilmDetailPanel` l'utilise pour afficher les horaires d'un film pour un jour donné.
- * - Le `GestionSeancesPanel` de l'administrateur s'en sert pour créer, modifier et
- *   supprimer les séances.
+ * la programmation du cinéma. - Le `ProgrammationPanel` utilise massivement
+ * cette classe (via le service) pour filtrer et afficher les séances
+ * disponibles selon les critères du client. - Le `FilmDetailPanel` l'utilise
+ * pour afficher les horaires d'un film pour un jour donné. - Le
+ * `GestionSeancesPanel` de l'administrateur s'en sert pour créer, modifier et
+ * supprimer les séances.
  */
 public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
 
@@ -31,13 +32,13 @@ public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
     }
 
     @Override
-    public Optional<Seance> getSeanceById(int id) {
+    public Seance getSeanceById(int id) {
         for (Seance seance : this.data) {
             if (seance.getId() == id) {
-                return Optional.of(seance);
+                return seance;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override

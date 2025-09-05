@@ -15,7 +15,7 @@ import java.util.Optional;
  */
 public interface VenteSnackDAO {
     void addVenteSnack(VenteSnack vente);
-    Optional<VenteSnack> getVenteSnackById(int id);
+    VenteSnack getVenteSnackById(int id);
     List<VenteSnack> getAllVentesSnack();
     List<VenteSnack> getVentesByDate(LocalDate date);
     void rechargerDonnees();

@@ -29,13 +29,13 @@ public class ClientDAOImpl extends GenericDAOImpl<Client> implements ClientDAO {
     }
 
     @Override
-    public Optional<Client> getClientById(int id) {
+    public Client getClientById(int id) {
         for (Client client : this.data) {
             if (client.getId() == id) {
-                return Optional.of(client);
+                return client;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override

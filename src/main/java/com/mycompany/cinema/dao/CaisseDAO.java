@@ -22,7 +22,7 @@ public interface CaisseDAO {
      * La méthode retourne un `Optional`, un objet qui peut contenir une Caisse ou être vide.
      * C'est une façon moderne et sûre de dire "je vais chercher, mais je ne garantis pas de trouver".
      */
-    Optional<Caisse> getCaisseById(int id);
+    Caisse getCaisseById(int id);
 
     /** Règle n°3 : Savoir lister toutes les caisses. */
     List<Caisse> getAllCaisses();

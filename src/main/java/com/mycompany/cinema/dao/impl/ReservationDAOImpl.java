@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion des réservations (commandes) dans "reservations.dat".
- * 
- * Pour le développeur de l'interface graphique : cette classe est le cœur de l'historique client.
- * Le `HistoriqueReservationsPanel` dépend entièrement de `getReservationsByClientId` pour
- * afficher la liste des commandes passées par l'utilisateur connecté. La méthode `deleteReservation`
- * est appelée lorsque l'utilisateur décide d'annuler sa commande.
+ * Implémentation concrète pour la gestion des réservations (commandes) dans
+ * "reservations.dat".
+ *
+ * Pour le développeur de l'interface graphique : cette classe est le cœur de
+ * l'historique client. Le `HistoriqueReservationsPanel` dépend entièrement de
+ * `getReservationsByClientId` pour afficher la liste des commandes passées par
+ * l'utilisateur connecté. La méthode `deleteReservation` est appelée lorsque
+ * l'utilisateur décide d'annuler sa commande.
  */
 public class ReservationDAOImpl extends GenericDAOImpl<Reservation> implements ReservationDAO {
 
@@ -26,14 +28,15 @@ public class ReservationDAOImpl extends GenericDAOImpl<Reservation> implements R
         saveToFile();
     }
 
+    // Dans ReservationDAOImpl.java
     @Override
-    public Optional<Reservation> getReservationById(int id) {
+    public Reservation getReservationById(int id) {
         for (Reservation r : this.data) {
             if (r.getId() == id) {
-                return Optional.of(r);
+                return r;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override

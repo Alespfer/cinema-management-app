@@ -7,15 +7,16 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion du catalogue de films dans le fichier "films.dat".
- * C'est l'une des classes de gestion les plus importantes.
- * 
- * Pour le développeur de l'interface graphique : cette classe fournit toutes les données
- * nécessaires pour les panneaux liés aux films.
- * - `getAllFilms` et `findFilmsByTitre` alimentent le tableau du `ProgrammationPanel`.
- * - `getFilmById` est crucial pour afficher toutes les informations dans le `FilmDetailPanel`.
- * - Les autres méthodes (`add`, `update`, `delete`) sont les actions effectuées par
- *   les boutons du `GestionFilmsPanel` de l'administrateur.
+ * Implémentation concrète pour la gestion du catalogue de films dans le fichier
+ * "films.dat". C'est l'une des classes de gestion les plus importantes.
+ *
+ * Pour le développeur de l'interface graphique : cette classe fournit toutes
+ * les données nécessaires pour les panneaux liés aux films. - `getAllFilms` et
+ * `findFilmsByTitre` alimentent le tableau du `ProgrammationPanel`. -
+ * `getFilmById` est crucial pour afficher toutes les informations dans le
+ * `FilmDetailPanel`. - Les autres méthodes (`add`, `update`, `delete`) sont les
+ * actions effectuées par les boutons du `GestionFilmsPanel` de
+ * l'administrateur.
  */
 public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
 
@@ -29,14 +30,15 @@ public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
         saveToFile();
     }
 
+    // Dans FilmDAOImpl.java
     @Override
-    public Optional<Film> getFilmById(int id) {
+    public Film getFilmById(int id) {
         for (Film film : this.data) {
             if (film.getId() == id) {
-                return Optional.of(film);
+                return film;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override

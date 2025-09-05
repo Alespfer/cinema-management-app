@@ -14,7 +14,7 @@ import java.util.Optional;
  */
 public interface FilmDAO {
     void addFilm(Film film);
-    Optional<Film> getFilmById(int id);
+    Film getFilmById(int id);
     List<Film> getAllFilms();
     void updateFilm(Film film);
     void deleteFilm(int id);

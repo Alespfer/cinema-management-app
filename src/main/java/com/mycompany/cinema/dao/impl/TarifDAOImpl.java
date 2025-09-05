@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion des tarifs dans le fichier "tarifs.dat".
- * 
- * Pour le développeur de l'interface graphique : cette classe fournit les données pour :
- * - Le menu déroulant de sélection du tarif dans le `SiegePanel` (via `getAllTarifs`).
- * - Le panneau de gestion des tarifs de l'administrateur, `GestionTarifsPanel`, qui
- *   utilise l'ensemble des méthodes CRUD pour la maintenance.
+ * Implémentation concrète pour la gestion des tarifs dans le fichier
+ * "tarifs.dat".
+ *
+ * Pour le développeur de l'interface graphique : cette classe fournit les
+ * données pour : - Le menu déroulant de sélection du tarif dans le `SiegePanel`
+ * (via `getAllTarifs`). - Le panneau de gestion des tarifs de l'administrateur,
+ * `GestionTarifsPanel`, qui utilise l'ensemble des méthodes CRUD pour la
+ * maintenance.
  */
 public class TarifDAOImpl extends GenericDAOImpl<Tarif> implements TarifDAO {
 
@@ -26,14 +28,15 @@ public class TarifDAOImpl extends GenericDAOImpl<Tarif> implements TarifDAO {
         saveToFile();
     }
 
+    // Dans TarifDAOImpl.java
     @Override
-    public Optional<Tarif> getTarifById(int id) {
+    public Tarif getTarifById(int id) {
         for (Tarif tarif : this.data) {
             if (tarif.getId() == id) {
-                return Optional.of(tarif);
+                return tarif;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override

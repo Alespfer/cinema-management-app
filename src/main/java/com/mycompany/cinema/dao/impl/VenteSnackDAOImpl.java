@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion des tickets de caisse de snacks
- * dans le fichier "ventes_snack.dat".
- * 
- * Pour le développeur de l'interface graphique : cette classe est principalement utilisée
- * par le `ReportingPanel` de l'administrateur. Elle permet de récupérer la liste de
- * toutes les ventes (`getAllVentesSnack`) et de les filtrer par jour (`getVentesByDate`)
- * pour calculer le chiffre d'affaires.
+ * Implémentation concrète pour la gestion des tickets de caisse de snacks dans
+ * le fichier "ventes_snack.dat".
+ *
+ * Pour le développeur de l'interface graphique : cette classe est
+ * principalement utilisée par le `ReportingPanel` de l'administrateur. Elle
+ * permet de récupérer la liste de toutes les ventes (`getAllVentesSnack`) et de
+ * les filtrer par jour (`getVentesByDate`) pour calculer le chiffre d'affaires.
  */
 public class VenteSnackDAOImpl extends GenericDAOImpl<VenteSnack> implements VenteSnackDAO {
 
@@ -28,14 +28,15 @@ public class VenteSnackDAOImpl extends GenericDAOImpl<VenteSnack> implements Ven
         saveToFile();
     }
 
+    // Dans VenteSnackDAOImpl.java
     @Override
-    public Optional<VenteSnack> getVenteSnackById(int id) {
+    public VenteSnack getVenteSnackById(int id) {
         for (VenteSnack vente : this.data) {
             if (vente.getIdVente() == id) {
-                return Optional.of(vente);
+                return vente;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override

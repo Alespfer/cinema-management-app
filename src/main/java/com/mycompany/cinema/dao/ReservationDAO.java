@@ -14,7 +14,7 @@ import java.util.Optional;
  */
 public interface ReservationDAO {
     void addReservation(Reservation reservation);
-    Optional<Reservation> getReservationById(int id);
+    Reservation getReservationById(int id);
     List<Reservation> getAllReservations();
     List<Reservation> getReservationsByClientId(int clientID);
     void deleteReservation(int id);

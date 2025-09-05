@@ -16,7 +16,7 @@ import java.util.Optional;
  */
 public interface SeanceDAO {
     void addSeance(Seance seance);
-    Optional<Seance> getSeanceById(int id);
+    Seance getSeanceById(int id);
     List<Seance> getAllSeances();
     List<Seance> getSeancesByFilmId(int filmId);
     List<Seance> getSeancesByDate(LocalDate date);

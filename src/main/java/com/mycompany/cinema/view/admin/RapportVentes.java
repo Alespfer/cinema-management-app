@@ -7,13 +7,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Optional;
+// CORRECTION : L'import de 'Optional' a été supprimé. Il est interdit.
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
 
 public class RapportVentes extends javax.swing.JPanel {
 
@@ -27,10 +23,8 @@ public class RapportVentes extends javax.swing.JPanel {
 
     public RapportVentes(AdminService adminService) {
         this.adminService = adminService;
-
         initComponents();
         initModels();
-
         loadAllTables();
     }
 
@@ -75,19 +69,16 @@ public class RapportVentes extends javax.swing.JPanel {
         loadVentesSnackTable();
     }
 
-    /**
-     * Charge la table des réservations. VERSION CORRIGÉE CONFORME À LA DOCTRINE
-     * (SANS STREAM).
-     */
     private void loadReservationsTable() {
         reservationsTableModel.setRowCount(0);
         List<Reservation> reservations = adminService.getAllReservations();
 
         for (Reservation reservation : reservations) {
-            Optional<Client> clientOpt = adminService.getClientById(reservation.getIdClient());
+            // CORRECTION : Appel direct et vérification de nullité.
+            Client client = adminService.getClientById(reservation.getIdClient());
             String clientNom = "Client inconnu";
-            if (clientOpt.isPresent()) {
-                clientNom = clientOpt.get().getNom();
+            if (client != null) {
+                clientNom = client.getNom();
             }
 
             List<Billet> billets = adminService.getBilletsByReservationId(reservation.getId());
@@ -96,12 +87,12 @@ public class RapportVentes extends javax.swing.JPanel {
             }
 
             Billet premierBillet = billets.get(0);
-            Optional<Seance> seanceOpt = adminService.getSeanceById(premierBillet.getIdSeance());
+            // CORRECTION : Appel direct et vérification de nullité.
+            Seance seance = adminService.getSeanceById(premierBillet.getIdSeance());
 
             String filmTitre = "Film inconnu";
             String seanceDate = "Date inconnue";
-            if (seanceOpt.isPresent()) {
-                Seance seance = seanceOpt.get();
+            if (seance != null) {
                 seanceDate = seance.getDateHeureDebut().format(DATETIME_FORMATTER);
                 Film film = adminService.getFilmDetails(seance.getIdFilm());
                 if (film != null) {
@@ -113,19 +104,17 @@ public class RapportVentes extends javax.swing.JPanel {
             for (Billet b : billets) {
                 final int tarifId = b.getIdTarif();
 
-                // --- DÉBUT DE LA CORRECTION CONFORME À LA DOCTRINE ---
-                Optional<Tarif> tarifOpt = Optional.empty();
-                // On parcourt la liste des tarifs avec une boucle for classique.
+                // CORRECTION : Boucle de recherche simplifiée et conforme.
+                Tarif tarif = null;
                 for (Tarif t : adminService.getAllTarifs()) {
                     if (t.getId() == tarifId) {
-                        tarifOpt = Optional.of(t);
-                        break; // On a trouvé le tarif, on arrête la boucle.
+                        tarif = t;
+                        break;
                     }
                 }
-                // --- FIN DE LA CORRECTION ---
 
-                if (tarifOpt.isPresent()) {
-                    prixTotal += tarifOpt.get().getPrix();
+                if (tarif != null) {
+                    prixTotal += tarif.getPrix();
                 }
             }
 
@@ -143,20 +132,23 @@ public class RapportVentes extends javax.swing.JPanel {
         for (VenteSnack vente : ventes) {
             String canalDeVente, vendeur, clientAssocie;
 
-            if (vente.getIdPersonnel() >= 0) {
-                Optional<Personnel> pOpt = adminService.getPersonnelById(vente.getIdPersonnel());
-                vendeur = pOpt.isPresent() ? pOpt.get().getPrenom() + " " + pOpt.get().getNom() : "ID " + vente.getIdPersonnel();
+            if (vente.getIdPersonnel() >= 0) { // Hypothèse : idPersonnel < 0 signifie vente en ligne
+                // CORRECTION : Appel direct et vérification de nullité.
+                Personnel p = adminService.getPersonnelById(vente.getIdPersonnel());
+                vendeur = (p != null) ? p.getPrenom() + " " + p.getNom() : "ID " + vente.getIdPersonnel();
 
-                Optional<Caisse> cOpt = adminService.getCaisseById(vente.getIdCaisse());
-                canalDeVente = cOpt.isPresent() ? cOpt.get().getNom() : "Caisse ID " + vente.getIdCaisse();
+                // CORRECTION : Appel direct et vérification de nullité.
+                Caisse c = adminService.getCaisseById(vente.getIdCaisse());
+                canalDeVente = (c != null) ? c.getNom() : "Caisse ID " + vente.getIdCaisse();
             } else {
                 vendeur = "N/A";
                 canalDeVente = "Achat en Ligne";
             }
 
             if (vente.getIdClient() != null) {
-                Optional<Client> cOpt = adminService.getClientById(vente.getIdClient());
-                clientAssocie = cOpt.isPresent() ? cOpt.get().getNom() : "Client ID " + vente.getIdClient();
+                // CORRECTION : Appel direct et vérification de nullité.
+                Client c = adminService.getClientById(vente.getIdClient());
+                clientAssocie = (c != null) ? c.getNom() : "Client ID " + vente.getIdClient();
             } else {
                 clientAssocie = "Vente Anonyme";
             }

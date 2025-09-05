@@ -14,7 +14,7 @@ import java.util.Optional;
  */
 public interface SalleDAO {
     void addSalle(Salle salle);
-    Optional<Salle> getSalleById(int id);
+    Salle getSalleById(int id);
     List<Salle> getAllSalles();
     void updateSalle(Salle salle);
     void deleteSalle(int id);

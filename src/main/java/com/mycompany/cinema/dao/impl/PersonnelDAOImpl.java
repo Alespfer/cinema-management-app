@@ -7,14 +7,16 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion des données des employés dans le fichier "personnel.dat".
- * Cette classe contient toute la logique de bas niveau pour la persistance du personnel.
- * 
- * Pour le développeur de l'interface graphique : vous ne toucherez jamais à cette classe.
- * Cependant, toutes les actions que vous implémenterez dans le panneau `GestionPersonnelPanel`
- * (créer un nouvel employé, mettre à jour son rôle, le supprimer) feront appel au 'AdminService'
- * qui, à son tour, utilisera les méthodes de cette classe pour effectuer les modifications
- * dans la base de données de fichiers.
+ * Implémentation concrète pour la gestion des données des employés dans le
+ * fichier "personnel.dat". Cette classe contient toute la logique de bas niveau
+ * pour la persistance du personnel.
+ *
+ * Pour le développeur de l'interface graphique : vous ne toucherez jamais à
+ * cette classe. Cependant, toutes les actions que vous implémenterez dans le
+ * panneau `GestionPersonnelPanel` (créer un nouvel employé, mettre à jour son
+ * rôle, le supprimer) feront appel au 'AdminService' qui, à son tour, utilisera
+ * les méthodes de cette classe pour effectuer les modifications dans la base de
+ * données de fichiers.
  */
 public class PersonnelDAOImpl extends GenericDAOImpl<Personnel> implements PersonnelDAO {
 
@@ -28,14 +30,15 @@ public class PersonnelDAOImpl extends GenericDAOImpl<Personnel> implements Perso
         saveToFile();
     }
 
+    // Dans PersonnelDAOImpl.java
     @Override
-    public Optional<Personnel> getPersonnelById(int id) {
+    public Personnel getPersonnelById(int id) {
         for (Personnel p : this.data) {
             if (p.getId() == id) {
-                return Optional.of(p);
+                return p;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override

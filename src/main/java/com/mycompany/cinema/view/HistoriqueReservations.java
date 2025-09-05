@@ -21,6 +21,7 @@ import javax.swing.table.DefaultTableModel;
 
 /**
  * Panneau pour afficher l'historique des réservations.
+ *
  * @author albertoesperon
  */
 public class HistoriqueReservations extends javax.swing.JPanel {
@@ -36,16 +37,15 @@ public class HistoriqueReservations extends javax.swing.JPanel {
     public HistoriqueReservations(ClientService clientService, Client clientConnecte) {
         this.clientService = clientService;
         this.clientConnecte = clientConnecte;
-        
+
         initComponents();
-        
+
         this.setupTableModel();
         this.addListeners();
         this.loadHistorique();
     }
-    
-    // --- MÉTHODES DE LOGIQUE PRIVÉES ---
 
+    // --- MÉTHODES DE LOGIQUE PRIVÉES ---
     private void setupTableModel() {
         String[] columnNames = {"ID Res.", "Date Réservation", "Film", "Séance", "Nb. Billets", "Prix Total"};
         tableModel = new DefaultTableModel(columnNames, 0) {
@@ -64,25 +64,19 @@ public class HistoriqueReservations extends javax.swing.JPanel {
             }
         });
     }
-    
-    /**
-     * Méthode d'aide pour arrondir et formater le prix sans bibliothèques avancées.
-     */
+
     private String formaterPrix(double valeur) {
-        // Étape 1: Logique d'arrondi "fait maison" à 2 décimales
         double valeurDecalee = valeur * 100;
         double valeurPourArrondi = valeurDecalee + 0.5;
         int valeurEntiereArrondie = (int) valeurPourArrondi;
         double valeurFinaleArrondie = valeurEntiereArrondie / 100.0;
-        
-        // Étape 2: Formatage en chaîne avec 2 décimales garanties
+
         String valeurString = String.valueOf(valeurFinaleArrondie);
         int positionPoint = valeurString.indexOf('.');
         if (positionPoint != -1 && (valeurString.length() - positionPoint - 1) < 2) {
             valeurString = valeurString + "0";
         }
-        
-        // Étape 3: Remplacer le point par une virgule et ajouter le symbole
+
         String valeurAvecVirgule = valeurString.replace('.', ',');
         return valeurAvecVirgule + " €";
     }
@@ -95,13 +89,17 @@ public class HistoriqueReservations extends javax.swing.JPanel {
         List<Reservation> reservations = clientService.getHistoriqueReservationsClient(clientConnecte.getId());
         List<Tarif> tousLesTarifs = clientService.getAllTarifs();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        
+
         for (Reservation reservation : reservations) {
             List<Billet> billets = clientService.getBilletsByReservationId(reservation.getId());
-            if (billets.isEmpty()) continue;
+            if (billets.isEmpty()) {
+                continue;
+            }
 
             Billet premierBillet = billets.get(0);
-            Seance seance = clientService.getSeanceById(premierBillet.getIdSeance()).orElse(null);
+
+            // CORRECTION : Appel direct à la méthode. La vérification de nullité se fait ensuite.
+            Seance seance = clientService.getSeanceById(premierBillet.getIdSeance());
             Film film = (seance != null) ? clientService.getFilmDetails(seance.getIdFilm()) : null;
 
             double prixTotal = 0.0;
@@ -113,11 +111,10 @@ public class HistoriqueReservations extends javax.swing.JPanel {
                     }
                 }
             }
-            
+
             String nomFilm = (film != null) ? film.getTitre() : "N/A";
             String dateSeance = (seance != null) ? seance.getDateHeureDebut().format(formatter) : "N/A";
-            
-            // Appel à notre nouvelle méthode de formatage
+
             String prixAffiche = formaterPrix(prixTotal);
 
             Object[] rowData = {
@@ -198,7 +195,7 @@ public class HistoriqueReservations extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void annulerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_annulerButtonActionPerformed
-       gererAnnulerReservation(); // TODO add your handling code here:
+        gererAnnulerReservation(); // TODO add your handling code here:
     }//GEN-LAST:event_annulerButtonActionPerformed
 
 

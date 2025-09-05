@@ -10,10 +10,11 @@ import java.util.Optional;
 /**
  * Implémentation concrète pour gérer la sauvegarde des caisses enregistreuses.
  * S'occupe du fichier "caisses.dat".
- * 
- * Pour le développeur de l'interface graphique : cette classe est utilisée par le back-office.
- * Le `PointDeVenteFrame` l'utilisera pour identifier la caisse, et le `ReportingPanel`
- * pour afficher les détails d'une vente. L'interface client n'est pas concernée.
+ *
+ * Pour le développeur de l'interface graphique : cette classe est utilisée par
+ * le back-office. Le `PointDeVenteFrame` l'utilisera pour identifier la caisse,
+ * et le `ReportingPanel` pour afficher les détails d'une vente. L'interface
+ * client n'est pas concernée.
  */
 public class CaisseDAOImpl extends GenericDAOImpl<Caisse> implements CaisseDAO {
 
@@ -28,16 +29,13 @@ public class CaisseDAOImpl extends GenericDAOImpl<Caisse> implements CaisseDAO {
     }
 
     @Override
-    public Optional<Caisse> getCaisseById(int id) {
-        // On parcourt la liste pour trouver la caisse avec le bon ID.
+    public Caisse getCaisseById(int id) {
         for (Caisse c : this.data) {
             if (c.getId() == id) {
-                // Si on la trouve, on la "met dans une boîte" Optional et on la retourne.
-                return Optional.of(c);
+                return c;
             }
         }
-        // Si on a fini la boucle sans succès, on retourne une "boîte vide".
-        return Optional.empty();
+        return null;
     }
 
     @Override

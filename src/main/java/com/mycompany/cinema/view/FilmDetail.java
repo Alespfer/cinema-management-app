@@ -1,18 +1,17 @@
 package com.mycompany.cinema.view;
 
-import com.mycompany.cinema.Client; // Importation nécessaire
+import com.mycompany.cinema.Client;
 import com.mycompany.cinema.EvaluationClient;
 import com.mycompany.cinema.Film;
 import com.mycompany.cinema.Seance;
 import com.mycompany.cinema.service.ClientService;
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Image;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional; // Importation nécessaire
+// CORRECTION : L'import de 'Optional' a été supprimé. Il est interdit.
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -65,7 +64,6 @@ public class FilmDetail extends javax.swing.JPanel {
             }
         });
 
-        // --- NOUVEAU CELL RENDERER AMÉLIORÉ ---
         evaluationsJList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -73,16 +71,14 @@ public class FilmDetail extends javax.swing.JPanel {
                 if (value instanceof EvaluationClient) {
                     EvaluationClient eval = (EvaluationClient) value;
 
-                    // 1. Récupérer le client via le service
-                    Optional<Client> clientOpt = clientService.getClientById(eval.getIdClient());
+                    // CORRECTION : Appel direct à la méthode et vérification de nullité.
+                    Client client = clientService.getClientById(eval.getIdClient());
                     String nomClient = "Utilisateur anonyme";
-                    if (clientOpt.isPresent()) {
-                        nomClient = clientOpt.get().getNom();
+                    if (client != null) {
+                        nomClient = client.getNom();
                     }
 
                     String commentaire = eval.getCommentaire().isEmpty() ? "<i>(pas de commentaire)</i>" : eval.getCommentaire();
-
-                    // 2. Affichage mis à jour avec le nom
                     setText("<html><b>" + nomClient + "</b> (" + eval.getNote() + "/5 ★)<br>" + commentaire + "</html>");
                 }
                 return this;
@@ -99,12 +95,9 @@ public class FilmDetail extends javax.swing.JPanel {
             titleLabel.setText(film.getTitre());
             infoLabel.setText("Durée: " + film.getDureeMinutes() + " min | Classification: " + film.getClassification());
             synopsisArea.setText(film.getSynopsis());
-
-            // 1. Créer l'icône directement depuis le chemin du fichier.
             ImageIcon posterIcon = new ImageIcon("images/" + film.getUrlAffiche());
             Image image = posterIcon.getImage().getScaledInstance(300, 450, Image.SCALE_SMOOTH);
             posterLabel.setIcon(new ImageIcon(image));
-
             notePresseLabel.setText("Presse: " + String.format("%.1f", film.getNotePresse()) + " / 5");
             double moyenneSpectateurs = clientService.getNoteMoyenneSpectateurs(film.getId());
             noteSpectateursLabel.setText("Spectateurs: " + (moyenneSpectateurs > 0 ? String.format("%.1f", moyenneSpectateurs) + " / 5" : "N/A"));
@@ -115,10 +108,9 @@ public class FilmDetail extends javax.swing.JPanel {
                 evaluationsListModel.addElement(evaluations.get(i));
             }
 
-            // --- NOUVELLE LOGIQUE POUR LE BOUTON "NOTER" ---
             boolean aEvalue = clientService.aDejaEvalue(this.clientId, film.getId());
             noterButton.setText(aEvalue ? "Modifier mon avis" : "Donner un avis");
-            noterButton.setEnabled(true); // Le bouton est toujours actif
+            noterButton.setEnabled(true);
 
             seanceListModel.clear();
             List<Seance> seances = clientService.getSeancesPourFilmEtDate(film.getId(), date);
@@ -143,7 +135,6 @@ public class FilmDetail extends javax.swing.JPanel {
         noterButton.setEnabled(false);
     }
 
-    // ... (setters inchangés) ...
     public void setSeanceSelectionListener(SeanceSelectionListener listener) {
         this.seanceSelectionListener = listener;
     }
@@ -273,20 +264,17 @@ public class FilmDetail extends javax.swing.JPanel {
 
     private void noterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_noterButtonActionPerformed
         if (filmActuel != null) {
-            boolean aEvalue = clientService.aDejaEvalue(this.clientId, filmActuel.getId());
+            // CORRECTION : Appel direct à la méthode et vérification de nullité.
+            EvaluationClient eval = clientService.getEvaluation(clientId, filmActuel.getId());
 
-            if (aEvalue) {
-                // Mode MODIFICATION
-                Optional<EvaluationClient> evalOpt = clientService.getEvaluation(clientId, filmActuel.getId());
-                if (evalOpt.isPresent()) {
-                    Evaluation dialog = new Evaluation(this.parentFrame, clientService, evalOpt.get());
-                    dialog.setVisible(true);
-                }
-            } else {
-                // Mode CRÉATION
+            if (eval != null) { // Si une évaluation existe déjà, on la modifie.
+                Evaluation dialog = new Evaluation(this.parentFrame, clientService, eval);
+                dialog.setVisible(true);
+            } else { // Sinon, on en crée une nouvelle.
                 Evaluation dialog = new Evaluation(this.parentFrame, clientService, clientId, filmActuel.getId());
                 dialog.setVisible(true);
             }
+            // On rafraîchit l'affichage pour voir les changements.
             displayFilmAndSeances(filmActuel, dateActuelle, clientId);
         }
     }//GEN-LAST:event_noterButtonActionPerformed

@@ -16,7 +16,7 @@ import java.util.Optional;
  */
 public interface ProduitSnackDAO {
     void addProduit(ProduitSnack produit);
-    Optional<ProduitSnack> getProduitById(int id);
+    ProduitSnack getProduitById(int id);
     List<ProduitSnack> getAllProduits();
     void updateProduit(ProduitSnack produit);
     /**

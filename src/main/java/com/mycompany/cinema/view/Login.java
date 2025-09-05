@@ -37,17 +37,23 @@ public class Login extends javax.swing.JFrame {
         }
 
         if (clientRadio.isSelected()) {
-            Optional<Client> clientOpt = clientService.authentifierClient(user, password);
-            if (clientOpt.isPresent()) {
+            // CORRECTION : La méthode authentifierClient retourne maintenant un Client ou null.
+            Client client = clientService.authentifierClient(user, password);
+
+            // CORRECTION : La vérification se fait avec '!= null'.
+            if (client != null) {
                 this.dispose();
-                new ClientMain(clientService, clientOpt.get()).setVisible(true);
+                // CORRECTION : On passe l'objet 'client' directement. L'appel '.get()' était une erreur et a été supprimé.
+                new ClientMain(clientService, client).setVisible(true);
             } else {
                 javax.swing.JOptionPane.showMessageDialog(this, "Email ou mot de passe client incorrect.", "Erreur d'authentification", javax.swing.JOptionPane.ERROR_MESSAGE);
             }
         } else {
-            Optional<Personnel> personnelOpt = adminService.authentifierPersonnel(user, password);
-            if (personnelOpt.isPresent()) {
-                Personnel personnel = personnelOpt.get();
+            // CORRECTION : La méthode authentifierPersonnel retourne maintenant un Personnel ou null.
+            Personnel personnel = adminService.authentifierPersonnel(user, password);
+
+            // CORRECTION : La vérification se fait avec '!= null'.
+            if (personnel != null) {
                 Role role = null;
                 for (Role r : adminService.getAllRoles()) {
                     if (r.getId() == personnel.getIdRole()) {

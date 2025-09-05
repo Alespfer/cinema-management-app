@@ -4,7 +4,6 @@ import com.mycompany.cinema.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Interface des fonctionnalités administrateur.
@@ -18,7 +17,7 @@ public interface AdminService extends CinemaService {
      * Authentifie un membre du personnel via nom d'utilisateur et mot de passe.
      * @return Un Optional contenant le Personnel si authentifié, sinon vide.
      */
-    Optional<Personnel> authentifierPersonnel(String nomUtilisateur, String motDePasse);
+    Personnel authentifierPersonnel(String nomUtilisateur, String motDePasse);
 
     // =========================================================================
     // SECTION GESTION (CRUD - Create, Read, Update, Delete)
@@ -207,7 +206,7 @@ public interface AdminService extends CinemaService {
      * @param clientId L'ID du client.
      * @return Un Optional contenant le client.
      */
-    Optional<Client> getClientById(int clientId);
+    Client getClientById(int clientId);
 
     /**
      * Récupère tous les billets associés à un numéro de réservation spécifique.
@@ -223,9 +222,9 @@ public interface AdminService extends CinemaService {
      * @param seanceId L'ID de la séance.
      * @return Un Optional contenant la séance.
      */
-    Optional<Seance> getSeanceById(int seanceId);
+    Seance getSeanceById(int seanceId);
 
-    public Optional<Personnel> getPersonnelById(int idPersonnel);
+    public Personnel getPersonnelById(int idPersonnel);
     
     
     /**
@@ -234,7 +233,7 @@ public interface AdminService extends CinemaService {
      * @param caisseId L'ID de la caisse.
      * @return Un Optional contenant la caisse si elle est trouvée.
      */
-    Optional<Caisse> getCaisseById(int caisseId);
+    Caisse getCaisseById(int caisseId);
     
     
      /**

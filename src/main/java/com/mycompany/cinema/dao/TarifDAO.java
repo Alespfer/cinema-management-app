@@ -14,7 +14,7 @@ import java.util.Optional;
  */
 public interface TarifDAO {
     void addTarif(Tarif tarif);
-    Optional<Tarif> getTarifById(int id);
+    Tarif getTarifById(int id);
     List<Tarif> getAllTarifs();
     void updateTarif(Tarif tarif);
     void deleteTarif(int id);
