@@ -5,7 +5,7 @@ import com.mycompany.cinema.Role;
 import com.mycompany.cinema.service.AdminService;
 import java.awt.Component;
 import java.util.List;
-import javax.swing.DefaultComboBoxModel; // Importation nécessaire
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -15,49 +15,49 @@ public class GestionPersonnel extends javax.swing.JPanel {
 
     private final AdminService adminService;
     private Personnel personnelSelectionne;
-    // Les modèles sont gérés manuellement.
-    private DefaultListModel<Personnel> listModel;
-    private DefaultComboBoxModel<Role> comboBoxModel;
+
+    // CORRECTION : Un seul jeu de modèles, conforme à une JList et une JComboBox.
+    private DefaultListModel<Personnel> personnelListModel;
+    private DefaultComboBoxModel<Role> roleComboBoxModel;
 
     public GestionPersonnel(AdminService adminService) {
         this.adminService = adminService;
-
         initComponents();
         initModelsAndRenderers();
+        rafraichirDonnees();
+    }
 
+    public void rafraichirDonnees() {
         chargerRoles();
         chargerListePersonnel();
+        clearForm();
     }
 
     private void initModelsAndRenderers() {
-        // CORRECTION : Création et assignation MANUELLE des modèles.
-        listModel = new DefaultListModel<>();
-        listePersonnel.setModel(listModel);
-
-        comboBoxModel = new DefaultComboBoxModel<>();
-        roleComboBox.setModel(comboBoxModel);
-
-        // Configuration de l'affichage pour la JList.
+        // Modèle pour la JList du personnel
+        personnelListModel = new DefaultListModel<>();
+        listePersonnel.setModel(personnelListModel);
         listePersonnel.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Personnel) {
-                    setText(((Personnel) value).getPrenom() + " " + ((Personnel) value).getNom());
+                    Personnel p = (Personnel) value;
+                    setText(p.getPrenom() + " " + p.getNom());
                 }
                 return this;
             }
         });
 
-        // Configuration de l'affichage pour la JComboBox.
+        // Modèle pour la JComboBox des rôles
+        roleComboBoxModel = new DefaultComboBoxModel<>();
+        roleComboBox.setModel(roleComboBoxModel);
         roleComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Role) {
                     setText(((Role) value).getLibelle());
-                } else if (value == null) {
-                    setText("Sélectionnez un rôle");
                 }
                 return this;
             }
@@ -65,120 +65,88 @@ public class GestionPersonnel extends javax.swing.JPanel {
     }
 
     private void chargerListePersonnel() {
-        try {
-            listModel.clear();
-            List<Personnel> personnelList = adminService.getAllPersonnel();
-            for (Personnel p : personnelList) {
-                listModel.addElement(p);
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erreur lors du chargement du personnel: " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+        personnelListModel.clear();
+        List<Personnel> personnelList = adminService.getAllPersonnel();
+        for (Personnel p : personnelList) {
+            personnelListModel.addElement(p);
         }
-    }
-
-    // Dans la classe GestionPersonnel
-    public void rafraichirDonnees() {
-        chargerListePersonnel(); // Suppose que 'chargerPersonnel()' est la méthode qui remplit ta JTable ou JList.
     }
 
     private void chargerRoles() {
-        try {
-            comboBoxModel.removeAllElements();
-            List<Role> roles = adminService.getAllRoles();
-            for (Role role : roles) {
-                comboBoxModel.addElement(role);
-            }
-            roleComboBox.setSelectedIndex(-1);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erreur lors du chargement des rôles: " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+        roleComboBoxModel.removeAllElements();
+        List<Role> roles = adminService.getAllRoles();
+        for (Role role : roles) {
+            roleComboBoxModel.addElement(role);
         }
     }
 
-    private void mettreAJourChamps(Personnel p) {
+    private void displayPersonnelDetails(Personnel p) {
+        personnelSelectionne = p;
         if (p != null) {
             idField.setText(String.valueOf(p.getId()));
             nomField.setText(p.getNom());
             prenomField.setText(p.getPrenom());
-            motDePasseField.setText(p.getMotDePasse());
+            motDePasseField.setText(""); // Ne jamais pré-remplir un mot de passe
             supprimerButton.setEnabled(true);
 
             Role roleAssigne = null;
-            for (int i = 0; i < comboBoxModel.getSize(); i++) {
-                if (comboBoxModel.getElementAt(i).getId() == p.getIdRole()) {
-                    roleAssigne = comboBoxModel.getElementAt(i);
+            for (int i = 0; i < roleComboBoxModel.getSize(); i++) {
+                if (roleComboBoxModel.getElementAt(i).getId() == p.getIdRole()) {
+                    roleAssigne = roleComboBoxModel.getElementAt(i);
                     break;
                 }
             }
-            comboBoxModel.setSelectedItem(roleAssigne);
+            roleComboBox.setSelectedItem(roleAssigne);
 
         } else {
-            idField.setText("");
-            nomField.setText("");
-            prenomField.setText("");
-            motDePasseField.setText("");
-            roleComboBox.setSelectedIndex(-1);
-            supprimerButton.setEnabled(false);
+            clearForm();
         }
     }
 
-    // ... (Le reste des méthodes (actionNouveau, actionEnregistrer, actionSupprimer) reste INCHANGÉ)
-    private void actionNouveau() {
-        personnelSelectionne = null;
+    private void clearForm() {
         listePersonnel.clearSelection();
-        mettreAJourChamps(null);
+        personnelSelectionne = null;
+        idField.setText("");
+        nomField.setText("");
+        prenomField.setText("");
+        motDePasseField.setText("");
+        roleComboBox.setSelectedIndex(-1);
+        supprimerButton.setEnabled(false);
     }
 
-    /**
-     * Gère la création ou la modification d'un membre du personnel. VERSION
-     * CORRIGÉE AVEC ID MANAGER.
-     */
     private void actionEnregistrer() {
-        String nom = nomField.getText();
-        String prenom = prenomField.getText();
+        String nom = nomField.getText().trim();
+        String prenom = prenomField.getText().trim();
         String motDePasse = new String(motDePasseField.getPassword());
         Role roleSelectionne = (Role) roleComboBox.getSelectedItem();
 
-        // Validation des entrées (inchangée)
-        if (nom == null || nom.trim().isEmpty() || prenom == null || prenom.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Le nom et le prénom ne peuvent pas être vides.", "Validation", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        if (roleSelectionne == null) {
-            JOptionPane.showMessageDialog(this, "Veuillez sélectionner un rôle.", "Validation", JOptionPane.WARNING_MESSAGE);
+        if (nom.isEmpty() || prenom.isEmpty() || roleSelectionne == null) {
+            JOptionPane.showMessageDialog(this, "Nom, prénom et rôle sont obligatoires.", "Erreur de saisie", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
             if (personnelSelectionne == null) { // Mode Création
-                // 1. OBTENIR UN NOUVEL ID UNIQUE
+                if (motDePasse.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Le mot de passe est obligatoire pour un nouvel utilisateur.", "Erreur de saisie", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
                 int nouvelId = com.mycompany.cinema.util.IdManager.getNextPersonnelId();
-
-                // 2. CRÉER L'OBJET AVEC L'ID
-                Personnel nouveau = new Personnel(
-                        nouvelId,
-                        nom,
-                        prenom,
-                        motDePasse,
-                        roleSelectionne.getId()
-                );
-
-                // 3. ENVOYER AU SERVICE
+                Personnel nouveau = new Personnel(nouvelId, nom, prenom, motDePasse, roleSelectionne.getId());
                 adminService.ajouterPersonnel(nouveau);
                 JOptionPane.showMessageDialog(this, "Membre du personnel créé avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
 
-            } else { // Mode Modification (inchangé)
+            } else { // Mode Modification
                 personnelSelectionne.setNom(nom);
                 personnelSelectionne.setPrenom(prenom);
-                personnelSelectionne.setMotDePasse(motDePasse);
                 personnelSelectionne.setIdRole(roleSelectionne.getId());
+                if (!motDePasse.isEmpty()) {
+                    personnelSelectionne.setMotDePasse(motDePasse);
+                }
                 adminService.modifierPersonnel(personnelSelectionne);
                 JOptionPane.showMessageDialog(this, "Membre du personnel modifié avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
             }
-
-            // Rechargement et nettoyage
-            chargerListePersonnel();
-            actionNouveau();
-
+            rafraichirDonnees();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erreur lors de l'enregistrement : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
@@ -188,18 +156,12 @@ public class GestionPersonnel extends javax.swing.JPanel {
         if (personnelSelectionne == null) {
             return;
         }
-
-        int confirmation = JOptionPane.showConfirmDialog(this,
-                "Êtes-vous sûr de vouloir supprimer '" + personnelSelectionne.getPrenom() + " " + personnelSelectionne.getNom() + "' ?",
-                "Confirmation de suppression",
-                JOptionPane.YES_NO_OPTION);
-
+        int confirmation = JOptionPane.showConfirmDialog(this, "Êtes-vous sûr de vouloir supprimer '" + personnelSelectionne.getPrenom() + " " + personnelSelectionne.getNom() + "' ?", "Confirmation", JOptionPane.YES_NO_OPTION);
         if (confirmation == JOptionPane.YES_OPTION) {
             try {
                 adminService.supprimerPersonnel(personnelSelectionne.getId());
                 JOptionPane.showMessageDialog(this, "Membre supprimé avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
-                actionNouveau();
-                chargerListePersonnel();
+                rafraichirDonnees();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Erreur lors de la suppression : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
             }
@@ -311,7 +273,7 @@ public class GestionPersonnel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void nouveauButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nouveauButtonActionPerformed
-        actionNouveau();
+        clearForm();
 // TODO add your handling code here:
     }//GEN-LAST:event_nouveauButtonActionPerformed
 
@@ -327,7 +289,7 @@ public class GestionPersonnel extends javax.swing.JPanel {
     private void listePersonnelValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_listePersonnelValueChanged
         if (!evt.getValueIsAdjusting()) {
             personnelSelectionne = listePersonnel.getSelectedValue();
-            mettreAJourChamps(personnelSelectionne);
+            displayPersonnelDetails(personnelSelectionne);
         }// TODO add your handling code here:
     }//GEN-LAST:event_listePersonnelValueChanged
 
@@ -354,5 +316,4 @@ public class GestionPersonnel extends javax.swing.JPanel {
     private javax.swing.JButton supprimerButton;
     // End of variables declaration//GEN-END:variables
 
-  
 }

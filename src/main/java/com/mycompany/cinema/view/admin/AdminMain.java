@@ -26,7 +26,7 @@ public class AdminMain extends javax.swing.JFrame {
         setupTabs();
     }
 
-    /**
+        /**
      * Crée et ajoute tous les panneaux de gestion aux onglets.
      */
     private void setupTabs() {
@@ -34,18 +34,16 @@ public class AdminMain extends javax.swing.JFrame {
         tabbedPane.addTab("Gestion Séances", new GestionSeances(this.adminService));
         tabbedPane.addTab("Gestion Salles", new GestionSalles(this.adminService));
         tabbedPane.addTab("Gestion Personnel", new GestionPersonnel(this.adminService));
+        tabbedPane.addTab("Gestion Planning", new GestionPlanning(this.adminService));
         tabbedPane.addTab("Gestion Tarifs", new GestionTarifs(this.adminService));
         tabbedPane.addTab("Gestion Snacking", new GestionProduitsSnack(this.adminService));
         tabbedPane.addTab("Rapports de Ventes", new RapportVentes(this.adminService));
 
-        // CORRECTION : Le ChangeListener est maintenant actif et complet.
-        // Il garantit que les données sont toujours à jour lorsque l'admin change d'onglet.
+        // CORRECTION : Le ChangeListener est maintenant syntaxiquement correct et complet.
         tabbedPane.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 Component selectedComponent = tabbedPane.getSelectedComponent();
 
-                // On vérifie le type du panneau sélectionné et on appelle sa méthode de rafraîchissement.
-                // Cela rend l'interface dynamique et fiable.
                 if (selectedComponent instanceof GestionFilms) {
                     ((GestionFilms) selectedComponent).rafraichirDonnees();
                 } else if (selectedComponent instanceof GestionSeances) {
@@ -59,8 +57,9 @@ public class AdminMain extends javax.swing.JFrame {
                 } else if (selectedComponent instanceof GestionProduitsSnack) {
                     ((GestionProduitsSnack) selectedComponent).rafraichirDonnees();
                 } else if (selectedComponent instanceof RapportVentes) {
-                    // Les rapports aussi doivent être rafraîchis pour refléter les dernières ventes.
                     ((RapportVentes) selectedComponent).loadAllTables();
+                } else if (selectedComponent instanceof GestionPlanning) {
+                    ((GestionPlanning) selectedComponent).rafraichirDonnees();
                 }
             }
         });
