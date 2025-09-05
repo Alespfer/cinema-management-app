@@ -6,6 +6,7 @@ import com.mycompany.cinema.dao.impl.*;
 import com.mycompany.cinema.service.AdminService;
 import com.mycompany.cinema.service.ClientService;
 import com.mycompany.cinema.util.IdManager;
+import com.mycompany.cinema.view.LignePanier;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -281,9 +282,8 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     public boolean aDejaEvalue(int clientId, int filmId) {
         return evaluationClientDAO.getEvaluationByClientAndFilm(clientId, filmId).isPresent();
     }
-    
-    // --- MÉTHODE À AJOUTER ---
 
+    // --- MÉTHODE À AJOUTER ---
     /**
      *
      * @param clientId
@@ -295,16 +295,31 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         // Le service délègue simplement l'ordre au DAO spécialisé.
         return evaluationClientDAO.getEvaluationByClientAndFilm(clientId, filmId);
     }
-    
 
     @Override
     public List<EvaluationClient> getEvaluationsByFilmId(int filmId) {
         return evaluationClientDAO.getEvaluationsByFilmId(filmId);
     }
 
-    @Override
-    public Reservation finaliserCommandeComplete(int clientId, int seanceId, List<Integer> siegeIds, int tarifId, Map<ProduitSnack, Integer> panierSnacks) throws Exception {
-        /* ... */ return null;
+    public Reservation finaliserCommandeComplete(int clientId, int seanceId, List<Integer> siegeIds, int tarifId, List<LignePanier> panierSnacks) throws Exception {
+        // Étape 1 : Effectuer la réservation des billets
+        Reservation reservation = effectuerReservation(clientId, seanceId, siegeIds, tarifId);
+
+        // Étape 2 : Si il y a des snacks, les enregistrer
+        if (panierSnacks != null && !panierSnacks.isEmpty()) {
+            // NOTE: On assume qu'une vente de snack au comptoir est faite par un employé par défaut (ID 3) sur la caisse principale (ID 1)
+            // C'est une simplification, en situation réelle on choisirait un employé/caisse disponible.
+            VenteSnack venteSnack = enregistrerVenteSnack(3, 1, panierSnacks, clientId);
+
+            // Étape 3 : Lier la vente de snacks à la réservation
+            venteSnack.setIdReservation(reservation.getId());
+
+            // Il faudrait idéalement une méthode venteSnackDAO.updateVente(venteSnack) ici,
+            // mais pour l'instant, la liaison est faite en mémoire.
+        }
+
+        // Étape 4 : Retourner la réservation, qui n'est plus nulle.
+        return reservation;
     }
 
     @Override
@@ -484,9 +499,28 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     public void supprimerProduitSnack(int pId) throws Exception {
         /* ... */ }
 
-    @Override
-    public VenteSnack enregistrerVenteSnack(int pId, int cId, Map<ProduitSnack, Integer> panier) throws Exception {
-        /* ... */ return null;
+    // AJOUTEZ CETTE NOUVELLE MÉTHODE DANS CinemaServiceImpl.java (version acceptant List<LignePanier>)
+    public VenteSnack enregistrerVenteSnack(int idPersonnel, int idCaisse, List<LignePanier> panier, Integer idClient) throws Exception {
+        int venteId = IdManager.getNextVenteSnackId();
+        VenteSnack nouvelleVente = new VenteSnack(venteId, LocalDateTime.now(), idPersonnel, idCaisse, idClient);
+        venteSnackDAO.addVenteSnack(nouvelleVente);
+
+        for (int i = 0; i < panier.size(); i++) {
+            LignePanier ligne = panier.get(i);
+            ProduitSnack produit = ligne.produit;
+            int quantite = ligne.quantite;
+
+            if (produit.getStock() < quantite) {
+                throw new Exception("Stock insuffisant pour " + produit.getNomProduit());
+            }
+
+            Comporte ligneDeVente = new Comporte(venteId, produit.getId(), quantite, produit.getPrixVente());
+            comporteDAO.addLigneVente(ligneDeVente);
+
+            produit.setStock(produit.getStock() - quantite);
+            produitSnackDAO.updateProduit(produit);
+        }
+        return nouvelleVente;
     }
 
     // --- SECTION REPORTING (CONFORME) ---
@@ -582,6 +616,12 @@ public class CinemaServiceImpl implements ClientService, AdminService {
 
     @Override
     public void ajouterSalle(Salle salle) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+
+    @Override
+    public VenteSnack enregistrerVenteSnack(int idPersonnel, int idCaisse, Map<ProduitSnack, Integer> panier) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

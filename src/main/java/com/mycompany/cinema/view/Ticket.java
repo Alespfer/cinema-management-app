@@ -1,23 +1,16 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
- */
 package com.mycompany.cinema.view;
 
 import com.mycompany.cinema.ProduitSnack;
 import com.mycompany.cinema.Siege;
-import java.awt.Frame;
-import java.io.IOException; // <--- LA VOICI ! C'EST LA CORRECTION.
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-
-// <-- AJOUT 1 : La classe de données est nécessaire pour que le reste du code fonctionne.
 class BilletInfo {
+
     String filmTitre;
     String seanceDateHeure;
     String salleNumero;
@@ -26,40 +19,80 @@ class BilletInfo {
     int reservationId;
     String tarifLibelle;
     String prixTotal;
-    Map<ProduitSnack, Integer> panierSnacks;
+    List<LignePanier> panierSnacks; // CORRECTION: Map remplacée par List<LignePanier>
 }
 
-
-/**
- *
- * @author albertoesperon
- */
 public class Ticket extends javax.swing.JDialog {
-    
+
     private final String contenuBillet;
 
-    /**
-     * CONSTRUCTEUR MODIFIÉ : Il accepte maintenant les données du billet.
-     */
-    public Ticket(java.awt.Frame parent, boolean modal, BilletInfo infos) { // <-- MODIFIÉ
-        
-        // On génère le texte du billet UNE SEULE FOIS.
+    public Ticket(java.awt.Frame parent, boolean modal, BilletInfo infos) {
+        super(parent, modal);
         this.contenuBillet = buildContenuBillet(infos);
-        
-        // On appelle le code généré par NetBeans pour créer les composants.
         initComponents();
-        
-        // Une fois les composants créés, on remplit la zone de texte.
         this.BilletsTextArea.setText(contenuBillet);
-        
-        // Configuration finale
         this.setTitle("Confirmation de Commande");
         this.setLocationRelativeTo(parent);
     }
 
-    Ticket(ClientMain aThis, BilletInfo infos) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private String buildContenuBillet(BilletInfo infos) {
+        // StringBuilder est plus efficace pour la concaténation de chaînes
+        StringBuilder sb = new StringBuilder();
+        sb.append("****************************************\n");
+        sb.append("*             PISE CINEMA              *\n");
+        sb.append("****************************************\n\n");
+        sb.append("RÉCAPITULATIF DE COMMANDE\n");
+        sb.append("----------------------------------------\n");
+        sb.append("Client: ").append(infos.clientNom).append("\n");
+        sb.append("Réservation N°: ").append(infos.reservationId).append("\n\n");
+        sb.append("--- BILLETS ---\n");
+        sb.append("Film: ").append(infos.filmTitre).append("\n");
+        sb.append("Séance: ").append(infos.seanceDateHeure).append("\n");
+        sb.append("Salle: ").append(infos.salleNumero).append("\n");
+        sb.append("Sièges Réservés:\n");
+
+        // Boucle FOR conforme à la Doctrine
+        for (int i = 0; i < infos.sieges.size(); i++) {
+            Siege siege = infos.sieges.get(i);
+            sb.append("  - Rangée ").append(siege.getNumeroRangee()).append(", Siège ").append(siege.getNumeroSiege()).append("\n");
+        }
+
+        sb.append("Tarif Appliqué: ").append(infos.tarifLibelle).append("\n");
+
+        if (infos.panierSnacks != null && !infos.panierSnacks.isEmpty()) {
+            sb.append("\n--- SNACKS ---\n");
+            // CORRECTION: Boucle sur List<LignePanier>
+            for (int i = 0; i < infos.panierSnacks.size(); i++) {
+                LignePanier ligne = infos.panierSnacks.get(i);
+                sb.append("  - ").append(ligne.quantite).append("x ").append(ligne.produit.getNomProduit()).append("\n");
+            }
+        }
+
+        sb.append("\n----------------------------------------\n");
+        sb.append("PRIX TOTAL: ").append(infos.prixTotal).append("\n");
+        sb.append("----------------------------------------\n\n");
+        sb.append("Merci de votre visite et bonne séance !\n");
+        return sb.toString();
     }
+
+    private void exportTxt() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Enregistrer la confirmation");
+        fileChooser.setSelectedFile(new File("Confirmation_Commande.txt"));
+
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            try {
+                FileWriter writer = new FileWriter(fileToSave);
+                writer.write(contenuBillet);
+                writer.close();
+                JOptionPane.showMessageDialog(this, "Confirmation exportée avec succès !", "Succès", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Erreur lors de l'exportation : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -120,59 +153,8 @@ public class Ticket extends javax.swing.JDialog {
 
     }//GEN-LAST:event_closeButtonActionPerformed
 
-            
-     // <-- AJOUT 3 : La méthode de construction du texte, déplacée au bon endroit.
-    /**
-     * Construit la chaîne de caractères formatée représentant le billet.
-     */
-    private String buildContenuBillet(BilletInfo infos) {
-        String contenu = "";
-        // ... (le contenu de votre méthode est parfait, pas de changement ici)
-        contenu += "****************************************\n";
-        contenu += "*             PISE CINEMA              *\n";
-        contenu += "****************************************\n\n";
-        contenu += "RÉCAPITULATIF DE COMMANDE\n";
-        contenu += "----------------------------------------\n";
-        contenu += "Client: " + infos.clientNom + "\n";
-        contenu += "Réservation N°: " + infos.reservationId + "\n\n";
-        contenu += "--- BILLETS ---\n";
-        contenu += "Film: " + infos.filmTitre + "\n";
-        contenu += "Séance: " + infos.seanceDateHeure + "\n";
-        contenu += "Salle: " + infos.salleNumero + "\n";
-        contenu += "Sièges Réservés:\n";
-        for (Siege siege : infos.sieges) {
-            contenu += "  - Rangée " + siege.getNumeroRangee() + ", Siège " + siege.getNumeroSiege() + "\n";
-        }
-        contenu += "Tarif Appliqué: " + infos.tarifLibelle + "\n";
-        if (infos.panierSnacks != null && !infos.panierSnacks.isEmpty()) {
-            contenu += "\n--- SNACKS ---\n";
-            for(Map.Entry<ProduitSnack, Integer> entry : infos.panierSnacks.entrySet()){
-                contenu += "  - " + entry.getValue() + "x " + entry.getKey().getNomProduit() + "\n";
-            }
-        }
-        contenu += "\n----------------------------------------\n";
-        contenu += "PRIX TOTAL: " + infos.prixTotal + "\n";
-        contenu += "----------------------------------------\n\n";
-        contenu += "Merci de votre visite et bonne séance !\n";
-        return contenu;
-    }
+    
 
-    // <-- AJOUT 4 : La logique d'exportation.
-    private void exportTxt() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Enregistrer la confirmation");
-        fileChooser.setSelectedFile(new File("Confirmation_Commande.txt"));
-        
-        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File fileToSave = fileChooser.getSelectedFile();
-            try (FileWriter writer = new FileWriter(fileToSave)) {
-                writer.write(contenuBillet);
-                JOptionPane.showMessageDialog(this, "Confirmation exportée avec succès !", "Succès", JOptionPane.INFORMATION_MESSAGE);
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "Erreur lors de l'exportation : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea BilletsTextArea;
     private javax.swing.JButton closeButton;

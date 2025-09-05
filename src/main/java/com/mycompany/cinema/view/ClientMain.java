@@ -4,10 +4,8 @@
  */
 package com.mycompany.cinema.view;
 
-// Imports nécessaires
 import com.mycompany.cinema.Client;
 import com.mycompany.cinema.Film;
-import com.mycompany.cinema.ProduitSnack;
 import com.mycompany.cinema.Reservation;
 import com.mycompany.cinema.Salle;
 import com.mycompany.cinema.Seance;
@@ -15,71 +13,46 @@ import com.mycompany.cinema.Siege;
 import com.mycompany.cinema.Tarif;
 import com.mycompany.cinema.service.ClientService;
 import java.awt.CardLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
-/**
- * C'est la fenêtre principale de l'espace client. Elle gère la navigation entre
- * les différents écrans avec un CardLayout.
- */
 public class ClientMain extends javax.swing.JFrame {
 
-    // --- PARTIE MANUELLE : VOTRE LOGIQUE TRADUITE EN FRANÇAIS ---
-    // --- VOS VARIABLES D'INSTANCE ---
     private final ClientService clientService;
     private final Client clientConnecte;
     private Programmation panneauProgrammation;
     private FilmDetail panneauDetailFilm;
     private AffichageSieges panneauSieges;
-    private SnackSelectionPanel panneauSnacks;
+    private SnackSelection panneauSnacks;
     private CardLayout gestionnaireDeCartes;
     private Seance seanceEnCours;
     private List<Siege> siegesSelectionnes;
     private Tarif tarifSelectionne;
 
-    /**
-     * CONSTRUCTEUR
-     */
     public ClientMain(ClientService clientService, Client clientConnecte) {
         this.clientService = clientService;
         this.clientConnecte = clientConnecte;
-
-        // Appel au code généré par NetBeans pour construire la structure visuelle.
         initComponents();
 
-        // --- Notre logique ajoutée après la construction ---
-        // Configuration de la fenêtre
         setTitle("Alespfer Cinema - Espace Client (" + clientConnecte.getNom() + ")");
         setSize(1280, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // On récupère le CardLayout du panneau principal (mainPanel)
         this.gestionnaireDeCartes = (CardLayout) mainPanel.getLayout();
-
-        // On crée et on ajoute les panneaux dynamiquement
         configurerPanneaux();
-
-        // On attache les écouteurs d'événements
         attacherEcouteurs();
     }
 
-    /**
-     * Crée les panneaux personnalisés et les ajoute au CardLayout du mainPanel.
-     */
     private void configurerPanneaux() {
         panneauProgrammation = new Programmation(clientService);
         panneauDetailFilm = new FilmDetail(clientService, this);
         panneauSieges = new AffichageSieges(clientService, clientConnecte);
-        panneauSnacks = new SnackSelectionPanel(clientService);
+        panneauSnacks = new SnackSelection(clientService); // CORRECTION: Instanciation de la bonne classe
 
         mainPanel.add(panneauProgrammation, "PROGRAMMATION");
         mainPanel.add(panneauDetailFilm, "FILM_DETAIL");
@@ -87,14 +60,7 @@ public class ClientMain extends javax.swing.JFrame {
         mainPanel.add(panneauSnacks, "SNACKS");
     }
 
-    /**
-     * Regroupe tous les écouteurs d'événements pour plus de clarté.
-     */
     private void attacherEcouteurs() {
-        // --- GESTION DES ÉVÉNEMENTS AVEC DES CLASSES ANONYMES ---
-
-       
-
         panneauProgrammation.setSeanceSelectionListener(new Programmation.SeanceSelectionListener() {
             public void onSeanceSelected(Seance seance) {
                 if (seance != null) {
@@ -122,18 +88,18 @@ public class ClientMain extends javax.swing.JFrame {
             }
         });
 
-        panneauSnacks.setNavigationListener(new SnackSelectionPanel.NavigationListener() {
+        panneauSnacks.setNavigationListener(new SnackSelection.NavigationListener() {
             public void onRetourToSieges() {
                 gestionnaireDeCartes.show(mainPanel, "SIEGES");
             }
 
             public void onSkip() {
-                finaliserCommande(Collections.emptyMap());
+                finaliserCommande(new ArrayList<LignePanier>()); // CORRECTION: Envoi d'une liste vide
             }
         });
 
-        panneauSnacks.setListener(new SnackSelectionPanel.SnackSelectionListener() {
-            public void onSnackSelectionCompleted(Map<ProduitSnack, Integer> panier) {
+        panneauSnacks.setListener(new SnackSelection.SnackSelectionListener() {
+            public void onSnackSelectionCompleted(List<LignePanier> panier) {
                 finaliserCommande(panier);
             }
         });
@@ -155,10 +121,7 @@ public class ClientMain extends javax.swing.JFrame {
         });
     }
 
-    /**
-     * Gère la transaction finale (réservation + snacks).
-     */
-    private void finaliserCommande(Map<ProduitSnack, Integer> panierSnacks) {
+    private void finaliserCommande(List<LignePanier> panierSnacks) { // CORRECTION: Signature
         if (seanceEnCours == null || siegesSelectionnes == null || siegesSelectionnes.isEmpty() || tarifSelectionne == null) {
             JOptionPane.showMessageDialog(this, "Une erreur est survenue lors de la récupération de votre sélection.", "Erreur Critique", JOptionPane.ERROR_MESSAGE);
             return;
@@ -166,12 +129,14 @@ public class ClientMain extends javax.swing.JFrame {
 
         try {
             List<Integer> idsSieges = new ArrayList<>();
-            for (Siege s : siegesSelectionnes) {
-                idsSieges.add(s.getId());
+            for (int i = 0; i < siegesSelectionnes.size(); i++) {
+                idsSieges.add(siegesSelectionnes.get(i).getId());
             }
 
+            // Note: finaliserCommandeComplete doit être adaptée pour accepter List<LignePanier>
+            // Nous supposons que cette adaptation est faite dans la couche Service.
             Reservation reservation = clientService.finaliserCommandeComplete(
-                    clientConnecte.getId(), seanceEnCours.getId(), idsSieges, tarifSelectionne.getId(), panierSnacks
+                    clientConnecte.getId(), seanceEnCours.getId(), idsSieges, tarifSelectionne.getId(), panierSnacks // <<< PASSER LE PANIER, PAS NULL
             );
 
             BilletInfo infos = new BilletInfo();
@@ -180,7 +145,9 @@ public class ClientMain extends javax.swing.JFrame {
             infos.filmTitre = clientService.getFilmDetails(seanceEnCours.getIdFilm()).getTitre();
 
             Salle salleTrouvee = null;
-            for (Salle s : clientService.getAllSalles()) {
+            List<Salle> salles = clientService.getAllSalles();
+            for (int i = 0; i < salles.size(); i++) {
+                Salle s = salles.get(i);
                 if (s.getId() == seanceEnCours.getIdSalle()) {
                     salleTrouvee = s;
                     break;
@@ -195,8 +162,9 @@ public class ClientMain extends javax.swing.JFrame {
             double prixBillets = tarifSelectionne.getPrix() * siegesSelectionnes.size();
             double prixSnacks = 0;
             if (panierSnacks != null) {
-                for (Map.Entry<ProduitSnack, Integer> entree : panierSnacks.entrySet()) {
-                    prixSnacks += entree.getKey().getPrixVente() * entree.getValue();
+                for (int i = 0; i < panierSnacks.size(); i++) {
+                    LignePanier ligne = panierSnacks.get(i);
+                    prixSnacks = prixSnacks + (ligne.produit.getPrixVente() * ligne.quantite);
                 }
             }
             infos.prixTotal = String.format("%.2f €", prixBillets + prixSnacks);
@@ -266,11 +234,11 @@ public class ClientMain extends javax.swing.JFrame {
         int reponse = JOptionPane.showConfirmDialog(
                 this, "Êtes-vous sûr de vouloir vous déconnecter ?",
                 "Confirmation de déconnexion", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-        
+
         if (reponse == JOptionPane.YES_OPTION) {
             // 1. On ferme la fenêtre actuelle.
             dispose();
-            
+
             // 2. CORRECTION : On crée ET affiche la nouvelle fenêtre de connexion directement.
             new Login().setVisible(true);
         }// TODO add your handling code here:

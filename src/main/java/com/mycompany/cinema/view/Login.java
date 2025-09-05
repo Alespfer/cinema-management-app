@@ -7,7 +7,7 @@ import com.mycompany.cinema.service.AdminService;
 import com.mycompany.cinema.service.ClientService;
 import com.mycompany.cinema.service.impl.CinemaServiceImpl;
 import com.mycompany.cinema.view.admin.AdminMain;
-import com.mycompany.cinema.view.admin.PointDeVenteFrame;
+import com.mycompany.cinema.view.admin.PointDeVente;
 import java.util.Optional;
 
 public class Login extends javax.swing.JFrame {
@@ -57,7 +57,7 @@ public class Login extends javax.swing.JFrame {
                 }
                 this.dispose();
                 if (role != null && role.getLibelle().equalsIgnoreCase("Vendeur")) {
-                    new PointDeVenteFrame(adminService, personnel).setVisible(true);
+                    new PointDeVente(adminService, personnel).setVisible(true);
                 } else {
                     new AdminMain(adminService, personnel).setVisible(true);
                 }

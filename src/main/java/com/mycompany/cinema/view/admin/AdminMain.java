@@ -41,9 +41,9 @@ public class AdminMain extends javax.swing.JFrame {
         tabbedPane.addTab("Gestion Séances", new GestionSeances(this.adminService)); // Reste à convertir
         tabbedPane.addTab("Gestion Salles", new GestionSalles(this.adminService));
         tabbedPane.addTab("Gestion Personnel", new GestionPersonnel(this.adminService));
-        tabbedPane.addTab("Gestion Tarifs", new GestionTarifsPanel(this.adminService)); // Reste à convertir
-        tabbedPane.addTab("Gestion Snacking", new GestionProduitsSnackPanel(this.adminService));
-        tabbedPane.addTab("Rapports de Ventes", new ReportingPanel(this.adminService));
+        tabbedPane.addTab("Gestion Tarifs", new GestionTarifs(this.adminService)); // Reste à convertir
+        tabbedPane.addTab("Gestion Snacking", new GestionProduitsSnack(this.adminService));
+        tabbedPane.addTab("Rapports de Ventes", new RapportVentes(this.adminService));
 
         // Ajout du listener pour le rafraîchissement automatique.
         tabbedPane.addChangeListener(new ChangeListener() {
