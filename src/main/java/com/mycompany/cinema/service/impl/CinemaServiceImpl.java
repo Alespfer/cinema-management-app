@@ -10,6 +10,7 @@ import com.mycompany.cinema.LignePanier;
 // CORRECTION : Les imports pour java.time sont réintroduits comme seule exception à la doctrine.
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -92,13 +93,26 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     // --- SECTION CLIENT ---
     @Override
     public Client creerCompteClient(String nom, String email, String motDePasse) throws Exception {
+        // --- Validation des paramètres d'entrée ---
+        if (nom == null || nom.trim().isEmpty()) {
+            throw new Exception("Le nom du client est obligatoire.");
+        }
+        if (email == null || !email.contains("@")) {
+            throw new Exception("L'adresse email est invalide.");
+        }
+        if (motDePasse == null || motDePasse.length() < 4) {
+            throw new Exception("Le mot de passe doit contenir au moins 4 caractères.");
+        }
+        // --- Fin de la validation ---
+
         for (Client c : clientDAO.getAllClients()) {
             if (c.getEmail().equalsIgnoreCase(email)) {
                 throw new Exception("Email déjà utilisé.");
             }
         }
-        // CORRECTION : Retour à l'utilisation de LocalDate.now() comme convenu.
+
         Client nouveauClient = new Client(IdManager.getNextClientId(), nom, email, motDePasse, LocalDate.now());
+        // Pas besoin de valider l'objet ici car on a validé les entrées.
         clientDAO.addClient(nouveauClient);
         return nouveauClient;
     }
@@ -150,6 +164,14 @@ public class CinemaServiceImpl implements ClientService, AdminService {
 
     @Override
     public void modifierCompteClient(Client client) throws Exception {
+        validerClient(client); // <<<--- APPEL DE VALIDATION AJOUTÉ
+
+        // Règle d'unicité pour l'email
+        for (Client c : clientDAO.getAllClients()) {
+            if (c.getId() != client.getId() && c.getEmail().equalsIgnoreCase(client.getEmail())) {
+                throw new Exception("Un autre compte utilise déjà cet email.");
+            }
+        }
         clientDAO.updateClient(client);
     }
 
@@ -374,7 +396,6 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return null;
     }
 
-
     @Override
     public List<Salle> getAllSalles() {
         return salleDAO.getAllSalles();
@@ -411,23 +432,121 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return null;
     }
 
+    /**
+     *
+     * @param film
+     * @throws Exception
+     */
     @Override
-    public void ajouterFilm(Film film) {
+    public void ajouterFilm(Film film) throws Exception {
+        // On valide l'objet Film AVANT de l'ajouter.
+        // Si le film n'est pas valide, une exception est lancée et l'exécution s'arrête ici.
+        validerFilm(film);
+
+        // Si la validation passe, on procède à l'ajout.
         filmDAO.addFilm(film);
     }
 
     @Override
-    public void mettreAJourFilm(Film film) {
+    public void mettreAJourFilm(Film film) throws Exception {
+        // On valide également l'objet AVANT de le mettre à jour.
+        validerFilm(film);
+
+        // Si la validation passe, on procède à la mise à jour.
         filmDAO.updateFilm(film);
     }
 
     @Override
     public void supprimerFilm(int filmId) throws Exception {
+        // --- VÉRIFICATION DE LA LOGIQUE MÉTIER ---
+        // On vérifie si le film n'est pas encore lié à une séance.
+        for (Seance seance : seanceDAO.getAllSeances()) {
+            if (seance.getIdFilm() == filmId) {
+                // Si on trouve une séance, on lève une exception et on arrête tout.
+                throw new Exception("Impossible de supprimer le film ID " + filmId
+                        + " car il est encore programmé pour la séance du "
+                        + seance.getDateHeureDebut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'à' HH:mm")) + ".");
+            }
+        }
+
+        // --- FIN DE LA VÉRIFICATION ---
+        // Si la boucle se termine sans trouver de séance, le film peut être supprimé.
         filmDAO.deleteFilm(filmId);
+    }
+
+    /**
+     * Méthode privée pour valider l'intégrité d'un objet Film. Vérifie que tous
+     * les champs obligatoires sont remplis.
+     *
+     * @param film L'objet Film à valider.
+     * @throws Exception si une des règles métier n'est pas respectée.
+     */
+    private void validerFilm(Film film) throws Exception {
+        if (film == null) {
+            throw new Exception("L'objet Film ne peut pas être null.");
+        }
+        if (film.getTitre() == null || film.getTitre().trim().isEmpty()) {
+            throw new Exception("Le titre du film est obligatoire.");
+        }
+        if (film.getSynopsis() == null || film.getSynopsis().trim().isEmpty()) {
+            throw new Exception("Le synopsis est obligatoire.");
+        }
+        if (film.getDureeMinutes() <= 0) {
+            throw new Exception("La durée du film doit être un nombre positif de minutes.");
+        }
+        if (film.getClassification() == null || film.getClassification().trim().isEmpty()) {
+            throw new Exception("La classification est obligatoire.");
+        }
+        if (film.getUrlAffiche() == null || film.getUrlAffiche().trim().isEmpty()) {
+            throw new Exception("L'URL de l'affiche est obligatoire.");
+        }
+        if (film.getGenres() == null || film.getGenres().isEmpty()) {
+            throw new Exception("Le film doit avoir au moins un genre.");
+        }
+        // La note de presse (notePresse) n'est pas vérifiée car elle est optionnelle.
     }
 
     @Override
     public void ajouterSeance(Seance seance) throws Exception {
+        // --- VÉRIFICATION DE LA LOGIQUE MÉTIER ---
+
+        // 1. Récupérer le film pour connaître sa durée.
+        Film film = filmDAO.getFilmById(seance.getIdFilm());
+        if (film == null) {
+            throw new Exception("Le film associé à cette séance n'existe pas.");
+        }
+
+        // 2. Calculer l'heure de début et de fin de la NOUVELLE séance.
+        LocalDateTime debutNouvelleSeance = seance.getDateHeureDebut();
+        LocalDateTime finNouvelleSeance = debutNouvelleSeance.plusMinutes(film.getDureeMinutes());
+
+        // 3. Récupérer toutes les séances existantes pour la même salle.
+        List<Seance> seancesExistantesDansLaSalle = new ArrayList<>();
+        for (Seance s : seanceDAO.getAllSeances()) {
+            if (s.getIdSalle() == seance.getIdSalle()) {
+                seancesExistantesDansLaSalle.add(s);
+            }
+        }
+
+        // 4. Parcourir chaque séance existante pour détecter un chevauchement.
+        for (Seance seanceExistante : seancesExistantesDansLaSalle) {
+            Film filmExistant = filmDAO.getFilmById(seanceExistante.getIdFilm());
+            if (filmExistant != null) {
+                LocalDateTime debutExistant = seanceExistante.getDateHeureDebut();
+                LocalDateTime finExistant = debutExistant.plusMinutes(filmExistant.getDureeMinutes());
+
+                // La condition de conflit : si la nouvelle séance commence avant la fin de l'ancienne
+                // ET se termine après le début de l'ancienne, il y a un conflit.
+                if (debutNouvelleSeance.isBefore(finExistant) && finNouvelleSeance.isAfter(debutExistant)) {
+                    throw new Exception("Conflit d'horaire : La salle " + seance.getIdSalle()
+                            + " est déjà occupée par le film '" + filmExistant.getTitre()
+                            + "' de " + debutExistant.toLocalTime() + " à " + finExistant.toLocalTime() + ".");
+                }
+            }
+        }
+
+        // --- FIN DE LA VÉRIFICATION ---
+        // Si aucune exception n'a été lancée, on peut ajouter la séance en toute sécurité.
         seanceDAO.addSeance(seance);
     }
 
@@ -438,6 +557,17 @@ public class CinemaServiceImpl implements ClientService, AdminService {
 
     @Override
     public void supprimerSeance(int seanceId) throws Exception {
+        // --- VÉRIFICATION DE LA LOGIQUE MÉTIER ---
+        // On vérifie si des billets ont déjà été vendus pour cette séance.
+        List<Billet> billetsPourLaSeance = billetDAO.getBilletsBySeanceId(seanceId);
+        if (!billetsPourLaSeance.isEmpty()) {
+            // S'il y a au moins un billet, on lève une exception.
+            throw new Exception("Impossible de supprimer la séance ID " + seanceId
+                    + " car " + billetsPourLaSeance.size() + " billet(s) ont déjà été vendus.");
+        }
+
+        // --- FIN DE LA VÉRIFICATION ---
+        // Si aucun billet n'a été vendu, on peut supprimer la séance.
         seanceDAO.deleteSeance(seanceId);
     }
 
@@ -447,22 +577,58 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     }
 
     @Override
-    public void modifierSalle(Salle salle) {
+    public void modifierSalle(Salle salle) throws Exception { // Assurez-vous d'ajouter "throws Exception"
+        validerSalle(salle); // <<<--- APPEL DE VALIDATION AJOUTÉ
+
+        // Règle d'unicité pour la modification
+        for (Salle s : salleDAO.getAllSalles()) {
+            if (s.getId() != salle.getId() && s.getNumero().equalsIgnoreCase(salle.getNumero())) {
+                throw new Exception("Une autre salle avec le numéro '" + salle.getNumero() + "' existe déjà.");
+            }
+        }
         salleDAO.updateSalle(salle);
     }
 
     @Override
     public void supprimerSalle(int salleId) throws Exception {
+        // --- VÉRIFICATION DE LA LOGIQUE MÉTIER ---
+        // On vérifie si la salle n'est pas encore utilisée dans une séance.
+        for (Seance seance : seanceDAO.getAllSeances()) {
+            if (seance.getIdSalle() == salleId) {
+                // Si une séance utilise cette salle, on bloque la suppression.
+                throw new Exception("Impossible de supprimer la salle ID " + salleId
+                        + " car elle est encore utilisée pour une séance le "
+                        + seance.getDateHeureDebut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'à' HH:mm")) + ".");
+            }
+        }
+
+        // --- FIN DE LA VÉRIFICATION ---
         salleDAO.deleteSalle(salleId);
     }
 
     @Override
     public void ajouterTarif(Tarif tarif) throws Exception {
+        validerTarif(tarif); // <<<--- APPEL DE VALIDATION AJOUTÉ
+
+        // Règle d'unicité
+        for (Tarif t : tarifDAO.getAllTarifs()) {
+            if (t.getLibelle().equalsIgnoreCase(tarif.getLibelle())) {
+                throw new Exception("Un tarif avec le libellé '" + tarif.getLibelle() + "' existe déjà.");
+            }
+        }
         tarifDAO.addTarif(tarif);
     }
 
     @Override
     public void modifierTarif(Tarif tarif) throws Exception {
+        validerTarif(tarif); // <<<--- APPEL DE VALIDATION AJOUTÉ
+
+        // Règle d'unicité pour la modification
+        for (Tarif t : tarifDAO.getAllTarifs()) {
+            if (t.getId() != tarif.getId() && t.getLibelle().equalsIgnoreCase(tarif.getLibelle())) {
+                throw new Exception("Un autre tarif avec le libellé '" + tarif.getLibelle() + "' existe déjà.");
+            }
+        }
         tarifDAO.updateTarif(tarif);
     }
 
@@ -519,13 +685,29 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     }
 
     @Override
-    public void ajouterProduitSnack(ProduitSnack p) throws Exception {
-        produitSnackDAO.addProduit(p);
+    public void ajouterProduitSnack(ProduitSnack produit) throws Exception {
+        validerProduitSnack(produit); // <<<--- APPEL DE VALIDATION AJOUTÉ
+
+        // Règle d'unicité (optionnelle mais recommandée)
+        for (ProduitSnack p : produitSnackDAO.getAllProduits()) {
+            if (p.getNomProduit().equalsIgnoreCase(produit.getNomProduit())) {
+                throw new Exception("Un produit avec le nom '" + produit.getNomProduit() + "' existe déjà.");
+            }
+        }
+        produitSnackDAO.addProduit(produit);
     }
 
     @Override
-    public void modifierProduitSnack(ProduitSnack p) throws Exception {
-        produitSnackDAO.updateProduit(p);
+    public void modifierProduitSnack(ProduitSnack produit) throws Exception {
+        validerProduitSnack(produit); // <<<--- APPEL DE VALIDATION AJOUTÉ
+
+        // Règle d'unicité pour la modification
+        for (ProduitSnack p : produitSnackDAO.getAllProduits()) {
+            if (p.getId() != produit.getId() && p.getNomProduit().equalsIgnoreCase(produit.getNomProduit())) {
+                throw new Exception("Un autre produit avec le nom '" + produit.getNomProduit() + "' existe déjà.");
+            }
+        }
+        produitSnackDAO.updateProduit(produit);
     }
 
     // CORRECTION : Implémentation de la méthode qui était manquante, avec vérification de dépendance.
@@ -657,7 +839,14 @@ public class CinemaServiceImpl implements ClientService, AdminService {
 
     // CORRECTION : Implémentation de la méthode requise par l'interface.
     @Override
-    public void ajouterSalle(Salle salle) {
+    public void ajouterSalle(Salle salle) throws Exception { // N'oubliez pas le "throws"
+        validerSalle(salle);
+        // Règle d'unicité (logique métier supplémentaire)
+        for (Salle s : salleDAO.getAllSalles()) {
+            if (s.getNumero().equalsIgnoreCase(salle.getNumero())) {
+                throw new Exception("Une salle avec le numéro '" + salle.getNumero() + "' existe déjà.");
+            }
+        }// Appel à la validation
         salleDAO.addSalle(salle);
     }
 
@@ -670,12 +859,8 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     public VenteSnack enregistrerVenteSnack(int idPersonnel, int idCaisse, Map<ProduitSnack, Integer> panier) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
-    
-    
-        // --- Gestion des Genres ---
-  
-    
+
+    // --- Gestion des Genres ---
     @Override
     public List<Genre> getAllGenres() {
         return genreDAO.getAllGenres();
@@ -703,6 +888,49 @@ public class CinemaServiceImpl implements ClientService, AdminService {
             }
         }
         genreDAO.deleteGenre(genreId);
+    }
+
+    // AJOUTEZ CES MÉTHODES DE VALIDATION DANS CinemaServiceImpl
+    private void validerClient(Client client) throws Exception {
+        if (client.getNom() == null || client.getNom().trim().isEmpty()) {
+            throw new Exception("Le nom du client est obligatoire.");
+        }
+        if (client.getEmail() == null || !client.getEmail().contains("@")) {
+            throw new Exception("L'adresse email est invalide.");
+        }
+        if (client.getMotDePasse() == null || client.getMotDePasse().length() < 4) {
+            throw new Exception("Le mot de passe doit contenir au moins 4 caractères.");
+        }
+    }
+
+    private void validerProduitSnack(ProduitSnack produit) throws Exception {
+        if (produit.getNomProduit() == null || produit.getNomProduit().trim().isEmpty()) {
+            throw new Exception("Le nom du produit est obligatoire.");
+        }
+        if (produit.getPrixVente() < 0) {
+            throw new Exception("Le prix du produit ne peut pas être négatif.");
+        }
+        if (produit.getStock() < 0) {
+            throw new Exception("Le stock du produit ne peut pas être négatif.");
+        }
+    }
+
+    private void validerSalle(Salle salle) throws Exception {
+        if (salle.getNumero() == null || salle.getNumero().trim().isEmpty()) {
+            throw new Exception("Le numéro/nom de la salle est obligatoire.");
+        }
+        if (salle.getCapacite() <= 0) {
+            throw new Exception("La capacité de la salle doit être positive.");
+        }
+    }
+
+    private void validerTarif(Tarif tarif) throws Exception {
+        if (tarif.getLibelle() == null || tarif.getLibelle().trim().isEmpty()) {
+            throw new Exception("Le libellé du tarif est obligatoire.");
+        }
+        if (tarif.getPrix() < 0) {
+            throw new Exception("Le prix du tarif ne peut pas être négatif.");
+        }
     }
 
 }
