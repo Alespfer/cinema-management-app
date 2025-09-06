@@ -253,6 +253,24 @@ public interface AdminService extends CinemaService {
      * C'est la méthode à appeler pour garantir la fraîcheur des données.
      */
     void rechargerTouteLaBase();
+    
+    
+    
+     // --- Gestion des Genres ---
+
+    /** Retourne tous les genres existants. */
+    List<Genre> getAllGenres();
+
+    /** Ajoute un nouveau genre. */
+    void ajouterGenre(Genre genre);
+
+    /** Met à jour un genre existant. */
+    void modifierGenre(Genre genre);
+
+    /** Supprime un genre.
+     * @throws Exception si le genre est encore référencé dans un film.
+     */
+    void supprimerGenre(int genreId) throws Exception;
 
 
 }

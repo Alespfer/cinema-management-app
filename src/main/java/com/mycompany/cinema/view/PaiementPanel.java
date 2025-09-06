@@ -72,54 +72,50 @@ public class PaiementPanel extends javax.swing.JPanel {
 
         jLabel1 = new javax.swing.JLabel();
         formPanel = new javax.swing.JPanel();
-        labelsPanel = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        fieldsPanel = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
         cardNumberField = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
         expiryDateField = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
         cvvField = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
         totalAmountLabel = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         retourButton = new javax.swing.JButton();
         payerButton = new javax.swing.JButton();
 
+        setLayout(new java.awt.BorderLayout());
+
         jLabel1.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Paiement et confirmation");
+        add(jLabel1, java.awt.BorderLayout.PAGE_START);
 
-        formPanel.setLayout(new java.awt.BorderLayout());
+        formPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Informations de paiement"));
+        formPanel.setPreferredSize(new java.awt.Dimension(400, 200));
+        formPanel.setLayout(new java.awt.GridLayout(0, 2, 0, 10));
 
-        labelsPanel.setLayout(new java.awt.GridLayout(4, 1, 0, 5));
+        jLabel6.setText("Numéro de carte : ");
+        formPanel.add(jLabel6);
+        formPanel.add(cardNumberField);
 
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel2.setText("Numéro de carte : ");
-        labelsPanel.add(jLabel2);
+        jLabel7.setText("Date d'expiration (MM/AA) :");
+        formPanel.add(jLabel7);
+        formPanel.add(expiryDateField);
 
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel3.setText("Date d'expiration (MM/AA) :");
-        labelsPanel.add(jLabel3);
+        jLabel8.setText("CVV : ");
+        formPanel.add(jLabel8);
+        formPanel.add(cvvField);
 
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel4.setText("CVV :");
-        labelsPanel.add(jLabel4);
+        jLabel2.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
+        jLabel2.setText("Montant total : ");
+        formPanel.add(jLabel2);
 
-        jLabel5.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
-        jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel5.setText("Montant total : ");
-        labelsPanel.add(jLabel5);
+        totalAmountLabel.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
+        totalAmountLabel.setText("00,00 €");
+        formPanel.add(totalAmountLabel);
 
-        formPanel.add(labelsPanel, java.awt.BorderLayout.LINE_START);
-
-        fieldsPanel.setLayout(new java.awt.GridLayout(4, 1, 0, 5));
-        fieldsPanel.add(cardNumberField);
-        fieldsPanel.add(expiryDateField);
-        fieldsPanel.add(cvvField);
-        fieldsPanel.add(totalAmountLabel);
-
-        formPanel.add(fieldsPanel, java.awt.BorderLayout.CENTER);
+        add(formPanel, java.awt.BorderLayout.CENTER);
 
         retourButton.setText("<< Retour aux snacks");
         retourButton.addActionListener(new java.awt.event.ActionListener() {
@@ -137,29 +133,7 @@ public class PaiementPanel extends javax.swing.JPanel {
         });
         jPanel1.add(payerButton);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(formPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(formPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
+        add(jPanel1, java.awt.BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
 
     private void retourButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_retourButtonActionPerformed
@@ -177,15 +151,13 @@ public class PaiementPanel extends javax.swing.JPanel {
     private javax.swing.JTextField cardNumberField;
     private javax.swing.JTextField cvvField;
     private javax.swing.JTextField expiryDateField;
-    private javax.swing.JPanel fieldsPanel;
     private javax.swing.JPanel formPanel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel labelsPanel;
     private javax.swing.JButton payerButton;
     private javax.swing.JButton retourButton;
     private javax.swing.JLabel totalAmountLabel;

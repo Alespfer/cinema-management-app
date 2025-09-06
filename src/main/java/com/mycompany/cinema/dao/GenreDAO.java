@@ -13,7 +13,9 @@ import java.util.Optional;
  */
 public interface GenreDAO {
     void addGenre(Genre genre);
-    Optional<Genre> getGenreById(int id);
+    Genre getGenreById(int id);
     List<Genre> getAllGenres();
+    void updateGenre(Genre genre);          // <-- AJOUT
+    void deleteGenre(int id);    
     void rechargerDonnees();
 }

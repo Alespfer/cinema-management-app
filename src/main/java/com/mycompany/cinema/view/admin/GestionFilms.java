@@ -1,48 +1,39 @@
 package com.mycompany.cinema.view.admin;
 
 import com.mycompany.cinema.Film;
+import com.mycompany.cinema.Genre;
 import com.mycompany.cinema.service.AdminService;
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
 
-/**
- * Panneau de gestion (CRUD) pour les Films. Version corrigée et entièrement
- * compatible avec NetBeans et la Doctrine.
- */
 public class GestionFilms extends javax.swing.JPanel {
 
-    // --- VARIABLES D'INSTANCE (LOGIQUE MÉTIER) ---
     private final AdminService adminService;
     private Film filmSelectionne;
-    // Le modèle est déclaré ici. Il sera initialisé DANS le code généré.
-    // Il n'est PAS déclaré dans la section "Variables declaration" de NetBeans.
     private DefaultListModel<Film> filmListModel;
+    private DefaultListModel<Genre> genreListModel;
 
-    /**
-     * CONSTRUCTEUR CONFORME ET CORRIGÉ
-     */
     public GestionFilms(AdminService adminService) {
-        // CORRECTION 1 : Assignation de la variable avec la bonne casse. C'EST LA CORRECTION LA PLUS IMPORTANTE.
         this.adminService = adminService;
-
-        // SÉQUENCE D'INITIALISATION STRATÉGIQUE :
         initComponents();
         filmListModel = new DefaultListModel<>();
-
         filmJList.setModel(filmListModel);
-
-        configureListRenderer(); // 2. Configure leur apparence.
-        loadFilms();             // 3. Charge les données dans les composants maintenant prêts et initialisés.
+        configureFilmListRenderer();
+        loadFilms();
+        genreListModel = new DefaultListModel<>();
+        genreJList.setModel(genreListModel);
+        genreJList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        configureGenreListRenderer();
+        loadAllGenres();
     }
 
-    /**
-     * Configure l'affichage des objets Film dans la JList.
-     */
-    private void configureListRenderer() {
+    private void configureFilmListRenderer() {
         filmJList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -55,34 +46,20 @@ public class GestionFilms extends javax.swing.JPanel {
         });
     }
 
-    /**
-     * Initialise le modèle de données de la liste et configure son affichage.
-     */
-    private void initModelAndRenderer() {
-        // CORRECTION CRITIQUE : Création de l'instance du modèle.
-        filmListModel = new DefaultListModel<>();
-        // Assignation de ce modèle à notre JList créée par l'éditeur.
-        filmJList.setModel(filmListModel);
-
-        // Configuration de l'affichage (Renderer)
-        filmJList.setCellRenderer(new DefaultListCellRenderer() {
+    private void configureGenreListRenderer() {
+        genreJList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof Film) {
-                    setText(((Film) value).getTitre());
+                if (value instanceof Genre) {
+                    setText(((Genre) value).getLibelle());
                 }
                 return c;
             }
         });
     }
 
-    /**
-     * Charge les films depuis le service.
-     */
     private void loadFilms() {
-        // Cette ligne ne plantera plus car initComponents() a été appelée avant,
-        // initialisant filmListModel.
         filmListModel.clear();
         try {
             List<Film> films = adminService.getFilmsAffiche();
@@ -90,15 +67,28 @@ public class GestionFilms extends javax.swing.JPanel {
                 filmListModel.addElement(film);
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erreur lors du chargement des films.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Erreur lors du chargement des films : " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void loadAllGenres() {
+        genreListModel.clear();
+        try {
+            List<Genre> genres = adminService.getAllGenres();
+            for (Genre genre : genres) {
+                genreListModel.addElement(genre);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erreur lors du chargement des genres : " + e.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     public void rafraichirDonnees() {
-        loadFilms(); // Suppose que 'chargerFilms()' est la méthode qui remplit ta JTable ou JList.
+        loadFilms();
+        loadAllGenres();
     }
 
-    // --- LE RESTE DES MÉTHODES MÉTIER EST INCHANGÉ ---
+    // MODIFICATION : Affichage de la note de presse
     private void displayFilmDetails(Film film) {
         if (film != null) {
             titreField.setText(film.getTitre());
@@ -106,12 +96,36 @@ public class GestionFilms extends javax.swing.JPanel {
             dureeField.setText(String.valueOf(film.getDureeMinutes()));
             classificationField.setText(film.getClassification());
             urlAfficheField.setText(film.getUrlAffiche());
+            // AJOUT : Afficher la note de presse avec un formatage propre
+            notePresseField.setText(String.format("%.1f", film.getNotePresse()).replace(',', '.'));
             supprimerButton.setEnabled(true);
+            selectFilmGenres(film);
         } else {
             clearForm();
         }
     }
 
+    private void selectFilmGenres(Film film) {
+        genreJList.clearSelection();
+        List<Genre> filmGenres = film.getGenres();
+        if (filmGenres == null || filmGenres.isEmpty()) {
+            return;
+        }
+        List<Integer> indicesToSelect = new ArrayList<>();
+        for (int i = 0; i < genreListModel.size(); i++) {
+            Genre genreFromList = genreListModel.getElementAt(i);
+            for (Genre filmGenre : filmGenres) {
+                if (genreFromList.getId() == filmGenre.getId()) {
+                    indicesToSelect.add(i);
+                    break;
+                }
+            }
+        }
+        int[] indices = indicesToSelect.stream().mapToInt(i -> i).toArray();
+        genreJList.setSelectedIndices(indices);
+    }
+
+    // MODIFICATION : Effacer le champ de la note
     private void clearForm() {
         filmJList.clearSelection();
         filmSelectionne = null;
@@ -120,17 +134,28 @@ public class GestionFilms extends javax.swing.JPanel {
         dureeField.setText("");
         classificationField.setText("");
         urlAfficheField.setText("");
+        notePresseField.setText(""); // AJOUT : Effacer le champ de la note
+        genreJList.clearSelection();
         supprimerButton.setEnabled(false);
     }
 
+    // MODIFICATION : Sauvegarde de la note de presse
     private void actionEnregistrer() {
         try {
-            if (filmSelectionne == null) { // Mode Création
-                // 1. OBTENIR UN NOUVEL ID UNIQUE
-                int nouvelId = com.mycompany.cinema.util.IdManager.getNextFilmId();
+            // Validation simple des champs numériques
+            if (dureeField.getText().trim().isEmpty() || notePresseField.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "La durée et la note de presse sont requises.", "Validation", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
-                // 2. CRÉER UN NOUVEL OBJET FILM AVEC CET ID
-                // Note : Nous utilisons le constructeur qui prend toutes les valeurs.
+            // Conversion de la note en double (gestion du point et de la virgule)
+            String noteTexte = notePresseField.getText().trim().replace(',', '.');
+            double notePresse = Double.parseDouble(noteTexte);
+
+            List<Genre> genresSelectionnes = genreJList.getSelectedValuesList();
+
+            if (filmSelectionne == null) { // Mode Création
+                int nouvelId = com.mycompany.cinema.util.IdManager.getNextFilmId();
                 Film nouveauFilm = new Film(
                         nouvelId,
                         titreField.getText(),
@@ -138,27 +163,29 @@ public class GestionFilms extends javax.swing.JPanel {
                         Integer.parseInt(dureeField.getText()),
                         classificationField.getText(),
                         urlAfficheField.getText(),
-                        0.0 // Note presse par défaut pour un nouveau film
+                        notePresse // MODIFICATION : Utilisation de la note saisie
                 );
-
-                // 3. ENVOYER AU SERVICE
+                nouveauFilm.setGenres(genresSelectionnes);
                 adminService.ajouterFilm(nouveauFilm);
                 JOptionPane.showMessageDialog(this, "Film ajouté avec succès !");
 
-            } else { // Mode Mise à jour (la logique reste inchangée)
+            } else { // Mode Mise à jour
                 filmSelectionne.setTitre(titreField.getText());
                 filmSelectionne.setSynopsis(synopsisField.getText());
                 filmSelectionne.setDureeMinutes(Integer.parseInt(dureeField.getText()));
                 filmSelectionne.setClassification(classificationField.getText());
                 filmSelectionne.setUrlAffiche(urlAfficheField.getText());
+                filmSelectionne.setNotePresse(notePresse); // AJOUT : Mise à jour de la note
+                filmSelectionne.setGenres(genresSelectionnes);
+
                 adminService.mettreAJourFilm(filmSelectionne);
                 JOptionPane.showMessageDialog(this, "Film mis à jour avec succès !");
             }
-            // Recharger la liste pour voir les changements
             loadFilms();
             clearForm();
         } catch (NumberFormatException nfe) {
-            JOptionPane.showMessageDialog(this, "La durée doit être un nombre entier.", "Erreur de format", JOptionPane.ERROR_MESSAGE);
+            // Message d'erreur amélioré pour couvrir les deux champs
+            JOptionPane.showMessageDialog(this, "La durée (entier) et la note de presse (nombre) doivent être des nombres valides.", "Erreur de format", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erreur lors de l'enregistrement : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
@@ -205,6 +232,11 @@ public class GestionFilms extends javax.swing.JPanel {
         dureeField = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         classificationField = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        genreJList = new javax.swing.JList<>();
+        jLabel7 = new javax.swing.JLabel();
+        notePresseField = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         urlAfficheField = new javax.swing.JTextField();
 
@@ -266,6 +298,22 @@ public class GestionFilms extends javax.swing.JPanel {
         detailsPanel.add(jLabel4);
         detailsPanel.add(classificationField);
 
+        jLabel6.setText("Genre : ");
+        detailsPanel.add(jLabel6);
+
+        genreJList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                genreJListValueChanged(evt);
+            }
+        });
+        jScrollPane2.setViewportView(genreJList);
+
+        detailsPanel.add(jScrollPane2);
+
+        jLabel7.setText("Note de la presse : ");
+        detailsPanel.add(jLabel7);
+        detailsPanel.add(notePresseField);
+
         jLabel5.setText("Url affiche :");
         detailsPanel.add(jLabel5);
         detailsPanel.add(urlAfficheField);
@@ -295,6 +343,10 @@ public class GestionFilms extends javax.swing.JPanel {
         }// TODO add your handling code here:
     }//GEN-LAST:event_filmJListValueChanged
 
+    private void genreJListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_genreJListValueChanged
+        // TODO add your handling code here:
+    }//GEN-LAST:event_genreJListValueChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel actionPanel;
@@ -303,12 +355,17 @@ public class GestionFilms extends javax.swing.JPanel {
     private javax.swing.JTextField dureeField;
     private javax.swing.JButton enregistrerButton;
     private javax.swing.JList<com.mycompany.cinema.Film> filmJList;
+    private javax.swing.JList<com.mycompany.cinema.Genre> genreJList;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextField notePresseField;
     private javax.swing.JButton nouveauButton;
     private javax.swing.JButton supprimerButton;
     private javax.swing.JTextField synopsisField;

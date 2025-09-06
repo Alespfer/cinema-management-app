@@ -31,6 +31,7 @@ public class AdminMain extends javax.swing.JFrame {
      */
     private void setupTabs() {
         tabbedPane.addTab("Gestion Films", new GestionFilms(this.adminService));
+        tabbedPane.addTab("Gestion Genres", new GestionGenres(this.adminService));
         tabbedPane.addTab("Gestion Séances", new GestionSeances(this.adminService));
         tabbedPane.addTab("Gestion Salles", new GestionSalles(this.adminService));
         tabbedPane.addTab("Gestion Personnel", new GestionPersonnel(this.adminService));
@@ -60,6 +61,8 @@ public class AdminMain extends javax.swing.JFrame {
                     ((RapportVentes) selectedComponent).loadAllTables();
                 } else if (selectedComponent instanceof GestionPlanning) {
                     ((GestionPlanning) selectedComponent).rafraichirDonnees();
+                } else if (selectedComponent instanceof GestionGenres){
+                    ((GestionGenres) selectedComponent).rafraichirDonnees();
                 }
             }
         });

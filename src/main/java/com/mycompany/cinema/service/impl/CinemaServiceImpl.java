@@ -374,10 +374,6 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         return null;
     }
 
-    @Override
-    public List<Genre> getAllGenres() {
-        return genreDAO.getAllGenres();
-    }
 
     @Override
     public List<Salle> getAllSalles() {
@@ -674,4 +670,39 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     public VenteSnack enregistrerVenteSnack(int idPersonnel, int idCaisse, Map<ProduitSnack, Integer> panier) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+    
+    
+    
+        // --- Gestion des Genres ---
+  
+    
+    @Override
+    public List<Genre> getAllGenres() {
+        return genreDAO.getAllGenres();
+    }
+
+    @Override
+    public void ajouterGenre(Genre genre) {
+        genreDAO.addGenre(genre);
+    }
+
+    @Override
+    public void modifierGenre(Genre genre) {
+        genreDAO.updateGenre(genre);
+    }
+
+    @Override
+    public void supprimerGenre(int genreId) throws Exception {
+        // Vérifier si le genre est encore lié à des films
+        for (Film f : filmDAO.getAllFilms()) {
+            for (Genre g : f.getGenres()) {
+                if (g.getId() == genreId) {
+                    throw new Exception("Impossible de supprimer le genre ID " + genreId
+                            + " car il est encore lié au film : " + f.getTitre());
+                }
+            }
+        }
+        genreDAO.deleteGenre(genreId);
+    }
+
 }
