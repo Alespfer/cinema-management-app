@@ -26,13 +26,13 @@ public class AdminMain extends javax.swing.JFrame {
         setupTabs();
     }
 
-        /**
+    /**
      * Crée et ajoute tous les panneaux de gestion aux onglets.
      */
     private void setupTabs() {
         tabbedPane.addTab("Gestion Films", new GestionFilms(this.adminService));
-        tabbedPane.addTab("Gestion Genres", new GestionGenres(this.adminService));
         tabbedPane.addTab("Gestion Séances", new GestionSeances(this.adminService));
+        tabbedPane.addTab("Gestion Genres", new GestionGenres(this.adminService));
         tabbedPane.addTab("Gestion Salles", new GestionSalles(this.adminService));
         tabbedPane.addTab("Gestion Personnel", new GestionPersonnel(this.adminService));
         tabbedPane.addTab("Gestion Planning", new GestionPlanning(this.adminService));
@@ -61,7 +61,7 @@ public class AdminMain extends javax.swing.JFrame {
                     ((RapportVentes) selectedComponent).loadAllTables();
                 } else if (selectedComponent instanceof GestionPlanning) {
                     ((GestionPlanning) selectedComponent).rafraichirDonnees();
-                } else if (selectedComponent instanceof GestionGenres){
+                } else if (selectedComponent instanceof GestionGenres) {
                     ((GestionGenres) selectedComponent).rafraichirDonnees();
                 }
             }
@@ -102,12 +102,15 @@ public class AdminMain extends javax.swing.JFrame {
 
     private void deconnexionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deconnexionButtonActionPerformed
         // Étape 1 : Demander confirmation à l'utilisateur.
-        int reponse = JOptionPane.showConfirmDialog(
-                this,
-                "Êtes-vous sûr de vouloir vous déconnecter ?",
+        Object[] options = {"Oui", "Non"};
+        int reponse = JOptionPane.showOptionDialog(
+                this, "Êtes-vous sûr de vouloir vous déconnecter ?",
                 "Confirmation de déconnexion",
                 JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
+                JOptionPane.QUESTION_MESSAGE,
+                null, // Pas d'icône personnalisée
+                options, // Nos boutons personnalisés
+                options[0] // Le bouton par défaut ("Oui")
         );
 
         // Étape 2 : Si l'utilisateur confirme...

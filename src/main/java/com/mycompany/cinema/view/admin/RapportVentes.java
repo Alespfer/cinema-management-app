@@ -59,7 +59,7 @@ public class RapportVentes extends javax.swing.JPanel {
             resultatCaBilletsLabel.setText("CA du jour (Billets) : " + CURRENCY_FORMATTER.format(caBillets));
             resultatCaSnacksLabel.setText("CA du jour (Snacks) : " + CURRENCY_FORMATTER.format(caSnacks));
         } catch (DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "Format de date invalide. Utilisez jj/MM/yyyy.", "Erreur de Format", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Format de date invalide. Utilisez JJ/MM/AAAA.", "Erreur de Format", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -194,7 +194,7 @@ public class RapportVentes extends javax.swing.JPanel {
 
         topPanel.setLayout(new java.awt.BorderLayout());
 
-        jLabel1.setText("Date (jj/MM/aaaa) : ");
+        jLabel1.setText("Date (JJ/MM/AAAA) : ");
 
         dateField.setColumns(10);
 
@@ -269,7 +269,7 @@ public class RapportVentes extends javax.swing.JPanel {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 469, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -298,7 +298,7 @@ public class RapportVentes extends javax.swing.JPanel {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 469, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(

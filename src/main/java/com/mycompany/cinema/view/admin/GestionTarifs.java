@@ -137,11 +137,17 @@ public class GestionTarifs extends javax.swing.JPanel {
             return;
         }
 
-        int confirmation = JOptionPane.showConfirmDialog(this,
+        Object[] options = {"Oui", "Non"};
+        int response = JOptionPane.showOptionDialog(
+                this,
                 "Êtes-vous sûr de vouloir supprimer le tarif '" + tarifSelectionne.getLibelle() + "' ?",
-                "Confirmation de suppression", JOptionPane.YES_NO_OPTION);
+                "Confirmation de suppression",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE,
+                null, options, options[0]
+        );
 
-        if (confirmation == JOptionPane.YES_OPTION) {
+        if (response == JOptionPane.YES_OPTION) {
             try {
                 adminService.supprimerTarif(tarifSelectionne.getId());
                 JOptionPane.showMessageDialog(this, "Tarif supprimé avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
@@ -197,6 +203,11 @@ public class GestionTarifs extends javax.swing.JPanel {
         formPanel.add(jLabel1);
 
         idField.setEditable(false);
+        idField.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                idFieldMouseClicked(evt);
+            }
+        });
         formPanel.add(idField);
 
         jLabel2.setText("Libellé : ");
@@ -257,6 +268,19 @@ public class GestionTarifs extends javax.swing.JPanel {
             mettreAJourChamps(tarifSelectionne);
         }// TODO add your handling code here:
     }//GEN-LAST:event_listeTarifsValueChanged
+
+    private void idFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_idFieldMouseClicked
+        // On vérifie que le champ est bien désactivé pour l'édition
+        if (!idField.isEditable()) {
+            JOptionPane.showMessageDialog(
+                    this, // Le panneau parent
+                    "L'identifiant (ID) est généré automatiquement par le système lors de la création d'un nouvel élément.\n"
+                    + "Il ne peut pas être modifié manuellement.", // Le message à afficher
+                    "Information", // Le titre de la fenêtre pop-up
+                    JOptionPane.INFORMATION_MESSAGE // Le type de message (icône "i")
+            );
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_idFieldMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

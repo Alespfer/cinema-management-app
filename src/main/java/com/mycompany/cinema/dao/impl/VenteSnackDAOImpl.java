@@ -38,7 +38,7 @@ public class VenteSnackDAOImpl extends GenericDAOImpl<VenteSnack> implements Ven
         }
         return null;
     }
-    
+
     // --- DEBUT DE L'AJOUT ---
     @Override
     public VenteSnack getVenteByReservationId(int reservationId) {
@@ -56,6 +56,18 @@ public class VenteSnackDAOImpl extends GenericDAOImpl<VenteSnack> implements Ven
     @Override
     public List<VenteSnack> getAllVentesSnack() {
         return new ArrayList<>(this.data);
+    }
+
+    // Ajoutez cette méthode complète à la classe VenteSnackDAOImpl
+    @Override
+    public void updateVenteSnack(VenteSnack updatedVente) {
+        for (int i = 0; i < this.data.size(); i++) {
+            if (this.data.get(i).getIdVente() == updatedVente.getIdVente()) {
+                this.data.set(i, updatedVente);
+                saveToFile();
+                return;
+            }
+        }
     }
 
     @Override

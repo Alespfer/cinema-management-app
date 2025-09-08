@@ -138,11 +138,14 @@ public final class DataInitializer {
         items.add(new Genre(4, "Historique"));
         items.add(new Genre(5, "Action"));
         items.add(new Genre(6, "Animation"));
+        items.add(new Genre(7, "Fantastique"));
         return items;
     }
 
     private static List<Caisse> createCaisses() {
         List<Caisse> items = new ArrayList<>();
+        // AJOUT : Caisse virtuelle pour les ventes en ligne. ID 0.
+        items.add(new Caisse(0, "Canal Web", "Vente en ligne"));
         items.add(new Caisse(1, "Comptoir Principal", "Hall d'entrée"));
         items.add(new Caisse(2, "Borne Automatique 1", "Hall d'entrée - Gauche"));
         return items;
@@ -176,6 +179,24 @@ public final class DataInitializer {
         items.add(new Film(1, "Dune: Part Two", "Paul Atreides s'unit à Chani et aux Fremen...", 166, "Tous publics", "dune.jpg", 4.8));
         items.add(new Film(2, "Oppenheimer", "Le portrait du physicien J. Robert Oppenheimer...", 180, "Tous publics avec avertissement", "oppenheimer.jpg", 4.5));
         items.add(new Film(3, "Spider-Man: Across the Spider-Verse", "Miles Morales est catapulté à travers le Multivers...", 140, "Tous publics", "spiderman.jpg", 4.9));
+        items.add(new Film(
+                4, // ID suivant disponible
+                "Le Seigneur des Anneaux : Le Retour du Roi",
+                "Les armées de Sauron ont assiégé Minas Tirith, la capitale de Gondor...",
+                201,
+                "Tous publics",
+                "seigneur_anneaux.jpg",
+                5.0
+        ));
+        items.add(new Film(
+                5, // ID suivant disponible
+                "PISE : Le Film",
+                "Le parcours initiatique d'un soldat du code face à une doctrine implacable.",
+                240,
+                "Interdit aux -18 ans", // Classification non apte à tous les publics
+                "christophe.jpg",
+                4.2
+        ));
         return items;
     }
 
@@ -186,6 +207,13 @@ public final class DataInitializer {
         films.get(1).getGenres().add(genres.get(3));
         films.get(2).getGenres().add(genres.get(5));
         films.get(2).getGenres().add(genres.get(4));
+        // --- LIAISON DES NOUVEAUX FILMS ---
+        // Le Retour du Roi (index 3 dans la liste 'films')
+        films.get(3).getGenres().add(genres.get(1)); // -> Aventure (index 1 dans 'genres')
+        films.get(3).getGenres().add(genres.get(6)); // -> Fantastique (index 6 dans 'genres')
+
+        // PISE : Le Film (index 4 dans la liste 'films')
+        films.get(4).getGenres().add(genres.get(2)); // -> Drame (index 2 dans 'genres')
     }
 
     private static List<Client> createClients() {
@@ -197,9 +225,59 @@ public final class DataInitializer {
 
     private static List<Personnel> createPersonnel(List<Role> roles) {
         List<Personnel> items = new ArrayList<>();
-        items.add(new Personnel(1, "Dupont", "Jean", "admin", roles.get(0).getId()));
-        items.add(new Personnel(2, "Garcia", "Maria", "proj", roles.get(1).getId()));
-        items.add(new Personnel(3, "Smith", "John", "vendeur", roles.get(2).getId()));
+        // On remplace le nom d'utilisateur par un email
+        items.add(new Personnel(0, "Système", "En Ligne", "system@cinema.local", "system_pass", roles.get(0).getId()));
+        items.add(new Personnel(1, "Dupont", "Jean", "admin@pisecinema.com", "admin", roles.get(0).getId()));
+        items.add(new Personnel(2, "Garcia", "Maria", "maria@pisecinema.com", "proj", roles.get(1).getId()));
+        items.add(new Personnel(3, "Smith", "John", "vendeur@pisecinema.com", "vendeur", roles.get(2).getId()));
+        return items;
+    }
+
+    // Dans le fichier DataInitializer.java
+    private static List<Planning> createPlannings(List<Personnel> personnel) {
+        List<Planning> items = new ArrayList<>();
+
+        // On récupère la date et l'heure actuelles comme point de référence
+        LocalDateTime maintenant = LocalDateTime.now();
+
+        // --- Planning pour Jean Dupont (Admin, ID 1) ---
+        // Il n'a pas de planning fixe car il est admin, on peut laisser vide ou ajouter
+        // un créneau de supervision pour l'exemple.
+        // Pas de planning ajouté pour lui pour l'instant.
+        // --- Planning pour Maria Garcia (Projectionniste, ID 2) ---
+        // On lui assigne des créneaux de projection pour les séances du soir
+        items.add(new Planning(
+                IdManager.getNextPlanningId(),
+                maintenant.withHour(17).withMinute(0).withSecond(0), // Aujourd'hui à 17h00
+                maintenant.withHour(23).withMinute(30).withSecond(0), // Aujourd'hui à 23h30
+                "Projection Salle 1 & 2",
+                personnel.get(1).getId() // ID de Maria
+        ));
+        items.add(new Planning(
+                IdManager.getNextPlanningId(),
+                maintenant.plusDays(1).withHour(17).withMinute(0).withSecond(0), // Demain à 17h00
+                maintenant.plusDays(1).withHour(23).withMinute(30).withSecond(0), // Demain à 23h30
+                "Projection Salle 3 (IMAX)",
+                personnel.get(1).getId()
+        ));
+
+        // --- Planning pour John Smith (Vendeur, ID 3) ---
+        // On lui assigne des créneaux de vente au comptoir
+        items.add(new Planning(
+                IdManager.getNextPlanningId(),
+                maintenant.withHour(18).withMinute(0).withSecond(0), // Aujourd'hui à 18h00
+                maintenant.withHour(22).withMinute(0).withSecond(0), // Aujourd'hui à 22h00
+                "Vente Snacking",
+                personnel.get(2).getId() // ID de John
+        ));
+        items.add(new Planning(
+                IdManager.getNextPlanningId(),
+                maintenant.plusDays(2).withHour(14).withMinute(0).withSecond(0), // Après-demain à 14h00
+                maintenant.plusDays(2).withHour(19).withMinute(0).withSecond(0), // Après-demain à 19h00
+                "Accueil & Billetterie",
+                personnel.get(2).getId()
+        ));
+
         return items;
     }
 
@@ -244,13 +322,6 @@ public final class DataInitializer {
         if (seances.size() >= 3) {
             items.add(new AffectationSeance(seances.get(2).getId(), personnel.get(1).getId()));
         }
-        return items;
-    }
-
-    private static List<Planning> createPlannings(List<Personnel> personnel) {
-        List<Planning> items = new ArrayList<>();
-        LocalDateTime now = LocalDateTime.now();
-        items.add(new Planning(1, now.withHour(18), now.withHour(23), "Vente Snacking", personnel.get(2).getId()));
         return items;
     }
 

@@ -1,16 +1,19 @@
 package com.mycompany.cinema.view.admin;
 
+import com.mycompany.cinema.LignePanier;
 import com.mycompany.cinema.Personnel;
 import com.mycompany.cinema.ProduitSnack;
 import com.mycompany.cinema.service.AdminService;
+import com.mycompany.cinema.view.Login;
 import java.awt.Component;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 
 public class PointDeVente extends javax.swing.JFrame {
@@ -19,18 +22,15 @@ public class PointDeVente extends javax.swing.JFrame {
     private final Personnel vendeurConnecte;
     private DefaultListModel<ProduitSnack> listModel;
     private DefaultTableModel tableModel;
-    private Map<ProduitSnack, Integer> panier;
+    private List<LignePanier> panier;
 
     public PointDeVente(AdminService adminService, Personnel vendeur) {
         this.adminService = adminService;
         this.vendeurConnecte = vendeur;
-
         initComponents();
         initModelsAndRenderers();
-
-        this.panier = new HashMap<>();
+        this.panier = new ArrayList<>();
         chargerProduits();
-
         setTitle("Point de Vente - " + vendeur.getPrenom() + " " + vendeur.getNom());
         setLocationRelativeTo(null);
     }
@@ -41,6 +41,7 @@ public class PointDeVente extends javax.swing.JFrame {
 
         String[] columnNames = {"Produit", "Quantité", "Prix Unitaire", "Sous-total"};
         tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
             public boolean isCellEditable(int r, int c) {
                 return false;
             }
@@ -48,6 +49,7 @@ public class PointDeVente extends javax.swing.JFrame {
         panierTable.setModel(tableModel);
 
         listeProduits.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof ProduitSnack) {
@@ -72,23 +74,46 @@ public class PointDeVente extends javax.swing.JFrame {
     }
 
     private void actionAjouter() {
-        ProduitSnack selected = listeProduits.getSelectedValue();
-        if (selected == null) {
+        ProduitSnack produitSelectionne = listeProduits.getSelectedValue();
+        if (produitSelectionne == null) {
             return;
         }
 
-        int quantiteActuelle = 0;
-        if (panier.containsKey(selected)) {
-            quantiteActuelle = panier.get(selected);
+        if (produitSelectionne.getStock() <= 0) {
+            JOptionPane.showMessageDialog(this, "Produit en rupture de stock.", "Stock épuisé", JOptionPane.WARNING_MESSAGE);
+            return;
         }
-        panier.put(selected, quantiteActuelle + 1);
 
+        for (LignePanier ligne : panier) {
+            if (ligne.getProduit().getId() == produitSelectionne.getId()) {
+                ligne.setQuantite(ligne.getQuantite() + 1);
+                mettreAJourPanier();
+                return;
+            }
+        }
+        panier.add(new LignePanier(produitSelectionne, 1));
+        mettreAJourPanier();
+    }
+
+    private void actionSupprimer() {
+        int selectedRow = panierTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Veuillez sélectionner une ligne dans le panier.", "Information", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        panier.remove(selectedRow);
         mettreAJourPanier();
     }
 
     private void actionAnnuler() {
-        panier.clear();
-        mettreAJourPanier();
+        if (panier.isEmpty()) {
+            return;
+        }
+        int response = JOptionPane.showConfirmDialog(this, "Voulez-vous vraiment annuler toute la vente ?", "Confirmation", JOptionPane.YES_NO_OPTION);
+        if (response == JOptionPane.YES_OPTION) {
+            panier.clear();
+            mettreAJourPanier();
+        }
     }
 
     private void actionValider() {
@@ -98,24 +123,28 @@ public class PointDeVente extends javax.swing.JFrame {
         try {
             adminService.enregistrerVenteSnack(vendeurConnecte.getId(), 1, panier);
             JOptionPane.showMessageDialog(this, "Vente enregistrée avec succès !", "Succès", JOptionPane.INFORMATION_MESSAGE);
-            actionAnnuler();
+            actionAnnulerApresVente();
             chargerProduits();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erreur: " + ex.getMessage(), "Erreur de Vente", JOptionPane.ERROR_MESSAGE);
         }
     }
 
+    // Version silencieuse d'actionAnnuler pour après une vente réussie
+    private void actionAnnulerApresVente() {
+        panier.clear();
+        mettreAJourPanier();
+    }
+
     private void mettreAJourPanier() {
         tableModel.setRowCount(0);
         double totalGeneral = 0.0;
-
-        for (ProduitSnack p : panier.keySet()) {
-            Integer qte = panier.get(p);
-            double sousTotal = p.getPrixVente() * qte;
+        for (LignePanier ligne : panier) {
+            double sousTotal = ligne.getProduit().getPrixVente() * ligne.getQuantite();
             tableModel.addRow(new Object[]{
-                p.getNomProduit(),
-                qte,
-                String.format("%.2f €", p.getPrixVente()),
+                ligne.getProduit().getNomProduit(),
+                ligne.getQuantite(),
+                String.format("%.2f €", ligne.getProduit().getPrixVente()),
                 String.format("%.2f €", sousTotal)
             });
             totalGeneral += sousTotal;
@@ -145,6 +174,8 @@ public class PointDeVente extends javax.swing.JFrame {
         buttonsPanel = new javax.swing.JPanel();
         annulerButton = new javax.swing.JButton();
         validerButton = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -166,7 +197,7 @@ public class PointDeVente extends javax.swing.JFrame {
             panneauGaucheLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panneauGaucheLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(panneauGaucheLayout.createSequentialGroup()
                 .addGap(77, 77, 77)
@@ -177,7 +208,7 @@ public class PointDeVente extends javax.swing.JFrame {
             panneauGaucheLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panneauGaucheLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 419, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 217, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(ajouterButton)
                 .addContainerGap())
@@ -233,6 +264,19 @@ public class PointDeVente extends javax.swing.JFrame {
 
         getContentPane().add(jSplitPane1, java.awt.BorderLayout.CENTER);
 
+        jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+
+        jButton1.setText("Déconnexion");
+        jButton1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButton1);
+
+        getContentPane().add(jPanel1, java.awt.BorderLayout.PAGE_START);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -248,12 +292,37 @@ public class PointDeVente extends javax.swing.JFrame {
         actionValider();// TODO add your handling code here:
     }//GEN-LAST:event_validerButtonActionPerformed
 
-  
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // 1. Définir les options des boutons en français
+        Object[] options = {"Oui", "Non"};
+
+        // 2. Créer et afficher la boîte de dialogue personnalisée
+        int reponse = JOptionPane.showOptionDialog(
+                this, // Composant parent
+                "Êtes-vous sûr de vouloir vous déconnecter ?", // Message
+                "Confirmation de déconnexion", // Titre
+                JOptionPane.YES_NO_OPTION, // Type d'option (pour l'icône)
+                JOptionPane.QUESTION_MESSAGE, // Type de message (icône '?')
+                null, // Icône personnalisée (aucune ici)
+                options, // Le tableau avec nos textes de boutons
+                options[0] // Le bouton par défaut 
+        );
+
+        // 3. Traiter la réponse
+        // L'option "Oui" correspond à l'index 0, "Non" à l'index 1
+        if (reponse == JOptionPane.YES_OPTION) { // ou (reponse == 0)
+            this.dispose();
+            new Login().setVisible(true);
+        }// TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton ajouterButton;
     private javax.swing.JButton annulerButton;
     private javax.swing.JPanel buttonsPanel;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;

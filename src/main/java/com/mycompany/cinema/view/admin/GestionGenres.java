@@ -107,9 +107,15 @@ public class GestionGenres extends javax.swing.JPanel {
             return;
         }
 
-        int response = JOptionPane.showConfirmDialog(this,
-                "Êtes-vous sûr de vouloir supprimer ce genre ?", "Confirmation",
-                JOptionPane.YES_NO_OPTION);
+        Object[] options = {"Oui", "Non"};
+        int response = JOptionPane.showOptionDialog(
+                this,
+                "Êtes-vous sûr de vouloir supprimer le genre '" + genreSelectionne.getLibelle() + "' ?",
+                "Confirmation de suppression",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null, options, options[0]
+        );
 
         if (response == JOptionPane.YES_OPTION) {
             try {
@@ -147,6 +153,7 @@ public class GestionGenres extends javax.swing.JPanel {
 
         setLayout(new java.awt.BorderLayout());
 
+        genreJList.setPreferredSize(new java.awt.Dimension(300, 0));
         genreJList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
                 genreJListValueChanged(evt);
@@ -198,9 +205,9 @@ public class GestionGenres extends javax.swing.JPanel {
 
         idField.setEditable(false);
         idField.setPreferredSize(new java.awt.Dimension(250, 23));
-        idField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                idFieldActionPerformed(evt);
+        idField.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                idFieldMouseClicked(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -238,16 +245,25 @@ public class GestionGenres extends javax.swing.JPanel {
         actionSupprimer();// TODO add your handling code here:
     }//GEN-LAST:event_supprimerButtonActionPerformed
 
-    private void idFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_idFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_idFieldActionPerformed
-
     private void genreJListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_genreJListValueChanged
         if (!evt.getValueIsAdjusting()) {
             genreSelectionne = genreJList.getSelectedValue();
             displayGenreDetails(genreSelectionne);
         }// TODO add your handling code here:
     }//GEN-LAST:event_genreJListValueChanged
+
+    private void idFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_idFieldMouseClicked
+        // On vérifie que le champ est bien désactivé pour l'édition
+        if (!idField.isEditable()) {
+            JOptionPane.showMessageDialog(
+                    this, // Le panneau parent
+                    "L'identifiant (ID) est généré automatiquement par le système lors de la création d'un nouvel élément.\n"
+                    + "Il ne peut pas être modifié manuellement.", // Le message à afficher
+                    "Information", // Le titre de la fenêtre pop-up
+                    JOptionPane.INFORMATION_MESSAGE // Le type de message (icône "i")
+            );
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_idFieldMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

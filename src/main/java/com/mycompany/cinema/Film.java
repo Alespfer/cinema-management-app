@@ -3,6 +3,7 @@ package com.mycompany.cinema;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * C'est l'un des objets les plus importants pour l'interface graphique. Il
@@ -129,5 +130,19 @@ public class Film implements Serializable {
         }
         Film film = (Film) obj;
         return idFilm == film.idFilm;
+    }
+
+    /**
+     * Calcule le hash code basé sur l'identifiant du film. Cette méthode est
+     * essentielle pour garantir le bon fonctionnement du film dans les
+     * collections de type HashSet ou comme clé de HashMap. Elle respecte le
+     * contrat : si deux films sont égaux, ils ont le même hash code.
+     */
+    @Override
+    public int hashCode() {
+        // La méthode statique Objects.hash est une manière simple et robuste
+        // de générer un hash code à partir d'un ou plusieurs champs.
+        // (cf. doctrine p. 182)
+        return Objects.hash(idFilm);
     }
 }

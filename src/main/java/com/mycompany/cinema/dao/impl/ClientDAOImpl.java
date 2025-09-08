@@ -10,11 +10,11 @@ import java.util.Optional;
 /**
  * Implémentation concrète pour gérer la sauvegarde des comptes clients.
  * S'occupe du fichier "clients.dat".
- * 
- * Pour le développeur de l'interface graphique : c'est votre outil principal pour
- * interagir avec les données des utilisateurs. Chaque action dans `RegisterDialog`,
- * `LoginFrame`, et `InfosPersonnellesPanel` finira par appeler (via le service)
- * une des méthodes de cette classe.
+ *
+ * Pour le développeur de l'interface graphique : c'est votre outil principal
+ * pour interagir avec les données des utilisateurs. Chaque action dans
+ * `RegisterDialog`, `LoginFrame`, et `InfosPersonnellesPanel` finira par
+ * appeler (via le service) une des méthodes de cette classe.
  */
 public class ClientDAOImpl extends GenericDAOImpl<Client> implements ClientDAO {
 
@@ -36,6 +36,16 @@ public class ClientDAOImpl extends GenericDAOImpl<Client> implements ClientDAO {
             }
         }
         return null;
+    }
+
+    @Override
+    public Client getClientByEmail(String email) {
+        for (Client c : this.data) {   // this.data est ta liste en mémoire (héritée de GenericDAOImpl)
+            if (c.getEmail().equalsIgnoreCase(email)) {
+                return c;
+            }
+        }
+        return null; // pas trouvé
     }
 
     @Override

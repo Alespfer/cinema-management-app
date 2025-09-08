@@ -37,7 +37,7 @@ public class ClientMain extends javax.swing.JFrame {
         this.clientConnecte = clientConnecte;
         initComponents();
 
-        setTitle("Alespfer Cinema - Espace Client (" + clientConnecte.getNom() + ")");
+        setTitle("Cinema - PISE 2025 (" + clientConnecte.getNom() + ")");
         setSize(1280, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -156,12 +156,13 @@ public class ClientMain extends javax.swing.JFrame {
         double prixBillets = tarifSelectionne.getPrix() * siegesSelectionnes.size();
         double prixSnacks = 0;
         for (LignePanier ligne : panierSnacksEnCours) {
-            prixSnacks += ligne.produit.getPrixVente() * ligne.quantite;
+            prixSnacks += ligne.getProduit().getPrixVente() * ligne.getQuantite();
         }
         double montantTotal = prixBillets + prixSnacks;
 
         // Passer le montant au panneau de paiement et l'afficher
         panneauPaiement.setMontantTotal(montantTotal);
+        panneauPaiement.reset(); // On vide les champs avant d'afficher
         gestionnaireDeCartes.show(mainPanel, "PAIEMENT");
     }
 
@@ -172,8 +173,9 @@ public class ClientMain extends javax.swing.JFrame {
         }
         try {
             List<Integer> idsSieges = new ArrayList<>();
-            for (int i = 0; i < siegesSelectionnes.size(); i++) {
-                idsSieges.add(siegesSelectionnes.get(i).getId());
+// "Pour chaque Siege 'siege' dans la liste siegesSelectionnes..."
+            for (Siege siege : siegesSelectionnes) {
+                idsSieges.add(siege.getId());
             }
 
             Reservation reservation = clientService.finaliserCommandeComplete(
@@ -187,11 +189,11 @@ public class ClientMain extends javax.swing.JFrame {
 
             Salle salleTrouvee = null;
             List<Salle> salles = clientService.getAllSalles();
-            for (int i = 0; i < salles.size(); i++) {
-                Salle s = salles.get(i);
+// "Pour chaque Salle 's' dans la liste salles..."
+            for (Salle s : salles) {
                 if (s.getId() == seanceEnCours.getIdSalle()) {
                     salleTrouvee = s;
-                    break;
+                    break; // Le break est parfaitement valide dans une boucle for-each.
                 }
             }
             infos.salleNumero = (salleTrouvee != null) ? salleTrouvee.getNumero() : "Salle " + seanceEnCours.getIdSalle();
@@ -203,9 +205,10 @@ public class ClientMain extends javax.swing.JFrame {
             double prixBillets = tarifSelectionne.getPrix() * siegesSelectionnes.size();
             double prixSnacks = 0;
             if (panierSnacks != null) {
-                for (int i = 0; i < panierSnacks.size(); i++) {
-                    LignePanier ligne = panierSnacks.get(i);
-                    prixSnacks = prixSnacks + (ligne.produit.getPrixVente() * ligne.quantite);
+                // "Pour chaque LignePanier 'ligne' dans le panierSnacks..."
+                for (LignePanier ligne : panierSnacks) {
+                    // Nous utilisons les getters, conformément à notre correction sur l'encapsulation de LignePanier
+                    prixSnacks = prixSnacks + (ligne.getProduit().getPrixVente() * ligne.getQuantite());
                 }
             }
             infos.prixTotal = String.format("%.2f €", prixBillets + prixSnacks);
@@ -271,9 +274,16 @@ public class ClientMain extends javax.swing.JFrame {
     }//GEN-LAST:event_monCompteButtonActionPerformed
 
     private void deconnexionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deconnexionButtonActionPerformed
-        int reponse = JOptionPane.showConfirmDialog(
+        Object[] options = {"Oui", "Non"};
+        int reponse = JOptionPane.showOptionDialog(
                 this, "Êtes-vous sûr de vouloir vous déconnecter ?",
-                "Confirmation de déconnexion", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                "Confirmation de déconnexion",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null, // Pas d'icône personnalisée
+                options, // Nos boutons personnalisés
+                options[0] // Le bouton par défaut ("Oui")
+        );
 
         if (reponse == JOptionPane.YES_OPTION) {
             // 1. On ferme la fenêtre actuelle.

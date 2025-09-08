@@ -85,6 +85,8 @@ public class GestionPlanning extends javax.swing.JPanel {
         }
     }
 
+    // Dans la classe GestionPlanning
+    // Dans la classe GestionPlanning
     private void actionAjouterCreneau() {
         Personnel selection = (Personnel) personnelComboBox.getSelectedItem();
         if (selection == null) {
@@ -92,32 +94,140 @@ public class GestionPlanning extends javax.swing.JPanel {
             return;
         }
 
-        String dateDebutStr = JOptionPane.showInputDialog(this, "Date de début (jj/MM/aaaa HH:mm) :");
-        if (dateDebutStr == null) {
-            return;
-        }
-        String dateFinStr = JOptionPane.showInputDialog(this, "Date de fin (jj/MM/aaaa HH:mm) :");
-        if (dateFinStr == null) {
-            return;
-        }
-        String poste = JOptionPane.showInputDialog(this, "Poste occupé :");
-        if (poste == null || poste.trim().isEmpty()) {
-            return;
+        LocalDateTime debut = null;
+        LocalDateTime fin = null;
+        String poste = null;
+
+        // --- BOUCLE DE VALIDATION POUR LA DATE DE DÉBUT ---
+        while (true) {
+            String dateDebutStr = JOptionPane.showInputDialog(
+                    this,
+                    "Entrez la date de début du service (ex: " + LocalDateTime.now().format(FORMATTER) + ")",
+                    "Ajout - Début du créneau",
+                    JOptionPane.QUESTION_MESSAGE
+            );
+            if (dateDebutStr == null) {
+                return;
+            }
+
+            try {
+                debut = LocalDateTime.parse(dateDebutStr.trim(), FORMATTER);
+
+                // --- NOUVELLE VÉRIFICATION ---
+                // On vérifie que la date de début n'est pas dans le passé.
+                if (!estDansLePresentOuFutur(debut, LocalDateTime.now())) {
+                    JOptionPane.showMessageDialog(this, "La date de début ne peut pas être dans le passé.", "Erreur de logique", JOptionPane.ERROR_MESSAGE);
+                    continue; // La date est passée, on redemande la saisie.
+                }
+                // --- FIN DE LA NOUVELLE VÉRIFICATION ---
+
+                break; // La date est valide et future, on sort de la boucle.
+            } catch (DateTimeParseException ex) {
+                JOptionPane.showMessageDialog(this, "Format de date invalide. Utilisez bien jj/MM/aaaa HH:mm.", "Erreur de format", JOptionPane.ERROR_MESSAGE);
+            }
         }
 
+        // --- BOUCLE DE VALIDATION POUR LA DATE DE FIN (avec isAfter, conforme à la doctrine sur ce point) ---
+        while (true) {
+            String dateFinStr = JOptionPane.showInputDialog(
+                    this,
+                    "Entrez la date de fin du service (ex: " + debut.plusHours(5).format(FORMATTER) + ")",
+                    "Ajout - Fin du créneau",
+                    JOptionPane.QUESTION_MESSAGE
+            );
+            if (dateFinStr == null) {
+                return;
+            }
+
+            try {
+                fin = LocalDateTime.parse(dateFinStr.trim(), FORMATTER);
+                // La méthode isAfter() de LocalDateTime est acceptable ici car elle fait partie de l'API standard java.time
+                // que nous avons autorisée comme exception à la doctrine de base.
+                if (!fin.isAfter(debut)) {
+                    JOptionPane.showMessageDialog(this, "La date de fin doit être strictement postérieure à la date de début.", "Erreur de logique", JOptionPane.ERROR_MESSAGE);
+                    continue;
+                }
+                break;
+            } catch (DateTimeParseException ex) {
+                JOptionPane.showMessageDialog(this, "Format de date invalide. Utilisez bien jj/MM/aaaa HH:mm.", "Erreur de format", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        // --- BOUCLE DE VALIDATION POUR LE POSTE ---
+        while (true) {
+            poste = JOptionPane.showInputDialog(
+                    this,
+                    "Entrez le nom du poste occupé (ex: Vente, Projection...)",
+                    "Ajout - Poste",
+                    JOptionPane.QUESTION_MESSAGE
+            );
+            if (poste == null) {
+                return;
+            }
+
+            if (poste.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Le nom du poste ne peut pas être vide.", "Erreur de saisie", JOptionPane.WARNING_MESSAGE);
+            } else {
+                break;
+            }
+        }
+
+        // --- ENREGISTREMENT FINAL ---
         try {
-            LocalDateTime debut = LocalDateTime.parse(dateDebutStr, FORMATTER);
-            LocalDateTime fin = LocalDateTime.parse(dateFinStr, FORMATTER);
-
-            adminService.creerPlanning(selection.getId(), debut, fin, poste);
-            JOptionPane.showMessageDialog(this, "Créneau ajouté avec succès !");
+            adminService.creerPlanning(selection.getId(), debut, fin, poste.trim());
+            JOptionPane.showMessageDialog(this, "Créneau ajouté avec succès pour " + selection.getPrenom() + " !", "Succès", JOptionPane.INFORMATION_MESSAGE);
             chargerPlanningPourPersonnelSelectionne();
-
-        } catch (DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "Format de date invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erreur lors de l'ajout : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    /**
+     * Compare deux instants temporels pour savoir si le premier est après OU au
+     * même moment que le second.
+     *
+     * @param dateTimeATester L'instant à tester.
+     * @param maintenant L'instant de référence.
+     * @return true si dateTimeATester est dans le futur ou exactement
+     * maintenant, sinon false.
+     */
+    private boolean estDansLePresentOuFutur(LocalDateTime dateTimeATester, LocalDateTime maintenant) {
+        if (dateTimeATester.getYear() > maintenant.getYear()) {
+            return true;
+        }
+        if (dateTimeATester.getYear() < maintenant.getYear()) {
+            return false;
+        }
+
+        if (dateTimeATester.getMonthValue() > maintenant.getMonthValue()) {
+            return true;
+        }
+        if (dateTimeATester.getMonthValue() < maintenant.getMonthValue()) {
+            return false;
+        }
+
+        if (dateTimeATester.getDayOfMonth() > maintenant.getDayOfMonth()) {
+            return true;
+        }
+        if (dateTimeATester.getDayOfMonth() < maintenant.getDayOfMonth()) {
+            return false;
+        }
+
+        if (dateTimeATester.getHour() > maintenant.getHour()) {
+            return true;
+        }
+        if (dateTimeATester.getHour() < maintenant.getHour()) {
+            return false;
+        }
+
+        if (dateTimeATester.getMinute() > maintenant.getMinute()) {
+            return true;
+        }
+        if (dateTimeATester.getMinute() < maintenant.getMinute()) {
+            return false;
+        }
+
+        return true; // Les instants sont égaux à la minute près.
     }
 
     /**

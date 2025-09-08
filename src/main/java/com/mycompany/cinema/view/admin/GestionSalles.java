@@ -82,47 +82,83 @@ public class GestionSalles extends javax.swing.JPanel {
      * Gère la création ou la modification d'une salle. VERSION CORRIGÉE AVEC ID
      * MANAGER.
      */
+    // Dans GestionSalles.java
     private void actionEnregistrer() {
-        String numero = numeroField.getText();
-        if (numero == null || numero.trim().isEmpty()) {
+        String numero = numeroField.getText().trim();
+        if (numero.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Le numéro de la salle ne peut pas être vide.", "Validation", JOptionPane.WARNING_MESSAGE);
             return;
         }
+
         int capacite;
         try {
-            capacite = Integer.parseInt(capaciteField.getText());
+            capacite = Integer.parseInt(capaciteField.getText().trim());
             if (capacite <= 0) {
-                throw new NumberFormatException();
+                JOptionPane.showMessageDialog(this, "La capacité doit être un nombre entier positif.", "Validation", JOptionPane.WARNING_MESSAGE);
+                return;
             }
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "La capacité doit être un nombre entier positif.", "Validation", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "La capacité doit être un nombre entier valide.", "Validation", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
-            if (salleSelectionnee == null) { // Mode Création
-                // 1. OBTENIR UN NOUVEL ID UNIQUE
+            if (salleSelectionnee == null) { // --- MODE CRÉATION ---
+
+                int nbRangees = 0;
+                int nbSiegesParRangee = 0;
+                boolean configurationValide = false;
+
+                // --- DEBUT DE LA BOUCLE DO-WHILE ---
+                do {
+                    try {
+                        String nbRangeesStr = JOptionPane.showInputDialog(this, "Combien de rangées pour la salle '" + numero + "' ?", "Configuration de la salle", JOptionPane.QUESTION_MESSAGE);
+                        if (nbRangeesStr == null) {
+                            return; // L'utilisateur a annulé, on arrête tout.
+                        }
+                        nbRangees = Integer.parseInt(nbRangeesStr.trim());
+
+                        String nbSiegesStr = JOptionPane.showInputDialog(this, "Combien de sièges par rangée ?", "Configuration de la salle", JOptionPane.QUESTION_MESSAGE);
+                        if (nbSiegesStr == null) {
+                            return; // L'utilisateur a annulé
+                        }
+                        nbSiegesParRangee = Integer.parseInt(nbSiegesStr.trim());
+
+                        if (nbRangees <= 0 || nbSiegesParRangee <= 0) {
+                            JOptionPane.showMessageDialog(this, "Le nombre de rangées et de sièges doit être positif.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                            // configurationValide reste false, la boucle va recommencer.
+                        } else if (nbRangees * nbSiegesParRangee != capacite) {
+                            JOptionPane.showMessageDialog(this,
+                                    "Incohérence : " + nbRangees + " rangées × " + nbSiegesParRangee + " sièges = " + (nbRangees * nbSiegesParRangee) + " places.\n"
+                                    + "Cela ne correspond pas à la capacité totale de " + capacite + " que vous avez indiquée.",
+                                    "Erreur de configuration", JOptionPane.ERROR_MESSAGE);
+                            // configurationValide reste false, la boucle va recommencer.
+                        } else {
+                            // Toutes les validations sont passées, on peut sortir de la boucle.
+                            configurationValide = true;
+                        }
+
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(this, "Veuillez entrer des nombres entiers valides.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
+                        // configurationValide reste false, la boucle va recommencer.
+                    }
+                } while (!configurationValide);
+                // --- FIN DE LA BOUCLE DO-WHILE ---
+
                 int nouvelId = com.mycompany.cinema.util.IdManager.getNextSalleId();
+                Salle nouvelleSalle = new Salle(nouvelId, numero, capacite);
 
-                // 2. CRÉER L'OBJET AVEC L'ID
-                Salle nouvelleSalle = new Salle(
-                        nouvelId,
-                        numero,
-                        capacite
-                );
+                adminService.ajouterSalleAvecPlan(nouvelleSalle, nbRangees, nbSiegesParRangee);
 
-                // 3. ENVOYER AU SERVICE
-                adminService.ajouterSalle(nouvelleSalle);
-                JOptionPane.showMessageDialog(this, "Salle créée avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Salle et son plan de " + (nbRangees * nbSiegesParRangee) + " sièges créés avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
 
-            } else { // Mode Modification (inchangé)
+            } else { // --- MODE MODIFICATION ---
                 salleSelectionnee.setNumero(numero);
                 salleSelectionnee.setCapacite(capacite);
                 adminService.modifierSalle(salleSelectionnee);
                 JOptionPane.showMessageDialog(this, "Salle modifiée avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
             }
 
-            // Rechargement et nettoyage
             chargerListeSalles();
             actionNouveau();
 
@@ -136,11 +172,17 @@ public class GestionSalles extends javax.swing.JPanel {
             return;
         }
 
-        int confirmation = JOptionPane.showConfirmDialog(this,
+        Object[] options = {"Oui", "Non"};
+        int response = JOptionPane.showOptionDialog(
+                this,
                 "Êtes-vous sûr de vouloir supprimer la salle '" + salleSelectionnee.getNumero() + "' ?",
-                "Confirmation de suppression", JOptionPane.YES_NO_OPTION);
+                "Confirmation de suppression",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE, // Icône d'avertissement plus appropriée
+                null, options, options[0]
+        );
 
-        if (confirmation == JOptionPane.YES_OPTION) {
+        if (response == JOptionPane.YES_OPTION) {
             try {
                 adminService.supprimerSalle(salleSelectionnee.getId());
                 JOptionPane.showMessageDialog(this, "Salle supprimée avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
@@ -188,6 +230,11 @@ public class GestionSalles extends javax.swing.JPanel {
         formPanel.add(jLabel1);
 
         idField.setEditable(false);
+        idField.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                idFieldMouseClicked(evt);
+            }
+        });
         formPanel.add(idField);
 
         jLabel2.setText("Numéro/Nom : ");
@@ -266,6 +313,19 @@ public class GestionSalles extends javax.swing.JPanel {
         }// TODO add your handling code here:
     }//GEN-LAST:event_listeSallesValueChanged
 
+    private void idFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_idFieldMouseClicked
+        // On vérifie que le champ est bien désactivé pour l'édition
+        if (!idField.isEditable()) {
+            JOptionPane.showMessageDialog(
+                    this, // Le panneau parent
+                    "L'identifiant (ID) est généré automatiquement par le système lors de la création d'un nouvel élément.\n"
+                    + "Il ne peut pas être modifié manuellement.", // Le message à afficher
+                    "Information", // Le titre de la fenêtre pop-up
+                    JOptionPane.INFORMATION_MESSAGE // Le type de message (icône "i")
+            );
+        }// TODO add your handling code here:
+    }//GEN-LAST:event_idFieldMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel buttonPanel;
@@ -285,5 +345,4 @@ public class GestionSalles extends javax.swing.JPanel {
     private javax.swing.JButton supprimerButton;
     // End of variables declaration//GEN-END:variables
 
-    
 }

@@ -1,15 +1,16 @@
 // Dans le fichier PaiementPanel.java
-
 package com.mycompany.cinema.view;
 
+import java.time.LocalDate;
 import javax.swing.JOptionPane;
-
 
 public class PaiementPanel extends javax.swing.JPanel {
 
     // --- INTERFACE DE COMMUNICATION ---
     public interface PaiementListener {
+
         void onPaiementValide(); // Informer que le paiement est "réussi"
+
         void onRetour();        // Informer qu'il faut revenir en arrière
     }
     private PaiementListener listener;
@@ -17,7 +18,7 @@ public class PaiementPanel extends javax.swing.JPanel {
     public PaiementPanel() {
         initComponents();
     }
-    
+
     // Méthode pour que la fenêtre principale puisse s'abonner aux événements
     public void setListener(PaiementListener listener) {
         this.listener = listener;
@@ -30,14 +31,15 @@ public class PaiementPanel extends javax.swing.JPanel {
 
     // La logique de validation sera ici
     private void validerPaiement() {
-        String cardNumber = cardNumberField.getText();
-        String expiryDate = expiryDateField.getText();
-        String cvv = cvvField.getText();
+        String cardNumber = cardNumberField.getText().trim();
+        String expiryDate = expiryDateField.getText().trim();
+        String cvv = cvvField.getText().trim();
 
+        // --- 1. VALIDATION DU FORMAT DES CHAMPS (AVEC REGEX) ---
         // Regex pour 16 chiffres
-        String cardRegex = "^\\d{16}$"; 
+        String cardRegex = "^\\d{16}$";
         // Regex pour MM/AA, avec MM de 01 à 12
-        String expiryRegex = "^(0[1-9]|1[0-2])\\/\\d{2}$"; 
+        String expiryRegex = "^(0[1-9]|1[0-2])\\/\\d{2}$";
         // Regex pour 3 ou 4 chiffres
         String cvvRegex = "^\\d{3,4}$";
 
@@ -54,13 +56,57 @@ public class PaiementPanel extends javax.swing.JPanel {
             return;
         }
 
-        // Si toutes les validations passent, on prévient la fenêtre principale
+        // --- 2. VALIDATION LOGIQUE DE LA DATE D'EXPIRATION ---
+        try {
+            // Découper la chaîne "MM/AA" pour obtenir le mois et l'année
+            String[] dateParts = expiryDate.split("/");
+            int moisCarte = Integer.parseInt(dateParts[0]);
+            // Convertir l'année courte en année complète (ex: "28" -> 2028)
+            int anneeCarte = 2000 + Integer.parseInt(dateParts[1]);
+
+            // Obtenir le mois et l'année actuels
+            LocalDate dateActuelle = LocalDate.now();
+            int moisActuel = dateActuelle.getMonthValue();
+            int anneeActuelle = dateActuelle.getYear();
+
+            // Logique de comparaison orthodoxe
+            boolean estExpiree = false;
+            if (anneeCarte < anneeActuelle) {
+                // L'année de la carte est passée -> expirée
+                estExpiree = true;
+            } else if (anneeCarte == anneeActuelle) {
+                // L'année est la même, on compare les mois
+                if (moisCarte < moisActuel) {
+                    // Le mois de la carte est passé -> expirée
+                    estExpiree = true;
+                }
+            }
+            // Si l'année de la carte est dans le futur, 'estExpiree' reste 'false'.
+            // Si l'année est la même et le mois est le même ou futur, 'estExpiree' reste 'false'.
+
+            if (estExpiree) {
+                JOptionPane.showMessageDialog(this, "Cette carte bancaire est expirée. Veuillez entrer une carte valide", "Carte invalide", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        } catch (Exception e) {
+            // Sécurité en cas de problème lors de la conversion, bien que peu probable grâce à la regex
+            JOptionPane.showMessageDialog(this, "La date d'expiration n'a pas pu être validée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // --- 3. SI TOUTES LES VALIDATIONS PASSENT ---
+        // On prévient la fenêtre principale que le paiement est "accepté"
         if (listener != null) {
             listener.onPaiementValide();
         }
     }
-    
-                                         
+
+    public void reset() {
+        cardNumberField.setText("");
+        expiryDateField.setText("");
+        cvvField.setText("");
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

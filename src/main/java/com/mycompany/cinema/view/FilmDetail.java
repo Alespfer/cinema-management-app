@@ -218,6 +218,7 @@ public class FilmDetail extends javax.swing.JPanel {
 
         middleContentPanel.setLayout(new java.awt.BorderLayout());
 
+        synopsisArea.setEditable(false);
         synopsisArea.setColumns(20);
         synopsisArea.setRows(5);
         synopsisArea.setText("La synopsis du film apparaîtra ici...");

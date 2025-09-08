@@ -25,8 +25,8 @@ public class SnackSelection extends javax.swing.JPanel {
 
     // --- DEBUT DE LA PARTIE MANUELLE ---
     private final ClientService clientService;
-    private final List<ProduitSnack> listeProduitsAffiches = new ArrayList<>();
-    private final List<JSpinner> listeSpinners = new ArrayList<>();
+    private final List<LignePanier> panier = new ArrayList<>();
+    private final List<SnackLignePanel> listeItemsPanels = new ArrayList<>();
     private static final DecimalFormat CURRENCY_FORMATTER = new DecimalFormat("#,##0.00 €");
 
     public interface SnackSelectionListener {
@@ -48,75 +48,80 @@ public class SnackSelection extends javax.swing.JPanel {
         initComponents();
         initialiserListeProduits();
         updateTotal();
+
     }
 
     private void initialiserListeProduits() {
-        List<ProduitSnack> produits = clientService.getAllProduitsSnack();
-        for (int i = 0; i < produits.size(); i++) {
-            ProduitSnack produit = produits.get(i);
+        produitListPanel.removeAll();
+        panier.clear();
+        listeItemsPanels.clear();
+
+        List<ProduitSnack> produitsDisponibles = clientService.getAllProduitsSnack();
+
+        for (ProduitSnack produit : produitsDisponibles) {
             if (produit.getStock() > 0) {
-                produitListPanel.add(createProductPanel(produit));
+                LignePanier ligne = new LignePanier(produit, 0);
+                panier.add(ligne);
+
+                SnackLignePanel itemPanel = new SnackLignePanel(ligne);
+                listeItemsPanels.add(itemPanel);
+
+                itemPanel.getSpinner().addChangeListener(new ChangeListener() {
+                    @Override
+                    public void stateChanged(ChangeEvent e) {
+                        updateTotal();
+                    }
+                });
+                produitListPanel.add(itemPanel);
                 produitListPanel.add(Box.createRigidArea(new Dimension(0, 10)));
             }
         }
+        produitListPanel.revalidate();
+        produitListPanel.repaint();
     }
 
-    private JPanel createProductPanel(final ProduitSnack produit) {
-        JPanel panel = new JPanel(new BorderLayout(20, 0));
-        panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.GRAY),
-                BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        ));
-
-        String labelText = "<html><b>" + produit.getNomProduit() + "</b><br>"
-                + "<i>" + produit.getDescription() + "</i><br>"
-                + "<font color='blue'>Prix: " + CURRENCY_FORMATTER.format(produit.getPrixVente()) + "</font></html>";
-        JLabel productLabel = new JLabel(labelText);
-
-        SpinnerModel spinnerModel = new SpinnerNumberModel(0, 0, produit.getStock(), 1);
-        final JSpinner spinner = new JSpinner(spinnerModel);
-
-        spinner.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                updateTotal();
-            }
-        });
-
-        listeProduitsAffiches.add(produit);
-        listeSpinners.add(spinner);
-
-        panel.add(productLabel, BorderLayout.CENTER);
-        panel.add(spinner, BorderLayout.EAST);
-        return panel;
-    }
-
+    // --- MÉTHODE CORRIGÉE ---
     private void updateTotal() {
         double total = 0.0;
-        for (int i = 0; i < listeProduitsAffiches.size(); i++) {
-            ProduitSnack produit = listeProduitsAffiches.get(i);
-            int quantite = (Integer) listeSpinners.get(i).getValue();
-            total = total + (produit.getPrixVente() * quantite);
+        boolean panierEstVide = true;
+
+
+        // --- DEBUT DE LA CORRECTION ---
+        // Au lieu de lire dans la liste 'panier', on lit directement
+        // la valeur actuelle des composants graphiques 'JSpinner'.
+        // Cela garantit que nous avons toujours l'information la plus à jour.
+        for (SnackLignePanel itemPanel : listeItemsPanels) {
+            int quantite = itemPanel.getQuantite(); // Cette méthode lit directement le spinner
+            total += itemPanel.getProduit().getPrixVente() * quantite;
+
+            if (quantite > 0) {
+                panierEstVide = false;
+            }
         }
+        // --- FIN DE LA CORRECTION ---
+        skipButton.setEnabled(panierEstVide);
         totalLabel.setText("Total Snacks: " + CURRENCY_FORMATTER.format(total));
+        validerButton.setEnabled(!panierEstVide);
     }
 
     private List<LignePanier> getCart() {
-        List<LignePanier> panier = new ArrayList<>();
-        for (int i = 0; i < listeProduitsAffiches.size(); i++) {
-            int quantite = (Integer) listeSpinners.get(i).getValue();
-            if (quantite > 0) {
-                ProduitSnack produit = listeProduitsAffiches.get(i);
-                panier.add(new LignePanier(produit, quantite));
+        List<LignePanier> panierFinal = new ArrayList<>();
+        for (LignePanier ligne : panier) {
+            if (ligne.getQuantite() > 0) {
+                panierFinal.add(ligne);
             }
         }
-        return panier;
+        return panierFinal;
     }
 
     public void resetPanel() {
-        for (int i = 0; i < listeSpinners.size(); i++) {
-            listeSpinners.get(i).setValue(0);
+        for (SnackLignePanel itemPanel : listeItemsPanels) {
+            itemPanel.reset();
         }
-        updateTotal();
+        boolean panierEstVide = true;
+
+        skipButton.setEnabled(panierEstVide);
+
     }
 
     public void setListener(SnackSelectionListener listener) {
@@ -172,6 +177,7 @@ public class SnackSelection extends javax.swing.JPanel {
         buttonPanel.add(retourButton);
 
         skipButton.setText("Non, merci (Paiement)");
+        skipButton.setEnabled(false);
         skipButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 skipButtonActionPerformed(evt);
@@ -180,6 +186,7 @@ public class SnackSelection extends javax.swing.JPanel {
         buttonPanel.add(skipButton);
 
         validerButton.setText("Valider avec snacks (Paiement) >>");
+        validerButton.setEnabled(false);
         validerButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 validerButtonActionPerformed(evt);

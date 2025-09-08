@@ -22,4 +22,7 @@ public interface ClientDAO {
     void deleteClient(int id);
     
     void rechargerDonnees();
+    
+    Client getClientByEmail(String email);
+
 }

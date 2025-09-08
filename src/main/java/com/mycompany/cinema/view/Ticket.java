@@ -53,8 +53,7 @@ public class Ticket extends javax.swing.JDialog {
         contenu += "Sièges Réservés:\n";
 
         // Boucle FOR classique, conforme à la Doctrine.
-        for (int i = 0; i < infos.sieges.size(); i++) {
-            Siege siege = infos.sieges.get(i);
+        for (Siege siege : infos.sieges) {
             contenu += "  - Rangée " + siege.getNumeroRangee() + ", Siège " + siege.getNumeroSiege() + "\n";
         }
 
@@ -63,9 +62,8 @@ public class Ticket extends javax.swing.JDialog {
         if (infos.panierSnacks != null && !infos.panierSnacks.isEmpty()) {
             contenu += "\n--- SNACKS ---\n";
             // Boucle FOR classique, conforme à la Doctrine.
-            for (int i = 0; i < infos.panierSnacks.size(); i++) {
-                LignePanier ligne = infos.panierSnacks.get(i);
-                contenu += "  - " + ligne.quantite + "x " + ligne.produit.getNomProduit() + "\n";
+            for (LignePanier ligne : infos.panierSnacks) {
+                contenu += "  - " + ligne.getQuantite() + "x " + ligne.getProduit().getNomProduit() + "\n";
             }
         }
 

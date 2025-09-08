@@ -8,8 +8,10 @@ import com.mycompany.cinema.Seance;
 import com.mycompany.cinema.service.ClientService;
 import java.awt.Component;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
@@ -23,7 +25,8 @@ public class Programmation extends javax.swing.JPanel {
 
     private final ClientService clientService;
     private DefaultTableModel tableModel;
-    private List<Seance> seancesAffichees;
+    private List<Seance> seancesResultatRecherche;
+    private List<Seance> seancesEffectivementAffichees; // <-- NOUVELLE LISTE
     private DefaultComboBoxModel<Genre> genreComboBoxModel;
     private SeanceSelectionListener selectionListener;
 
@@ -31,6 +34,7 @@ public class Programmation extends javax.swing.JPanel {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     public interface SeanceSelectionListener {
+
         void onSeanceSelected(Seance seance);
     }
 
@@ -38,7 +42,7 @@ public class Programmation extends javax.swing.JPanel {
         this.clientService = clientService;
         initComponents();
         initCustomComponents();
-        rechercher(); 
+        rechercher();
     }
 
     private void initCustomComponents() {
@@ -84,13 +88,23 @@ public class Programmation extends javax.swing.JPanel {
                 date = LocalDate.parse(dateFilter.getText().trim(), DATE_FORMATTER);
             }
         } catch (DateTimeParseException e) {
-            JOptionPane.showMessageDialog(this, "Format de date invalide. Utilisez jj/MM/aaaa.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Le format de la date est invalide.\n"
+                    + "Veuillez utiliser le format : JJ/MM/AAAA" ,
+                    "Erreur de saisie",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
         String titreKeyword = titreFilter.getText().trim();
         Genre genreSelectionne = (Genre) genreFilter.getSelectedItem();
         Integer genreId = (genreSelectionne != null) ? genreSelectionne.getId() : null;
-        seancesAffichees = clientService.rechercherSeances(date, genreId, titreKeyword);
+
+        // La recherche initiale remplit la liste complète
+        seancesResultatRecherche = clientService.rechercherSeances(date, genreId, titreKeyword);
+
+        // On initialise notre liste d'affichage qui sera remplie par mettreAJourTable()
+        seancesEffectivementAffichees = new ArrayList<>();
+
         mettreAJourTable();
     }
 
@@ -103,22 +117,105 @@ public class Programmation extends javax.swing.JPanel {
 
     private void mettreAJourTable() {
         tableModel.setRowCount(0);
-        for (Seance seance : seancesAffichees) {
-            Film film = clientService.getFilmDetails(seance.getIdFilm());
-            Salle salle = null;
-            for (Salle s : clientService.getAllSalles()) {
-                if (s.getId() == seance.getIdSalle()) {
-                    salle = s;
-                    break;
+        seancesEffectivementAffichees.clear(); // Important : on vide la liste avant de la remplir
+        LocalDateTime maintenant = LocalDateTime.now();
+
+        // On parcourt les résultats complets de la recherche
+        for (Seance seance : seancesResultatRecherche) {
+
+            // On applique le filtre temporel
+            if (estFutureOuEnCours(seance.getDateHeureDebut(), maintenant)) {
+
+                // Si la séance passe le filtre, on l'ajoute à notre liste d'affichage
+                seancesEffectivementAffichees.add(seance);
+
+                Film film = clientService.getFilmDetails(seance.getIdFilm());
+                Salle salle = null;
+                for (Salle s : clientService.getAllSalles()) {
+                    if (s.getId() == seance.getIdSalle()) {
+                        salle = s;
+                        break;
+                    }
                 }
+
+                String titreFilm;
+                if (film != null) {
+                    titreFilm = film.getTitre();
+                } else {
+                    titreFilm = "Film Inconnu";
+                }
+
+                String numeroSalle;
+                if (salle != null) {
+                    numeroSalle = salle.getNumero();
+                } else {
+                    numeroSalle = "Salle Inconnue";
+                }
+
+                int dureeFilm;
+                if (film != null) {
+                    dureeFilm = film.getDureeMinutes();
+                } else {
+                    dureeFilm = 0;
+                }
+
+                String dateSeance = seance.getDateHeureDebut().format(DATE_FORMATTER);
+                String heureSeance = seance.getDateHeureDebut().format(TIME_FORMATTER);
+
+                // On ajoute la ligne à la table visuelle
+                tableModel.addRow(new Object[]{titreFilm, dateSeance, heureSeance, numeroSalle, dureeFilm});
             }
-            String titreFilm = (film != null) ? film.getTitre() : "Film Inconnu";
-            String numeroSalle = (salle != null) ? salle.getNumero() : "Salle Inconnue";
-            int dureeFilm = (film != null) ? film.getDureeMinutes() : 0;
-            String dateSeance = seance.getDateHeureDebut().format(DATE_FORMATTER);
-            String heureSeance = seance.getDateHeureDebut().format(TIME_FORMATTER);
-            tableModel.addRow(new Object[]{ titreFilm, dateSeance, heureSeance, numeroSalle, dureeFilm });
         }
+    }
+
+    /**
+     * Compare deux instants temporels pour savoir si le premier est après OU au
+     * même moment que le second. Cette méthode utilise des comparaisons
+     * d'entiers, conformément aux concepts de base du cours.
+     *
+     * @param seanceDateTime L'instant à tester.
+     * @param maintenant L'instant de référence.
+     * @return true si seanceDateTime est dans le futur ou exactement
+     * maintenant, sinon false.
+     */
+    private boolean estFutureOuEnCours(LocalDateTime seanceDateTime, LocalDateTime maintenant) {
+        if (seanceDateTime.getYear() > maintenant.getYear()) {
+            return true;
+        }
+        if (seanceDateTime.getYear() < maintenant.getYear()) {
+            return false;
+        }
+
+        if (seanceDateTime.getMonthValue() > maintenant.getMonthValue()) {
+            return true;
+        }
+        if (seanceDateTime.getMonthValue() < maintenant.getMonthValue()) {
+            return false;
+        }
+
+        if (seanceDateTime.getDayOfMonth() > maintenant.getDayOfMonth()) {
+            return true;
+        }
+        if (seanceDateTime.getDayOfMonth() < maintenant.getDayOfMonth()) {
+            return false;
+        }
+
+        if (seanceDateTime.getHour() > maintenant.getHour()) {
+            return true;
+        }
+        if (seanceDateTime.getHour() < maintenant.getHour()) {
+            return false;
+        }
+
+        if (seanceDateTime.getMinute() > maintenant.getMinute()) {
+            return true;
+        }
+        if (seanceDateTime.getMinute() < maintenant.getMinute()) {
+            return false;
+        }
+
+        // Si toutes les composantes sont égales, la séance est "en cours".
+        return true;
     }
 
     public void setSeanceSelectionListener(SeanceSelectionListener listener) {
@@ -152,7 +249,7 @@ public class Programmation extends javax.swing.JPanel {
         filterPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Filtres"));
         filterPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 5));
 
-        jLabel1.setText("Date (jj/MM/aaaa) : ");
+        jLabel1.setText("Date (JJ/MM/AAAA) : ");
         filterPanel.add(jLabel1);
 
         dateFilter.setColumns(10);
@@ -210,14 +307,17 @@ public class Programmation extends javax.swing.JPanel {
         if (selectionListener != null) {
             int selectedRow = seancesTable.getSelectedRow();
             if (selectedRow >= 0) {
-                Seance selectedSeance = seancesAffichees.get(selectedRow);
-                System.out.println("DAN REPORT (Clic détecté): Programmation Panel a détecté la sélection de la séance ID: " + selectedSeance.getId());
+                // CORRECTION : On récupère la séance dans la liste qui correspond
+                // exactement à ce qui est affiché dans la table.
+                Seance selectedSeance = seancesEffectivementAffichees.get(selectedRow);
+
+                System.out.println("Programmation Panel a détecté la sélection de la séance ID: " + selectedSeance.getId());
                 selectionListener.onSeanceSelected(selectedSeance);
             }
         }// TODO add your handling code here:
     }//GEN-LAST:event_seancesTableMouseClicked
 
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField dateFilter;
     private javax.swing.JPanel filterPanel;

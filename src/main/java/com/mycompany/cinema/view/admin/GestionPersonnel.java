@@ -15,8 +15,6 @@ public class GestionPersonnel extends javax.swing.JPanel {
 
     private final AdminService adminService;
     private Personnel personnelSelectionne;
-
-    // CORRECTION : Un seul jeu de modèles, conforme à une JList et une JComboBox.
     private DefaultListModel<Personnel> personnelListModel;
     private DefaultComboBoxModel<Role> roleComboBoxModel;
 
@@ -34,7 +32,6 @@ public class GestionPersonnel extends javax.swing.JPanel {
     }
 
     private void initModelsAndRenderers() {
-        // Modèle pour la JList du personnel
         personnelListModel = new DefaultListModel<>();
         listePersonnel.setModel(personnelListModel);
         listePersonnel.setCellRenderer(new DefaultListCellRenderer() {
@@ -49,7 +46,6 @@ public class GestionPersonnel extends javax.swing.JPanel {
             }
         });
 
-        // Modèle pour la JComboBox des rôles
         roleComboBoxModel = new DefaultComboBoxModel<>();
         roleComboBox.setModel(roleComboBoxModel);
         roleComboBox.setRenderer(new DefaultListCellRenderer() {
@@ -86,7 +82,8 @@ public class GestionPersonnel extends javax.swing.JPanel {
             idField.setText(String.valueOf(p.getId()));
             nomField.setText(p.getNom());
             prenomField.setText(p.getPrenom());
-            motDePasseField.setText(""); // Ne jamais pré-remplir un mot de passe
+            emailField.setText(p.getEmail()); // AFFICHER L'EMAIL
+            motDePasseField.setText("");
             supprimerButton.setEnabled(true);
 
             Role roleAssigne = null;
@@ -109,22 +106,35 @@ public class GestionPersonnel extends javax.swing.JPanel {
         idField.setText("");
         nomField.setText("");
         prenomField.setText("");
+        emailField.setText(""); // VIDER LE CHAMP EMAIL
         motDePasseField.setText("");
         roleComboBox.setSelectedIndex(-1);
         supprimerButton.setEnabled(false);
     }
 
+    // Dans GestionPersonnel.java
     private void actionEnregistrer() {
         String nom = nomField.getText().trim();
         String prenom = prenomField.getText().trim();
+        String email = emailField.getText().trim();
         String motDePasse = new String(motDePasseField.getPassword());
         Role roleSelectionne = (Role) roleComboBox.getSelectedItem();
 
-        if (nom.isEmpty() || prenom.isEmpty() || roleSelectionne == null) {
-            JOptionPane.showMessageDialog(this, "Nom, prénom et rôle sont obligatoires.", "Erreur de saisie", JOptionPane.WARNING_MESSAGE);
+        // --- DEBUT DES MODIFICATIONS DE VALIDATION ---
+        // 1. Validation des champs obligatoires
+        if (nom.isEmpty() || prenom.isEmpty() || email.isEmpty() || roleSelectionne == null) {
+            JOptionPane.showMessageDialog(this, "Nom, prénom, email et rôle sont obligatoires.", "Erreur de saisie", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
+        // 2. Validation du format de l'email avec la regex standard
+        String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
+        if (!email.matches(emailRegex)) {
+            JOptionPane.showMessageDialog(this, "Veuillez entrer une adresse email au format valide (ex: contact@cinema.com).", "Erreur de saisie", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // --- FIN DES MODIFICATIONS DE VALIDATION ---
         try {
             if (personnelSelectionne == null) { // Mode Création
                 if (motDePasse.isEmpty()) {
@@ -132,13 +142,14 @@ public class GestionPersonnel extends javax.swing.JPanel {
                     return;
                 }
                 int nouvelId = com.mycompany.cinema.util.IdManager.getNextPersonnelId();
-                Personnel nouveau = new Personnel(nouvelId, nom, prenom, motDePasse, roleSelectionne.getId());
+                Personnel nouveau = new Personnel(nouvelId, nom, prenom, email, motDePasse, roleSelectionne.getId());
                 adminService.ajouterPersonnel(nouveau);
                 JOptionPane.showMessageDialog(this, "Membre du personnel créé avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
 
             } else { // Mode Modification
                 personnelSelectionne.setNom(nom);
                 personnelSelectionne.setPrenom(prenom);
+                personnelSelectionne.setEmail(email);
                 personnelSelectionne.setIdRole(roleSelectionne.getId());
                 if (!motDePasse.isEmpty()) {
                     personnelSelectionne.setMotDePasse(motDePasse);
@@ -156,8 +167,17 @@ public class GestionPersonnel extends javax.swing.JPanel {
         if (personnelSelectionne == null) {
             return;
         }
-        int confirmation = JOptionPane.showConfirmDialog(this, "Êtes-vous sûr de vouloir supprimer '" + personnelSelectionne.getPrenom() + " " + personnelSelectionne.getNom() + "' ?", "Confirmation", JOptionPane.YES_NO_OPTION);
-        if (confirmation == JOptionPane.YES_OPTION) {
+
+        Object[] options = {"Oui", "Non"};
+        int response = JOptionPane.showOptionDialog(
+                this,
+                "Êtes-vous sûr de vouloir supprimer '" + personnelSelectionne.getPrenom() + " " + personnelSelectionne.getNom() + "' ?",
+                "Confirmation de suppression",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE,
+                null, options, options[0]);
+
+        if (response == JOptionPane.YES_OPTION) {
             try {
                 adminService.supprimerPersonnel(personnelSelectionne.getId());
                 JOptionPane.showMessageDialog(this, "Membre supprimé avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
@@ -188,6 +208,8 @@ public class GestionPersonnel extends javax.swing.JPanel {
         nomField = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         prenomField = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        emailField = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         motDePasseField = new javax.swing.JPasswordField();
         jLabel5 = new javax.swing.JLabel();
@@ -222,6 +244,11 @@ public class GestionPersonnel extends javax.swing.JPanel {
         jPanel2.add(jLabel1);
 
         idField.setEditable(false);
+        idField.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                idFieldMouseClicked(evt);
+            }
+        });
         jPanel2.add(idField);
 
         jLabel2.setText("Nom : ");
@@ -231,6 +258,10 @@ public class GestionPersonnel extends javax.swing.JPanel {
         jLabel3.setText("Prénom : ");
         jPanel2.add(jLabel3);
         jPanel2.add(prenomField);
+
+        jLabel6.setText("Email : ");
+        jPanel2.add(jLabel6);
+        jPanel2.add(emailField);
 
         jLabel4.setText("Mot de passe : ");
         jPanel2.add(jLabel4);
@@ -293,8 +324,22 @@ public class GestionPersonnel extends javax.swing.JPanel {
         }// TODO add your handling code here:
     }//GEN-LAST:event_listePersonnelValueChanged
 
+    private void idFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_idFieldMouseClicked
+        // On vérifie que le champ est bien désactivé pour l'édition
+        if (!idField.isEditable()) {
+            JOptionPane.showMessageDialog(
+                    this, // Le panneau parent
+                    "L'identifiant (ID) est généré automatiquement par le système lors de la création d'un nouvel élément.\n"
+                    + "Il ne peut pas être modifié manuellement.", // Le message à afficher
+                    "Information", // Le titre de la fenêtre pop-up
+                    JOptionPane.INFORMATION_MESSAGE // Le type de message (icône "i")
+            );
+        } // TODO add your handling code here:
+    }//GEN-LAST:event_idFieldMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField emailField;
     private javax.swing.JButton enregistrerButton;
     private javax.swing.JTextField idField;
     private javax.swing.JLabel jLabel1;
@@ -302,6 +347,7 @@ public class GestionPersonnel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;

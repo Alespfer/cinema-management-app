@@ -19,40 +19,40 @@ public class Login extends javax.swing.JFrame {
         CinemaServiceImpl serviceImpl = new CinemaServiceImpl();
         this.clientService = serviceImpl;
         this.adminService = serviceImpl;
-
         initComponents();
-
-        setTitle("Connexion - Alespfer Cinema");
+        setTitle("Cinema PISE 2025 - Connexion");
         setLocationRelativeTo(null);
-
     }
 
     private void actionConnexion() {
-        String user = utilisateurField.getText();
+        String user = utilisateurField.getText().trim();
         String password = new String(passwordField.getPassword());
 
         if (user.isEmpty() || password.isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs.", "Erreur de saisie", javax.swing.JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
+        // --- Logique pour CLIENT ---
         if (clientRadio.isSelected()) {
-            // CORRECTION : La méthode authentifierClient retourne maintenant un Client ou null.
+            if (!emailValide(user)) {
+                JOptionPane.showMessageDialog(this, "Adresse e-mail invalide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             Client client = clientService.authentifierClient(user, password);
-
-            // CORRECTION : La vérification se fait avec '!= null'.
             if (client != null) {
                 this.dispose();
-                // CORRECTION : On passe l'objet 'client' directement. L'appel '.get()' était une erreur et a été supprimé.
                 new ClientMain(clientService, client).setVisible(true);
             } else {
-                javax.swing.JOptionPane.showMessageDialog(this, "Email ou mot de passe client incorrect.", "Erreur d'authentification", javax.swing.JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Email ou mot de passe client incorrect.", "Erreur d'authentification", JOptionPane.ERROR_MESSAGE);
             }
+            // --- Logique pour PERSONNEL ---
         } else {
-            // CORRECTION : La méthode authentifierPersonnel retourne maintenant un Personnel ou null.
+            if (!emailValide(user)) { // On vérifie aussi le format pour le personnel
+                JOptionPane.showMessageDialog(this, "L'identifiant du personnel doit être un email valide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             Personnel personnel = adminService.authentifierPersonnel(user, password);
-
-            // CORRECTION : La vérification se fait avec '!= null'.
             if (personnel != null) {
                 Role role = null;
                 for (Role r : adminService.getAllRoles()) {
@@ -68,56 +68,67 @@ public class Login extends javax.swing.JFrame {
                     new AdminMain(adminService, personnel).setVisible(true);
                 }
             } else {
-                javax.swing.JOptionPane.showMessageDialog(this, "Nom d'utilisateur ou mot de passe du personnel incorrect.", "Erreur d'authentification", javax.swing.JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Email ou mot de passe du personnel incorrect.", "Erreur d'authentification", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
     private void actionInscription() {
-        // ORDRE N°1 : Cacher le quartier-général (la fenêtre de login).
         this.setVisible(false);
-
-        // ORDRE N°2 : Déployer l'unité d'inscription (votre code existant).
-        // Le programme attendra ici que la fenêtre se ferme.
         Inscription inscriptionDialog = new Inscription(this, clientService, true);
         inscriptionDialog.setVisible(true);
-
-        // ORDRE N°3 : Une fois la mission d'inscription terminée (succès ou annulation),
-        // redéployer le quartier-général.
         this.setVisible(true);
     }
 
-    // Copiez cette méthode (de la réponse précédente) dans votre classe Login.java
-    private void handleForgotPassword() {
+    // --- NOUVELLE MÉTHODE UNIQUE POUR LA RÉINITIALISATION ---
+    private void actionMotDePasseOublie() {
         String email = JOptionPane.showInputDialog(
                 this,
-                "Veuillez saisir votre adresse e-mail :",
+                "Veuillez saisir l'adresse e-mail de votre compte :",
                 "Récupération de mot de passe",
                 JOptionPane.QUESTION_MESSAGE
         );
 
         if (email == null || email.trim().isEmpty()) {
+            return; // L'utilisateur a annulé
+        }
+
+        email = email.trim();
+        if (!emailValide(email)) {
+            JOptionPane.showMessageDialog(this, "Veuillez entrer une adresse email valide.", "Format invalide", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Assurez-vous d'avoir une variable 'clientService' dans votre classe Login
-        Client client = clientService.getClientByEmail(email.trim());
+        Client client = clientService.getClientByEmail(email);
+        Personnel personnel = adminService.getPersonnelByEmail(email);
 
-        if (client != null) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Un e-mail de réinitialisation a été simulé.\nVotre mot de passe est : " + client.getMotDePasse(),
-                    "Mot de passe récupéré",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-        } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Aucun compte n'est associé à cette adresse e-mail.",
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE
-            );
+        if (client == null && personnel == null) {
+            JOptionPane.showMessageDialog(this, "Aucun compte n'est associé à cette adresse e-mail.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
         }
+
+        ReinitialiserMotDePasse dialog = new ReinitialiserMotDePasse(this, true);
+        String nouveauMotDePasse = dialog.showDialog();
+
+        if (nouveauMotDePasse != null) { // L'utilisateur a validé un nouveau mot de passe
+            try {
+                if (client != null) {
+                    clientService.changerMotDePasseClient(client.getId(), nouveauMotDePasse);
+                } else { // C'est donc le membre du personnel
+                    adminService.changerMotDePassePersonnel(personnel.getId(), nouveauMotDePasse);
+                }
+                JOptionPane.showMessageDialog(this, "Votre mot de passe a été mis à jour avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Une erreur est survenue lors de la mise à jour : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private boolean emailValide (String email) {
+        if (email == null) {
+            return false;
+        }
+        return email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$");
     }
 
     /**
@@ -130,6 +141,7 @@ public class Login extends javax.swing.JFrame {
     private void initComponents() {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
+        buttonGroup2 = new javax.swing.ButtonGroup();
         panneauPrincipal = new javax.swing.JPanel();
         buttonPanel = new javax.swing.JPanel();
         forgotPassWordButton = new javax.swing.JButton();
@@ -182,7 +194,7 @@ public class Login extends javax.swing.JFrame {
         labelsPanel.setLayout(new java.awt.GridLayout(3, 1, 0, 12));
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel1.setText("Utilisateur/Email : ");
+        jLabel1.setText("Email : ");
         labelsPanel.add(jLabel1);
 
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -226,13 +238,16 @@ public class Login extends javax.swing.JFrame {
     }//GEN-LAST:event_connexionButtonActionPerformed
 
     private void forgotPassWordButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_forgotPassWordButtonActionPerformed
-        handleForgotPassword();// TODO add your handling code here:
+        // 1. Demander à l'utilisateur quel type de compte il veut réinitialiser.
+        actionMotDePasseOublie();
+        // Si l'utilisateur ferme la boîte, il ne se passe rien.// TODO add your handling code here:
     }//GEN-LAST:event_forgotPassWordButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JRadioButton adminRadio;
     private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.ButtonGroup buttonGroup2;
     private javax.swing.JPanel buttonPanel;
     private javax.swing.JRadioButton clientRadio;
     private javax.swing.JButton connexionButton;

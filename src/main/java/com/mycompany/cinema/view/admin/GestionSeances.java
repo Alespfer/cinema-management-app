@@ -34,8 +34,6 @@ public class GestionSeances extends javax.swing.JPanel {
         rafraichirDonnees();
     }
 
-    
-
     private void initModelsAndRenderers() {
         seanceListModel = new DefaultListModel<>();
         jListSeances.setModel(seanceListModel);
@@ -115,18 +113,23 @@ public class GestionSeances extends javax.swing.JPanel {
         if (seance != null) {
             jTextFieldDateHeure.setText(seance.getDateHeureDebut().format(FORMATTER));
 
-            // CORRECTION : Logique de sélection de l'élément dans la ComboBox.
-            // On reconstruit un objet temporaire avec le bon ID pour que 'setSelectedItem'
-            // trouve la correspondance grâce à la méthode 'equals' (qui doit être implémentée dans vos modèles).
-            // Si 'equals' n'est pas surchargée, cette méthode se basera sur l'égalité des références, ce qui est faux.
-            // Assumons que 'equals' est correctement implémentée sur les ID.
-            Film filmSeance = new Film();
-            filmSeance.setId(seance.getIdFilm());
-            filmComboBoxModel.setSelectedItem(filmSeance);
+            // --- DEBUT DE LA CORRECTION ---
+            // Sélectionner le bon film
+            for (int i = 0; i < filmComboBoxModel.getSize(); i++) {
+                if (filmComboBoxModel.getElementAt(i).getId() == seance.getIdFilm()) {
+                    jComboBoxFilm.setSelectedIndex(i);
+                    break;
+                }
+            }
 
-            Salle salleSeance = new Salle();
-            salleSeance.setId(seance.getIdSalle());
-            salleComboBoxModel.setSelectedItem(salleSeance);
+            // Sélectionner la bonne salle
+            for (int i = 0; i < salleComboBoxModel.getSize(); i++) {
+                if (salleComboBoxModel.getElementAt(i).getId() == seance.getIdSalle()) {
+                    jComboBoxSalle.setSelectedIndex(i);
+                    break;
+                }
+            }
+            // --- FIN DE LA CORRECTION ---
 
             jButtonSupprimer.setEnabled(true);
         } else {

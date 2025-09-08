@@ -206,6 +206,11 @@ public class GestionProduitsSnack extends javax.swing.JPanel {
         formPanel.add(jLabel1);
 
         idField.setEditable(false);
+        idField.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                idFieldMouseClicked(evt);
+            }
+        });
         formPanel.add(idField);
 
         jLabel2.setText("Nom : ");
@@ -275,6 +280,19 @@ public class GestionProduitsSnack extends javax.swing.JPanel {
         }// TODO add your handling code here:
     }//GEN-LAST:event_listeProduitsValueChanged
 
+    private void idFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_idFieldMouseClicked
+        // On vérifie que le champ est bien désactivé pour l'édition avant d'afficher le message.
+        if (!idField.isEditable()) {
+            JOptionPane.showMessageDialog(
+                    this, // Le composant parent (ce panneau)
+                    "L'identifiant (ID) est généré automatiquement par le système lors de la création d'un nouvel élément.\n"
+                    + "Il ne peut pas être modifié manuellement.", // Le message à afficher
+                    "Information", // Le titre de la fenêtre pop-up
+                    JOptionPane.INFORMATION_MESSAGE // L'icône "information"
+            );
+        }// TODO add your handling code here:
+    }//GEN-LAST:event_idFieldMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel buttonPanel;
@@ -298,5 +316,4 @@ public class GestionProduitsSnack extends javax.swing.JPanel {
     private javax.swing.JButton supprimerButton;
     // End of variables declaration//GEN-END:variables
 
-   
 }

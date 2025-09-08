@@ -8,54 +8,57 @@ import com.mycompany.cinema.Client;
 import com.mycompany.cinema.service.ClientService;
 import java.awt.Frame;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  *
  * @author albertoesperon
  */
 public class EspaceClient extends javax.swing.JDialog {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(EspaceClient.class.getName());
 
     /**
      * Creates new form EspaceClient
      */
     /**
-     * CONSTRUCTEUR MODIFIÉ
-     * Remplacez le constructeur généré par NetBeans par celui-ci.
+     * CONSTRUCTEUR MODIFIÉ Remplacez le constructeur généré par NetBeans par
+     * celui-ci.
      */
     public EspaceClient(java.awt.Frame parent, boolean modal, ClientService clientService, Client clientConnecte) {
-        
+
         // Appel au code généré par NetBeans pour construire l'interface visuelle
         initComponents();
-        
+
         // --- C'est ici qu'on ajoute notre logique après la construction ---
-        
         // 1. On crée les instances de nos panneaux personnalisés
         //    (Ce sont des classes que vous avez déjà dans votre projet)
         JPanel infosPanel = new InfosPersonnelles(clientService, clientConnecte, this);
         HistoriqueReservations historiquePanel = new HistoriqueReservations(clientService, clientConnecte);
-        
+
         // 2. On remplace les panneaux vides (jPanel1, jPanel2) créés par le designer
         //    par nos vrais panneaux. L'index 0 correspond au premier onglet, 1 au second.
         tabbedPane.setComponentAt(0, infosPanel);
         tabbedPane.setComponentAt(1, historiquePanel);
-        
+
         // 3. On ajoute l'écouteur d'événement qui se déclenche quand on change d'onglet.
-        tabbedPane.addChangeListener(e -> {
-            // Si l'onglet qui est maintenant visible est celui de l'historique...
-            if (tabbedPane.getSelectedComponent() == historiquePanel) {
-                // ...alors on appelle sa méthode publique pour recharger les données.
-                historiquePanel.loadHistorique();
+        tabbedPane.addChangeListener(new ChangeListener() {
+            @Override // Annotation recommandée par la doctrine (p. 162)
+            public void stateChanged(ChangeEvent e) {
+                // Si l'onglet qui est maintenant visible est celui de l'historique...
+                if (tabbedPane.getSelectedComponent() == historiquePanel) {
+                    // ...alors on appelle sa méthode publique pour recharger les données.
+                    historiquePanel.loadHistorique();
+                }
             }
         });
-        
+
         // 4. On finalise la configuration de la fenêtre (titre, taille, position).
         this.setTitle("Mon Espace Client");
         this.setSize(800, 600);
         this.setLocationRelativeTo(parent);
     }
-
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -103,7 +106,6 @@ public class EspaceClient extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;

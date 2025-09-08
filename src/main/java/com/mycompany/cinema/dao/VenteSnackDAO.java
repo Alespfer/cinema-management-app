@@ -19,6 +19,7 @@ public interface VenteSnackDAO {
     List<VenteSnack> getAllVentesSnack();
     List<VenteSnack> getVentesByDate(LocalDate date);
     VenteSnack getVenteByReservationId(int reservationId);
+    void updateVenteSnack(VenteSnack vente); // <-- AJOUTEZ CETTE LIGNE
     void rechargerDonnees();
 
 

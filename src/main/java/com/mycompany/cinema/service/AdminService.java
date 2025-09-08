@@ -46,7 +46,7 @@ public interface AdminService extends CinemaService {
      *
      * @throws Exception si les paramètres sont incohérents.
      */
-    void ajouterSeance(Seance seance) throws Exception;
+    void ajouterSalleAvecPlan(Salle salle, int nbRangees, int nbSiegesParRangee) throws Exception;
 
     /**
      * Modifie une séance existante.
@@ -66,6 +66,12 @@ public interface AdminService extends CinemaService {
      * Retourne toutes les séances enregistrées.
      */
     List<Seance> getAllSeances();
+
+    void ajouterSeance(Seance seance) throws Exception;
+
+    Personnel getPersonnelByEmail(String email);
+
+    void changerMotDePassePersonnel(int personnelId, String nouveauMotDePasse) throws Exception;
 
     // --- Gestion des Salles ---
     /**
@@ -202,7 +208,7 @@ public interface AdminService extends CinemaService {
      * @return L'objet VenteSnack qui a été créé.
      * @throws Exception en cas de stock insuffisant ou autre erreur métier.
      */
-    VenteSnack enregistrerVenteSnack(int idPersonnel, int idCaisse, java.util.Map<ProduitSnack, Integer> panier) throws Exception;
+    VenteSnack enregistrerVenteSnack(int idPersonnel, int idCaisse, List<LignePanier> panier) throws Exception;
 
     // =========================================================================
     // SECTION REPORTING (Suivi des Ventes)

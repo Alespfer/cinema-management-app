@@ -1,6 +1,7 @@
 package com.mycompany.cinema;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Représente une salle de projection physique dans le cinéma.
@@ -71,5 +72,16 @@ public class Salle implements Serializable {
         }
         Salle salle = (Salle) obj;
         return idSalle == salle.idSalle;
+    }
+
+    /**
+     * Calcule le hash code basé sur l'identifiant de la salle. Cette méthode
+     * est essentielle pour respecter le contrat entre equals() et hashCode().
+     */
+    @Override
+    public int hashCode() {
+        // On utilise la méthode utilitaire Objects.hash pour garantir une implémentation
+        // correcte et performante, comme vu à la page 182 de la doctrine.
+        return Objects.hash(idSalle);
     }
 }
