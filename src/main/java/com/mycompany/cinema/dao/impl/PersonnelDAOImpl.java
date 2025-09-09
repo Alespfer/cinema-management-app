@@ -1,22 +1,16 @@
+// ========================================================================
+// FICHIER : PersonnelDAOImpl.java
+// ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Personnel;
 import com.mycompany.cinema.dao.PersonnelDAO;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion des données des employés dans le
- * fichier "personnel.dat". Cette classe contient toute la logique de bas niveau
- * pour la persistance du personnel.
- *
- * Pour le développeur de l'interface graphique : vous ne toucherez jamais à
- * cette classe. Cependant, toutes les actions que vous implémenterez dans le
- * panneau `GestionPersonnelPanel` (créer un nouvel employé, mettre à jour son
- * rôle, le supprimer) feront appel au 'AdminService' qui, à son tour, utilisera
- * les méthodes de cette classe pour effectuer les modifications dans la base de
- * données de fichiers.
+ * Implémentation concrète pour la gestion de la persistance des données des
+ * employés. Interagit avec le fichier "personnel.dat".
  */
 public class PersonnelDAOImpl extends GenericDAOImpl<Personnel> implements PersonnelDAO {
 
@@ -24,54 +18,74 @@ public class PersonnelDAOImpl extends GenericDAOImpl<Personnel> implements Perso
         super("personnel.dat");
     }
 
+    /**
+     * Ajoute un nouveau membre du personnel.
+     * @param personnel Le nouvel employé à enregistrer.
+     */
     @Override
-    public void addPersonnel(Personnel personnel) {
+    public void ajouterPersonnel(Personnel personnel) {
         this.data.add(personnel);
-        saveToFile();
+        sauvegarderDansFichier();
     }
 
-    // Dans PersonnelDAOImpl.java
+    /**
+     * Recherche un membre du personnel par son identifiant unique.
+     * @param id L'identifiant de l'employé.
+     * @return L'objet Personnel correspondant, ou `null` si non trouvé.
+     */
     @Override
-    public Personnel getPersonnelById(int id) {
-        for (Personnel p : this.data) {
-            if (p.getId() == id) {
-                return p;
+    public Personnel trouverPersonnelParId(int id) {
+        for (Personnel membre : this.data) {
+            if (membre.getId() == id) {
+                return membre;
             }
         }
         return null;
     }
-
+    
+    
+    
+    /**
+     * Retourne la liste de tous les membres du personnel.
+     * @return Une copie de la liste des employés.
+     */
     @Override
-    public List<Personnel> getAllPersonnel() {
-        // Retourne une copie de la liste pour éviter des modifications accidentelles de l'extérieur.
+    public List<Personnel> trouverToutLePersonnel() {
         return new ArrayList<>(this.data);
     }
+    
 
+   /**
+     * Met à jour les informations d'un membre du personnel.
+     * @param personnelMisAJour L'objet Personnel avec les données mises à jour.
+     */
     @Override
-    public void updatePersonnel(Personnel updatedPersonnel) {
-        // On cherche l'employé par son ID pour le remplacer par sa version mise à jour.
+    public void mettreAJourPersonnel(Personnel personnelMisAJour) {
         for (int i = 0; i < this.data.size(); i++) {
-            if (this.data.get(i).getId() == updatedPersonnel.getId()) {
-                this.data.set(i, updatedPersonnel);
-                saveToFile();
+            if (this.data.get(i).getId() == personnelMisAJour.getId()) {
+                this.data.set(i, personnelMisAJour);
+                sauvegarderDansFichier();
                 return;
             }
         }
     }
 
+   /**
+     * Supprime un membre du personnel de la source de données.
+     * @param id L'identifiant de l'employé à supprimer.
+     */
     @Override
-    public void deletePersonnel(int id) {
-        // On cherche l'employé par son ID pour le supprimer de la liste.
-        boolean changed = false;
+    public void supprimerPersonnelParId(int id) {
+        int indexASupprimer = -1;
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getId() == id) {
-                this.data.remove(i);
-                changed = true;
+                indexASupprimer = i;
                 break;
             }
         }
-        if (changed) {
-            saveToFile();
+        if (indexASupprimer != -1) {
+            this.data.remove(indexASupprimer);
+            sauvegarderDansFichier();
         }
     }
 }

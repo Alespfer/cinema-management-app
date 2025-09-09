@@ -1,6 +1,6 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
+ * FenetreReinitialiserMotDePasse.java
+ * Fenêtre de dialogue pour la saisie et la validation d'un nouveau mot de passe.
  */
 package com.mycompany.cinema.view;
 
@@ -10,11 +10,10 @@ import javax.swing.JOptionPane;
 public class ReinitialiserMotDePasse extends javax.swing.JDialog {
 
     // Cette variable stockera le nouveau mot de passe si et seulement si la validation est réussie.
+    // Elle reste null si l'utilisateur annule.
     private String nouveauMotDePasse = null;
 
-    /**
-     * Constructeur.
-     */
+    // Constructeur 
     public ReinitialiserMotDePasse(java.awt.Frame parent, boolean modal) {
         super(parent, "Réinitialiser le mot de passe", modal);
         initComponents();
@@ -23,13 +22,12 @@ public class ReinitialiserMotDePasse extends javax.swing.JDialog {
     }
 
     /**
-     * Méthode publique pour afficher le dialogue et retourner le résultat.
-     * C'est la seule méthode que la fenêtre Login appellera.
+     * Affiche le dialogue et retourne le résultat. 
      *
      * @return Le nouveau mot de passe validé, ou null si l'utilisateur a
      * annulé.
      */
-    public String showDialog() {
+    public String afficherDialogue() {
         this.setVisible(true);
         return this.nouveauMotDePasse;
     }
@@ -43,9 +41,9 @@ public class ReinitialiserMotDePasse extends javax.swing.JDialog {
         char[] p2 = confirmPassField.getPassword();
 
         try {
-            // --- VALIDATION DE LA ROBUSTESSE AVEC DES REGEX SÉPARÉES ---
+            // --- Validation de la robustesse du mot de passe ---
 
-            // Règle 1 : Vérifier la longueur
+            // Règle 1 : Vérifier la longueur (8 caractères)
             if (motDePasseString.length() < 8) {
                 JOptionPane.showMessageDialog(this, "Le mot de passe doit contenir au moins 8 caractères.", "Mot de passe non conforme", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -69,7 +67,6 @@ public class ReinitialiserMotDePasse extends javax.swing.JDialog {
                 return;
             }
 
-            // --- FIN DE LA VALIDATION DE ROBUSTESSE ---
             // On vérifie que les deux mots de passe correspondent
             if (!Arrays.equals(p1, p2)) {
                 JOptionPane.showMessageDialog(this, "Les mots de passe ne correspondent pas.", "Validation", JOptionPane.ERROR_MESSAGE);

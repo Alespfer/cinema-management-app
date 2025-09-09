@@ -6,43 +6,44 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * C'est l'un des objets les plus importants pour l'interface graphique. Il
- * contient toutes les informations à afficher sur un film : son titre, son
- * affiche, son résumé, etc.
- *
- * Vous utiliserez un objet `Film` pour peupler : - Les lignes du tableau dans
- * `ProgrammationPanel`. - L'intégralité du panneau de détails
- * `FilmDetailPanel`. - Les formulaires de gestion dans `GestionFilmsPanel` pour
- * l'administrateur.
- *
- * Notez la présence de la `List<Genre> genres`. C'est une liste d'objets
- * `Genre` directement incluse dans le film, ce qui facilite l'affichage des
- * catégories (Action, Aventure...) associées au film.
+ * Représente un film avec ses données principales : titre, synopsis, durée,
+ * classification, affiche, note, etc.
+ * Sert de référence pour l’affichage dans la programmation, le détail d’un film
+ * ou les formulaires d’administration.
  */
 public class Film implements Serializable {
 
+    // Identifiant unique du film.
     private int idFilm;
-    private String titre;
-    private String synopsis;
-    private int dureeMinutes;
-    private String classification; // Ex: "Tous publics", "-12 ans"
-    private String urlAffiche;     // Le nom du fichier de l'affiche (ex: "dune.jpg")
-    private double notePresse;     // La note donnée par les critiques professionnels.
 
-    // Un film peut avoir plusieurs genres (ex: "Science-Fiction" ET "Aventure").
-    // On stocke donc une liste d'objets Genre directement ici.
+    // Titre du film.
+    private String titre;
+
+    // Synopsis.
+    private String synopsis;
+
+    // Durée en minutes.
+    private int dureeMinutes;
+
+    // Classification (ex. “Tous publics”, “-12 ans”, etc.).
+    private String classification;
+
+    // Nom de fichier ou URL de l’affiche.
+    private String urlAffiche;
+
+    // Note presse agrégée.
+    private double notePresse;
+
+    // Liste contenant les différents Genres associés au film.
     private List<Genre> genres;
 
-    /**
-     * Constructeur vide. Important : on initialise la liste des genres pour
-     * éviter les erreurs de type `NullPointerException`.
-     */
+    
     public Film() {
-        this.genres = new ArrayList<>();
+        this.genres = new ArrayList<Genre>();
     }
 
     /**
-     * Crée un objet Film complet.
+     * Constructeur principal.
      */
     public Film(int idFilm, String titre, String synopsis, int dureeMinutes, String classification, String urlAffiche, double notePresse) {
         this.idFilm = idFilm;
@@ -52,10 +53,10 @@ public class Film implements Serializable {
         this.classification = classification;
         this.urlAffiche = urlAffiche;
         this.notePresse = notePresse;
-        this.genres = new ArrayList<>(); // Toujours initialiser les listes !
+        this.genres = new ArrayList<Genre>();
     }
 
-    // --- ACCESSEURS (Getters and Setters) ---
+    // --- Getters / Setters ---
     public int getId() {
         return idFilm;
     }
@@ -133,16 +134,10 @@ public class Film implements Serializable {
     }
 
     /**
-     * Calcule le hash code basé sur l'identifiant du film. Cette méthode est
-     * essentielle pour garantir le bon fonctionnement du film dans les
-     * collections de type HashSet ou comme clé de HashMap. Elle respecte le
-     * contrat : si deux films sont égaux, ils ont le même hash code.
+     * Hash basé sur l’identifiant, conforme à equals.
      */
     @Override
     public int hashCode() {
-        // La méthode statique Objects.hash est une manière simple et robuste
-        // de générer un hash code à partir d'un ou plusieurs champs.
-        // (cf. doctrine p. 182)
         return Objects.hash(idFilm);
     }
 }

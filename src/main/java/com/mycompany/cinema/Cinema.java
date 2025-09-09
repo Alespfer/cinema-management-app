@@ -1,7 +1,7 @@
 package com.mycompany.cinema;
 
 import com.mycompany.cinema.util.DataInitializer;
-import com.mycompany.cinema.view.Login;
+import com.mycompany.cinema.view.FenetreConnexion;
 import java.io.File;
 import javax.swing.SwingUtilities;
 
@@ -29,14 +29,14 @@ public class Cinema {
         if (!dataDir.exists() || dataDir.list() == null || dataDir.list().length == 0) {
             // S'il n'existe pas, on le peuple avec des données de démonstration.
             System.out.println("Base de données de fichiers non trouvée. Création du jeu de données...");
-            DataInitializer.seed();
+            DataInitializer.initialiser();
             System.out.println("Jeu de données créé.");
         } else {
             System.out.println("Base de données de fichiers détectée.");
         }
 
             // Création et affichage de la fenêtre de connexion.
-            Login loginFrame = new Login();
+            FenetreConnexion loginFrame = new FenetreConnexion();
             loginFrame.setVisible(true);
     }
 }

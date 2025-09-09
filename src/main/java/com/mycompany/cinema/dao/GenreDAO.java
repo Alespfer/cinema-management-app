@@ -1,21 +1,21 @@
-// Fichier : GenreDAO.java
+// ========================================================================
+// FICHIER : GenreDAO.java
+// ========================================================================
 package com.mycompany.cinema.dao;
 
 import com.mycompany.cinema.Genre;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Définit le contrat pour la gestion des catégories de films (Action, Drame, etc.).
- * 
- * L'interface graphique utilisera ce contrat (via le service) pour peupler les
- * menus déroulants de filtres dans `ProgrammationPanel` et dans les panneaux d'administration.
+ * Utilisé pour peupler les menus de filtres et pour la gestion du catalogue.
  */
 public interface GenreDAO {
-    void addGenre(Genre genre);
-    Genre getGenreById(int id);
-    List<Genre> getAllGenres();
-    void updateGenre(Genre genre);          // <-- AJOUT
-    void deleteGenre(int id);    
+
+    void ajouterGenre(Genre genre);
+    Genre trouverGenreParId(int id);
+    List<Genre> trouverTousLesGenres();
+    void mettreAJourGenre(Genre genre);
+    void supprimerGenreParId(int id);    
     void rechargerDonnees();
 }

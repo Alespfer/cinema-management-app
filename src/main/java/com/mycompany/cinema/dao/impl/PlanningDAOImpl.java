@@ -1,3 +1,6 @@
+// ========================================================================
+// FICHIER : PlanningDAOImpl.java
+// ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Planning;
@@ -6,14 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implémentation concrète pour la gestion des plannings de travail du personnel.
- * S'occupe de la lecture et de l'écriture dans le fichier "plannings.dat".
- * 
- * Pour le développeur de l'interface graphique : cette classe fournit les données
- * pour le panneau d'administration qui gérera les horaires des employés.
- * Quand l'administrateur voudra voir l'emploi du temps de "Jean Dupont", c'est la
- * méthode `getPlanningsByPersonnelId` qui sera utilisée en arrière-plan pour
- * récupérer et afficher ses créneaux de travail.
+ * Implémentation pour la gestion des plannings de travail. Interagit avec le
+ * fichier "plannings.dat".
+ *
+ * Cette classe est utilisée par le back-office pour créer et afficher les
+ * horaires de service de chaque employé.
  */
 public class PlanningDAOImpl extends GenericDAOImpl<Planning> implements PlanningDAO {
 
@@ -21,27 +21,42 @@ public class PlanningDAOImpl extends GenericDAOImpl<Planning> implements Plannin
         super("plannings.dat");
     }
 
+    /**
+     * Ajoute un nouveau créneau de travail au planning.
+     *
+     * @param planning Le créneau à enregistrer.
+     */
     @Override
-    public void addPlanning(Planning planning) {
+    public void ajouterPlanning(Planning planning) {
         this.data.add(planning);
-        saveToFile();
+        sauvegarderDansFichier();
     }
 
+    /**
+     * Recherche tous les créneaux de planning pour un membre du personnel
+     * spécifique.
+     *
+     * @param idPersonnel L'identifiant de l'employé.
+     * @return Une liste de ses créneaux de travail.
+     */
     @Override
-    public List<Planning> getPlanningsByPersonnelId(int personnelId) {
-        List<Planning> planningsDuPersonnel = new ArrayList<>();
-        // On parcourt tous les créneaux de planning...
+    public List<Planning> trouverPlanningsParIdPersonnel(int idPersonnel) {
+        List<Planning> planningsTrouves = new ArrayList<>();
         for (Planning planning : this.data) {
-            // ...et on retourne uniquement ceux qui appartiennent à l'employé demandé.
-            if (planning.getIdPersonnel() == personnelId) {
-                planningsDuPersonnel.add(planning);
+            if (planning.getIdPersonnel() == idPersonnel) {
+                planningsTrouves.add(planning);
             }
         }
-        return planningsDuPersonnel;
+        return planningsTrouves;
     }
 
+    /**
+     * Retourne la totalité des créneaux de planning enregistrés.
+     *
+     * @return Une copie de la liste de tous les plannings.
+     */
     @Override
-    public List<Planning> getAllPlannings() {
+    public List<Planning> trouverTousLesPlannings() {
         return new ArrayList<>(this.data);
     }
 }

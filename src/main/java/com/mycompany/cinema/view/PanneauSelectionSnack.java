@@ -1,0 +1,248 @@
+/*
+ * PanneauSelectionSnack.java
+ * Affiche la liste des produits de snacking disponibles et permet au client
+ * de choisir les quantités désirées. Il calcule le total en temps réel.
+ */
+package com.mycompany.cinema.view;
+
+import com.mycompany.cinema.LignePanier;
+import com.mycompany.cinema.ProduitSnack;
+import com.mycompany.cinema.service.ClientService;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+public class PanneauSelectionSnack extends javax.swing.JPanel {
+
+    private final ClientService clientService;
+
+    // `panier` contient le modèle de données (les objets LignePanier).
+    // `panneauxLignesSnack` contient les composants graphiques correspondants.
+    private final List<LignePanier> panier = new ArrayList<>();
+    private final List<PanneauLigneSnack> listeItemsPanels = new ArrayList<>();
+    private static final DecimalFormat CURRENCY_FORMATTER = new DecimalFormat("#,##0.00 €");
+
+    public interface SnackSelectionListener {
+
+        void SelectionSnacksTerminee(List<LignePanier> cart);
+    }
+    private SnackSelectionListener listener;
+
+    public interface NavigationListener {
+
+        void RetourVersSieges();
+
+        void Skip();
+    }
+    private NavigationListener navigationListener;
+
+    public PanneauSelectionSnack(ClientService clientService) {
+        this.clientService = clientService;
+        initComponents();
+        initialiserListeProduits();
+        actualiserTotal();
+
+    }
+
+    /**
+     * Construit dynamiquement la liste des snacks en créant un
+     * PanneauLigneSnack pour chaque produit.
+     */
+    private void initialiserListeProduits() {
+        produitListPanel.removeAll();
+        panier.clear();
+        listeItemsPanels.clear();
+
+        List<ProduitSnack> produitsDisponibles = clientService.trouverTousLesProduits();
+
+        for (ProduitSnack produit : produitsDisponibles) {
+            if (produit.getStock() > 0) {
+                LignePanier ligne = new LignePanier(produit, 0);
+                panier.add(ligne);
+
+                PanneauLigneSnack itemPanel = new PanneauLigneSnack(ligne);
+                listeItemsPanels.add(itemPanel);
+
+                itemPanel.getSpinner().addChangeListener(new ChangeListener() {
+                    @Override
+                    public void stateChanged(ChangeEvent e) {
+                        actualiserTotal();
+                    }
+                });
+                produitListPanel.add(itemPanel);
+                produitListPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+            }
+        }
+        produitListPanel.revalidate();
+        produitListPanel.repaint();
+    }
+
+    /**
+     * Recalcule le total du panier de snacks et met à jour l'affichage.
+     */
+    private void actualiserTotal() {
+        double total = 0.0;
+        boolean panierEstVide = true;
+
+        for (PanneauLigneSnack itemPanel : listeItemsPanels) {
+            int quantite = itemPanel.getQuantite();
+            total += itemPanel.getProduit().getPrixVente() * quantite;
+
+            if (quantite > 0) {
+                panierEstVide = false;
+            }
+        }
+        totalLabel.setText("Total Snacks: " + CURRENCY_FORMATTER.format(total));
+
+        // On active/désactive les boutons en fonction de l'état du panier.
+        skipButton.setEnabled(panierEstVide);
+        validerButton.setEnabled(!panierEstVide);
+    }
+
+    /**
+     * Construit et retourne le panier final contenant uniquement les lignes
+     * avec une quantité > 0.
+     */
+    private List<LignePanier> getPanierFinal() {
+        List<LignePanier> panierFinal = new ArrayList<>();
+        for (LignePanier ligne : panier) {
+            if (ligne.getQuantite() > 0) {
+                panierFinal.add(ligne);
+            }
+        }
+        return panierFinal;
+    }
+    
+    
+     /**
+     * Réinitialise toutes les quantités à zéro.
+     */
+    public void reinitialiserPanneau() {
+        for (PanneauLigneSnack itemPanel : listeItemsPanels) {
+            itemPanel.reinitialiser();
+        }
+        boolean panierEstVide = true;
+
+        skipButton.setEnabled(panierEstVide);
+
+    }
+
+    public void setListener(SnackSelectionListener listener) {
+        this.listener = listener;
+    }
+
+    public void setNavigationListener(NavigationListener navigationListener) {
+        this.navigationListener = navigationListener;
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        scrollPaneProduits = new javax.swing.JScrollPane();
+        produitListPanel = new javax.swing.JPanel();
+        bottomPanel = new javax.swing.JPanel();
+        totalLabel = new javax.swing.JLabel();
+        buttonPanel = new javax.swing.JPanel();
+        retourButton = new javax.swing.JButton();
+        skipButton = new javax.swing.JButton();
+        validerButton = new javax.swing.JButton();
+
+        setBorder(javax.swing.BorderFactory.createTitledBorder("Étape 3/3 : Ajouter une collation ?"));
+        setLayout(new java.awt.BorderLayout());
+
+        produitListPanel.setLayout(new javax.swing.BoxLayout(produitListPanel, javax.swing.BoxLayout.Y_AXIS));
+        scrollPaneProduits.setViewportView(produitListPanel);
+
+        add(scrollPaneProduits, java.awt.BorderLayout.CENTER);
+
+        bottomPanel.setLayout(new java.awt.BorderLayout());
+
+        totalLabel.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
+        totalLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        totalLabel.setText("Total Snacks : 0,00 €");
+        bottomPanel.add(totalLabel, java.awt.BorderLayout.CENTER);
+
+        buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+
+        retourButton.setText("<< Retour aux sièges");
+        retourButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                retourButtonActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(retourButton);
+
+        skipButton.setText("Non, merci (Paiement)");
+        skipButton.setEnabled(false);
+        skipButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                skipButtonActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(skipButton);
+
+        validerButton.setText("Valider avec snacks (Paiement) >>");
+        validerButton.setEnabled(false);
+        validerButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                validerButtonActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(validerButton);
+
+        bottomPanel.add(buttonPanel, java.awt.BorderLayout.PAGE_END);
+
+        add(bottomPanel, java.awt.BorderLayout.PAGE_END);
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void validerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_validerButtonActionPerformed
+        if (listener != null) {
+            listener.SelectionSnacksTerminee(getPanierFinal());
+        }// TODO add your handling code here:
+    }//GEN-LAST:event_validerButtonActionPerformed
+
+    private void skipButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skipButtonActionPerformed
+        if (navigationListener != null) {
+            navigationListener.Skip();
+        }
+// TODO add your handling code here:
+    }//GEN-LAST:event_skipButtonActionPerformed
+
+    private void retourButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_retourButtonActionPerformed
+        if (navigationListener != null) {
+            navigationListener.RetourVersSieges();
+        }// TODO add your handling code here:
+    }//GEN-LAST:event_retourButtonActionPerformed
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel bottomPanel;
+    private javax.swing.JPanel buttonPanel;
+    private javax.swing.JPanel produitListPanel;
+    private javax.swing.JButton retourButton;
+    private javax.swing.JScrollPane scrollPaneProduits;
+    private javax.swing.JButton skipButton;
+    private javax.swing.JLabel totalLabel;
+    private javax.swing.JButton validerButton;
+    // End of variables declaration//GEN-END:variables
+}

@@ -1,22 +1,20 @@
+// ========================================================================
+// FICHIER : FilmDAOImpl.java
+// ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Film;
 import com.mycompany.cinema.dao.FilmDAO;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion du catalogue de films dans le fichier
- * "films.dat". C'est l'une des classes de gestion les plus importantes.
+ * Implémentation pour la gestion du catalogue de films. Interagit avec le
+ * fichier "films.dat".
  *
- * Pour le développeur de l'interface graphique : cette classe fournit toutes
- * les données nécessaires pour les panneaux liés aux films. - `getAllFilms` et
- * `findFilmsByTitre` alimentent le tableau du `ProgrammationPanel`. -
- * `getFilmById` est crucial pour afficher toutes les informations dans le
- * `FilmDetailPanel`. - Les autres méthodes (`add`, `update`, `delete`) sont les
- * actions effectuées par les boutons du `GestionFilmsPanel` de
- * l'administrateur.
+ * Elle fournit les données pour l'affichage de la programmation, les détails
+ * des films, et permet les opérations de gestion (création, modification,
+ * suppression) dans le panneau d'administration.
  */
 public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
 
@@ -24,15 +22,25 @@ public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
         super("films.dat");
     }
 
+    /**
+     * Ajoute un nouveau film au catalogue.
+     *
+     * @param film L'objet Film à enregistrer.
+     */
     @Override
-    public void addFilm(Film film) {
+    public void ajouterFilm(Film film) {
         this.data.add(film);
-        saveToFile();
+        sauvegarderDansFichier();
     }
 
-    // Dans FilmDAOImpl.java
+    /**
+     * Recherche un film par son identifiant unique.
+     *
+     * @param id L'identifiant du film.
+     * @return L'objet Film correspondant ou `null` si non trouvé.
+     */
     @Override
-    public Film getFilmById(int id) {
+    public Film trouverFilmParId(int id) {
         for (Film film : this.data) {
             if (film.getId() == id) {
                 return film;
@@ -40,49 +48,71 @@ public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
         }
         return null;
     }
-
+    
+    
+    /**
+     * Recherche des films dont le titre contient un mot-clé donné.
+     * La recherche est insensible à la cass (on convertit le mot en minuscules
+     * avant de comparer les titres)
+     * @param motCle Le texte à rechercher dans les titres.
+     * @return Une liste de films correspondant au critère.
+     */
     @Override
-    public List<Film> getAllFilms() {
+    public List<Film> rechercherFilmsParTitre(String motCle) {
+        List<Film> filmsCorrespondants = new ArrayList<>();
+        String motCleMinuscule = motCle.toLowerCase();
+        for (Film film : this.data) {
+            if (film.getTitre().toLowerCase().contains(motCleMinuscule)) {
+                filmsCorrespondants.add(film);
+            }
+        }
+        return filmsCorrespondants;
+    }
+
+    /**
+     * Retourne la liste complète de tous les films.
+     *
+     * @return Une copie de la liste pour protéger les données.
+     */
+    @Override
+    public List<Film> trouverTousLesFilms() {
         return new ArrayList<>(this.data);
     }
 
+    /**
+     * Met à jour les informations d'un film existant.
+     *
+     * @param filmMisAJour L'objet Film avec les données mises à jour.
+     */
     @Override
-    public void updateFilm(Film updatedFilm) {
+    public void mettreAJourFilm(Film filmMisAJour) {
         for (int i = 0; i < this.data.size(); i++) {
-            if (this.data.get(i).getId() == updatedFilm.getId()) {
-                this.data.set(i, updatedFilm);
-                saveToFile();
+            if (this.data.get(i).getId() == filmMisAJour.getId()) {
+                this.data.set(i, filmMisAJour);
+                sauvegarderDansFichier();
                 return;
             }
         }
     }
 
+     /**
+     * Supprime un film du catalogue à partir de son ID.
+     * @param id L'identifiant du film à supprimer.
+     */
     @Override
-    public void deleteFilm(int id) {
-        boolean changed = false;
+    public void supprimerFilmParId(int id) {
+        int indexASupprimer = -1;
+
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getId() == id) {
-                this.data.remove(i);
-                changed = true;
+                indexASupprimer = i;
                 break;
             }
         }
-        if (changed) {
-            saveToFile();
-        }
-    }
 
-    @Override
-    public List<Film> findFilmsByTitre(String keyword) {
-        List<Film> filmsTrouves = new ArrayList<>();
-        // On convertit le mot-clé en minuscules une seule fois pour l'efficacité.
-        String motCleMinuscule = keyword.toLowerCase();
-        for (Film film : this.data) {
-            // On compare les titres en minuscules pour que la recherche ne soit pas sensible à la casse.
-            if (film.getTitre().toLowerCase().contains(motCleMinuscule)) {
-                filmsTrouves.add(film);
-            }
+        if (indexASupprimer != -1) {
+            this.data.remove(indexASupprimer);
+            sauvegarderDansFichier();
         }
-        return filmsTrouves;
     }
 }

@@ -1,20 +1,17 @@
-// Fichier : RoleDAOImpl.java
+// ========================================================================
+// FICHIER : RoleDAOImpl.java
+// ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Role;
 import com.mycompany.cinema.dao.RoleDAO;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion des rôles du personnel dans
- * "roles.dat".
+ * Implémentation pour la gestion des rôles du personnel.
+ * Interagit avec le fichier "roles.dat".
  *
- * Pour le développeur de l'interface graphique : cette classe est essentielle
- * pour la logique de connexion et de gestion du personnel. - `getAllRoles` et
- * `getRoleById` sont utilisés par `LoginFrame` pour la redirection et par
- * `GestionPersonnelPanel` pour remplir la liste déroulante des rôles.
  */
 public class RoleDAOImpl extends GenericDAOImpl<Role> implements RoleDAO {
 
@@ -22,14 +19,23 @@ public class RoleDAOImpl extends GenericDAOImpl<Role> implements RoleDAO {
         super("roles.dat");
     }
 
+    /**
+     * Ajoute un nouveau rôle.
+     * @param role Le rôle à enregistrer.
+     */
     @Override
-    public void addRole(Role role) {
+    public void ajouterRole(Role role) {
         this.data.add(role);
-        saveToFile();
+        sauvegarderDansFichier();
     }
 
+    /**
+     * Recherche un rôle par son identifiant.
+     * @param id L'identifiant du rôle.
+     * @return L'objet Role, ou `null` si non trouvé.
+     */
     @Override
-    public Role getRoleById(int id) {
+    public Role trouverRoleParId(int id) {
         for (Role role : this.data) {
             if (role.getId() == id) {
                 return role;
@@ -37,9 +43,14 @@ public class RoleDAOImpl extends GenericDAOImpl<Role> implements RoleDAO {
         }
         return null;
     }
-
+    
+    
+    /**
+     * Retourne la liste de tous les rôles disponibles.
+     * @return Une copie de la liste des rôles.
+     */
     @Override
-    public List<Role> getAllRoles() {
+    public List<Role> trouverTousLesRoles() {
         return new ArrayList<>(this.data);
     }
 }

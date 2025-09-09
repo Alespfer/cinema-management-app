@@ -3,45 +3,45 @@ package com.mycompany.cinema;
 import java.io.Serializable;
 
 /**
- * Représente une catégorie de film, comme "Action", "Drame", ou "Science-Fiction".
- * 
- * Dans l'interface graphique, vous utiliserez principalement une liste d'objets `Genre`
- * pour peupler les menus déroulants de filtres (par exemple dans `ProgrammationPanel`).
- * Vous pourrez aussi afficher les libellés des genres sur la page de détail d'un film.
+ * Représente un genre cinématographique (ex. Action, Drame, Science-Fiction).
  */
 public class Genre implements Serializable {
-    
-    private int idGenre;    // Le numéro unique du genre.
-    private String libelle; // Le nom du genre (ex: "Aventure").
+
+    // Identifiant unique du genre.
+    private int idGenre;
+
+    // Libellé du genre.
+    private String libelle;
+
+    // Constructeur par défaut requis pour la sérialisation.
+    public Genre() {
+    }
 
     /**
-     * Constructeur vide (nécessité technique).
-     */
-    public Genre() {}
-
-    /**
-     * Crée une nouvelle catégorie de film.
-     * @param idGenre L'identifiant unique.
-     * @param libelle Le nom de la catégorie.
+     * Constructeur principal.
+     *
+     * @param idGenre identifiant du genre
+     * @param libelle libellé du genre
      */
     public Genre(int idGenre, String libelle) {
         this.idGenre = idGenre;
         this.libelle = libelle;
     }
-    
-    // --- ACCESSEURS (Getters and Setters) ---
 
-    public int getId() { 
-        return idGenre; 
+    // --- Getters / Setters ---
+    public int getId() {
+        return idGenre;
     }
-    public void setId(int idGenre) { 
-        this.idGenre = idGenre; 
+
+    public void setId(int idGenre) {
+        this.idGenre = idGenre;
     }
-    
-    public String getLibelle() { 
-        return libelle; 
+
+    public String getLibelle() {
+        return libelle;
     }
-    public void setLibelle(String libelle) { 
-        this.libelle = libelle; 
+
+    public void setLibelle(String libelle) {
+        this.libelle = libelle;
     }
 }

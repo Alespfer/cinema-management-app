@@ -1,19 +1,17 @@
+// ========================================================================
+// FICHIER : GenreDAOImpl.java
+// ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Genre;
 import com.mycompany.cinema.dao.GenreDAO;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Implémentation concrète pour gérer la sauvegarde des genres de films dans le
- * fichier "genres.dat".
+ * Implémentation pour la gestion de la persistance des objets Genre.
+ * Interagit avec le fichier "genres.dat".
  *
- * Pour le développeur de l'interface graphique : cette classe fournit les
- * données pour tous les menus déroulants de sélection de genre, que ce soit
- * dans le `ProgrammationPanel` pour le client ou dans les panneaux
- * d'administration.
  */
 public class GenreDAOImpl extends GenericDAOImpl<Genre> implements GenreDAO {
 
@@ -21,49 +19,76 @@ public class GenreDAOImpl extends GenericDAOImpl<Genre> implements GenreDAO {
         super("genres.dat");
     }
 
+    /**
+     * Ajoute un nouveau genre au système.
+     *
+     * @param genre L'objet Genre à enregistrer.
+     */
     @Override
-    public void addGenre(Genre genre) {
+    public void ajouterGenre(Genre genre) {
         this.data.add(genre);
-        saveToFile();
+        sauvegarderDansFichier();
     }
 
+    /**
+     * Recherche un genre par son identifiant.
+     *
+     * @param id L'identifiant du genre.
+     * @return L'objet Genre correspondant, ou `null` si non trouvé.
+     */
     @Override
-    public Genre getGenreById(int id) {
-        for (Genre g : this.data) {
-            if (g.getId() == id) {
-                return g;
+    public Genre trouverGenreParId(int id) {
+        for (Genre genre : this.data) {
+            if (genre.getId() == id) {
+                return genre;
             }
         }
         return null;
     }
 
+    /**
+     * Retourne la liste complète de tous les genres.
+     *
+     * @return Une copie de la liste pour la sécurité des données.
+     */
     @Override
-    public List<Genre> getAllGenres() {
-        // Retourne une copie de la liste pour la sécurité.
+    public List<Genre> trouverTousLesGenres() {
         return new ArrayList<>(this.data);
     }
 
+    /**
+     * Met à jour les informations d'un genre existant.
+     *
+     * @param genreMisAJour L'objet Genre contenant les nouvelles données.
+     */
     @Override
-    public void updateGenre(Genre genre) {
+    public void mettreAJourGenre(Genre genreMisAJour) {
         for (int i = 0; i < this.data.size(); i++) {
-            Genre g = this.data.get(i);
-            if (g.getId() == genre.getId()) {
-                this.data.set(i, genre);
-                saveToFile();
+            if (this.data.get(i).getId() == genreMisAJour.getId()) {
+                this.data.set(i, genreMisAJour);
+                sauvegarderDansFichier();
                 return;
             }
         }
     }
 
+    /**
+     * Supprime un genre de la source de données à partir de son identifiant.
+     *
+     * @param id L'identifiant du genre à supprimer.
+     */
     @Override
-    public void deleteGenre(int id) {
+    public void supprimerGenreParId(int id) {
+        int indexASupprimer = -1;
         for (int i = 0; i < this.data.size(); i++) {
-            Genre g = this.data.get(i);
-            if (g.getId() == id) {
-                this.data.remove(i);
-                saveToFile();
-                return;
+            if (this.data.get(i).getId() == id) {
+                indexASupprimer = i;
+                break;
             }
+        }
+        if (indexASupprimer != -1) {
+            this.data.remove(indexASupprimer);
+            sauvegarderDansFichier();
         }
     }
 }

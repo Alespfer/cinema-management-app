@@ -5,79 +5,77 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * C'est la "boîte à outils" magique pour tous les autres gestionnaires de données (DAO).
- * Son rôle est de fournir le code de base, commun à tous, pour lire et écrire
- * une liste d'objets dans un fichier.
- * 
- * Grâce au mécanisme de "génériques" (<T>), on peut lui dire de travailler avec n'importe
- * quel type d'objet : `GenericDAOImpl<Film>`, `GenericDAOImpl<Client>`, etc.
- * 
- * Pour le développeur de l'interface graphique : cette classe est le moteur invisible de la
- * persistance. Vous n'aurez jamais à l'utiliser directement, mais il est bon de savoir
- * qu'elle existe et qu'elle assure que toutes les données sont chargées et sauvegardées
- * de manière uniforme et sécurisée.
+ * Classe abstraite servant de "boîte à outils" pour toutes les autresclasses
+ * DAO du projet. Elle centralise la logique commune de lecture et
+ * d'écritured'une liste d'objets dans un fichier.
+ *
+ * Le mécanisme de "génériques" (représenté par <T>) lui permet de fonctionner
+ * avec n'importe quel type d'objet (Film, Client, etc.) sans avoir à réécrire
+ * le code.
+ *
  */
 public abstract class GenericDAOImpl<T> {
 
-    // Le chemin vers le fichier de sauvegarde (ex: "data/films.dat").
-    private final String filePath;
+    // Le chemin complet vers le fichier de sauvegarde (ex: "data/films.dat").
+    private final String cheminFichier;
     // La liste des objets (films, clients, etc.) actuellement chargée en mémoire.
     protected List<T> data;
 
     /**
-     * Le constructeur initialise le gestionnaire.
-     * @param fileName Le nom du fichier où les données seront stockées.
+     * Initialise le gestionnaire de données.
+     *
+     * @param nomFichier Le nom du fichier (ex: "films.dat") qui sera stocké
+     * dans le dossier "data".
      */
-    public GenericDAOImpl(String fileName) {
-        this.filePath = "data/" + fileName;
-        // Dès sa création, le DAO charge immédiatement les données depuis le disque.
-        this.data = loadFromFile();
-    }
-    
-    /**
-     * Force une relecture du fichier de données. Utile pour s'assurer que
-     * l'application dispose des informations les plus récentes.
-     */
-    public void rechargerDonnees() {
-        this.data = loadFromFile();
+    public GenericDAOImpl(String nomFichier) {
+        this.cheminFichier = "data/" + nomFichier;
+        // Dès l'instanciation, on charge immédiatement les données depuis le disque.
+        this.data = chargerDepuisFichier();
     }
 
     /**
-     * Charge la liste d'objets depuis le fichier spécifié par 'filePath'.
-     * C'est ici que la "désérialisation" a lieu.
+     * Force une relecture complète du fichier de données. Utile pour s'assurer
+     * que l'application travaille avec les informations les plus à jour.
      */
-    @SuppressWarnings("unchecked")
-    private List<T> loadFromFile() {
-        File file = new File(filePath);
-        // Si le fichier n'existe pas (premier lancement), on retourne une liste neuve et vide.
-        if (!file.exists()) {
+    public void rechargerDonnees() {
+        this.data = chargerDepuisFichier();
+    }
+
+    /**
+     * Charge une liste d'objets depuis un fichier binaire.
+     *
+     * @return Une List<T> contenant les objets lus. Si le fichier n'existe pas
+     * ou est corrompu, retourne une nouvelle liste vide.
+     */
+    private List<T> chargerDepuisFichier() {
+        File fichier = new File(cheminFichier);
+        if (!fichier.exists()) {
             return new ArrayList<>();
         }
-        // Bloc 'try-with-resources' : gère automatiquement la fermeture du fichier.
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
-            // Lecture de la liste d'objets depuis le fichier.
-            return (List<T>) ois.readObject();
+
+        try (ObjectInputStream fluxEntreeObjet = new ObjectInputStream(new FileInputStream(fichier))) {
+            // Lecture de l'intégralité de la liste d'objets depuis le fichier.
+            return (List<T>) fluxEntreeObjet.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            // En cas de problème de lecture, on affiche une erreur et on retourne une liste vide
-            // pour éviter que l'application ne plante.
-            System.err.println("Erreur critique lors du chargement de " + filePath);
+            System.err.println("Erreur critique lors du chargement du fichier : " + cheminFichier);
             e.printStackTrace();
             return new ArrayList<>();
         }
     }
 
     /**
-     * Sauvegarde la liste 'data' (actuellement en mémoire) dans le fichier.
-     * C'est ici que la "sérialisation" a lieu.
+     * Sauvegarde la liste complète des objets actuellement en mémoire dans un
+     * fichier binaire (sérialisation). Toute modification (ajout, mise à jour,
+     * suppression) dans une sous-classe doit appeler cette méthode pour rendre
+     * le changement permanent.
      */
-    protected void saveToFile() {
-        // S'assure que le dossier "data" existe avant d'essayer d'écrire dedans.
+    protected void sauvegarderDansFichier() {
         new File("data").mkdirs();
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(this.filePath))) {
-            // Écriture de la liste complète d'objets dans le fichier.
-            oos.writeObject(this.data);
+        try (ObjectOutputStream fluxSortieObjet = new ObjectOutputStream(new FileOutputStream(this.cheminFichier))) {
+            // Écrit l'intégralité de la liste 'data' dans le fichier, écrasant son contenu précédent.
+            fluxSortieObjet.writeObject(this.data);
         } catch (IOException e) {
-            System.err.println("Erreur critique lors de la sauvegarde de " + filePath);
+            System.err.println("Erreur critique lors de la sauvegarde dans le fichier : " + cheminFichier);
             e.printStackTrace();
         }
     }

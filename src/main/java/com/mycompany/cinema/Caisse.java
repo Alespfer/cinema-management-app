@@ -3,37 +3,39 @@ package com.mycompany.cinema;
 import java.io.Serializable;
 
 /**
- * Représente un point de vente physique ou une caisse enregistreuse.
- * Sert principalement à localiser où une vente de snack a été effectuée.
- * 
- * L'interface graphique client n'utilisera pas cette classe. Elle sera en revanche
- * essentielle pour le "PointDeVenteFrame" (l'interface du vendeur) et pour les
- * rapports de ventes dans le panneau d'administration.
+ * Représente une caisse enregistreuse ou un point de vente physique.
+ *
+ * Utilisée pour tracer l’origine des ventes (snacking, billetterie, etc.)
+ * et alimenter les rapports côté administration.
  */
 public class Caisse implements Serializable {
-    
-    private int idCaisse;       // Le numéro unique de la caisse.
-    private String nom;         // Un nom facile à reconnaître (ex: "Comptoir Principal").
-    private String emplacement; // Une description de sa position (ex: "Hall d'entrée").
 
-    /**
-     * Constructeur vide (nécessité technique).
-     */
+    // Identifiant unique de la caisse. 
+    private int idCaisse;
+
+    // Nom attribué à la caisse (ex. "Comptoir Principal").
+    private String nom;
+
+    // Emplacement ou localisation de la caisse (ex. "Hall d'entrée"). 
+    private String emplacement;
+
+    // Constructeur par défaut requis pour la sérialisation. 
     public Caisse() {}
 
     /**
-     * Crée une nouvelle caisse.
-     * @param idCaisse L'identifiant unique.
-     * @param nom Son nom.
-     * @param emplacement Sa localisation.
+     * Constructeur principal.
+     *
+     * @param idCaisse identifiant unique
+     * @param nom nom de la caisse
+     * @param emplacement localisation de la caisse
      */
     public Caisse(int idCaisse, String nom, String emplacement) {
         this.idCaisse = idCaisse;
         this.nom = nom;
         this.emplacement = emplacement;
     }
-
-    // --- ACCESSEURS (Getters & Setters) ---
+    
+    // --- Getters / Setters ---
 
     public int getId() {
         return idCaisse;

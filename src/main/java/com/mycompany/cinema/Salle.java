@@ -4,32 +4,28 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Représente une salle de projection physique dans le cinéma.
- *
- * Cet objet est utilisé à plusieurs endroits dans l'interface graphique : -
- * Pour afficher le nom de la salle dans les détails d'une séance (ex: "Salle
- * 5"). - Dans `SiegePanel`, l'ID de la salle est crucial pour savoir quel plan
- * de sièges il faut dessiner. - Dans la partie administration, pour gérer la
- * liste des salles disponibles dans `GestionSallesPanel`.
+ * Représente une salle de projection du cinéma.
  */
 public class Salle implements Serializable {
 
+    //  Identifiant unique de la salle.
     private int idSalle;
-    private String numero;   // Le nom ou numéro de la salle (ex: "Salle 1", "Salle IMAX").
-    private int capacite; // Le nombre total de sièges dans cette salle.
 
-    /**
-     * Constructeur vide (nécessité technique).
-     */
+    // Nom ou numéro de la salle (ex: "Salle 1", "Salle IMAX").
+    private String numero;
+
+    // Nombre total de sièges disponibles.
+    private int capacite;
+
     public Salle() {
     }
 
     /**
-     * Crée une nouvelle salle.
+     * Constructeur principal.
      *
-     * @param idSalle L'ID unique de la salle.
-     * @param numero Le nom de la salle.
-     * @param capacite Le nombre total de sièges.
+     * @param idSalle identifiant unique de la salle
+     * @param numero nom ou numéro attribué à la salle
+     * @param capacite nombre total de sièges
      */
     public Salle(int idSalle, String numero, int capacite) {
         this.idSalle = idSalle;
@@ -37,7 +33,7 @@ public class Salle implements Serializable {
         this.capacite = capacite;
     }
 
-    // --- ACCESSEURS (Getters and Setters) ---
+    // --- Getters / Setters ---
     public int getId() {
         return idSalle;
     }
@@ -62,6 +58,7 @@ public class Salle implements Serializable {
         this.capacite = capacite;
     }
 
+    // Rédéfinition de la méthode equals
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -74,14 +71,8 @@ public class Salle implements Serializable {
         return idSalle == salle.idSalle;
     }
 
-    /**
-     * Calcule le hash code basé sur l'identifiant de la salle. Cette méthode
-     * est essentielle pour respecter le contrat entre equals() et hashCode().
-     */
     @Override
     public int hashCode() {
-        // On utilise la méthode utilitaire Objects.hash pour garantir une implémentation
-        // correcte et performante, comme vu à la page 182 de la doctrine.
         return Objects.hash(idSalle);
     }
 }

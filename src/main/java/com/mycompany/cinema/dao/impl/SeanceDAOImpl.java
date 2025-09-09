@@ -1,3 +1,6 @@
+// ========================================================================
+// FICHIER : SeanceDAOImpl.java
+// ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Seance;
@@ -5,19 +8,14 @@ import com.mycompany.cinema.dao.SeanceDAO;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion des séances de projection dans
- * "seances.dat".
+ * Implémentation pour la gestion des séances de projection. Interagit avec le
+ * fichier "seances.dat".
  *
- * Pour le développeur de l'interface graphique : cette classe est le moteur de
- * la programmation du cinéma. - Le `ProgrammationPanel` utilise massivement
- * cette classe (via le service) pour filtrer et afficher les séances
- * disponibles selon les critères du client. - Le `FilmDetailPanel` l'utilise
- * pour afficher les horaires d'un film pour un jour donné. - Le
- * `GestionSeancesPanel` de l'administrateur s'en sert pour créer, modifier et
- * supprimer les séances.
+ * Cette classe est sollicitée par l'interface client pour afficher les séances
+ * disponibles et appliquer les filtres de recherche (par film, par date), ainsi
+ * que par l'administration pour la gestion du planning des projections.
  */
 public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
 
@@ -25,14 +23,25 @@ public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
         super("seances.dat");
     }
 
+    /**
+     * Ajoute une nouvelle séance à la programmation.
+     *
+     * @param seance L'objet Seance à enregistrer.
+     */
     @Override
-    public void addSeance(Seance seance) {
+    public void ajouterSeance(Seance seance) {
         this.data.add(seance);
-        saveToFile();
+        sauvegarderDansFichier();
     }
 
+    /**
+     * Recherche une séance par son identifiant unique.
+     *
+     * @param id L'identifiant de la séance.
+     * @return L'objet Seance correspondant, ou `null` si non trouvé.
+     */
     @Override
-    public Seance getSeanceById(int id) {
+    public Seance trouverSeanceParId(int id) {
         for (Seance seance : this.data) {
             if (seance.getId() == id) {
                 return seance;
@@ -41,59 +50,84 @@ public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
         return null;
     }
 
+    /**
+     * Retourne la liste de toutes les séances programmées.
+     *
+     * @return Une copie de la liste de toutes les séances.
+     */
     @Override
-    public List<Seance> getAllSeances() {
+    public List<Seance> trouverToutesLesSeances() {
         return new ArrayList<>(this.data);
     }
 
+    /**
+     * Recherche toutes les séances pour un film spécifique.
+     *
+     * @param idFilm L'identifiant unique du film.
+     * @return Une liste des séances pour ce film.
+     */
     @Override
-    public List<Seance> getSeancesByFilmId(int filmId) {
-        List<Seance> resultat = new ArrayList<>();
-        // Filtre les séances pour ne garder que celles d'un film spécifique.
+    public List<Seance> trouverSeancesParIdFilm(int idFilm) {
+        List<Seance> seancesTrouvees = new ArrayList<>();
         for (Seance seance : this.data) {
-            if (seance.getIdFilm() == filmId) {
-                resultat.add(seance);
+            if (seance.getIdFilm() == idFilm) {
+                seancesTrouvees.add(seance);
             }
         }
-        return resultat;
+        return seancesTrouvees;
     }
 
+    /**
+     * Recherche toutes les séances pour un jour donné.
+     *
+     * @param date La date pour laquelle rechercher les séances.
+     * @return Une liste des séances pour cette date.
+     */
     @Override
-    public List<Seance> getSeancesByDate(LocalDate date) {
-        List<Seance> resultat = new ArrayList<>();
-        // Filtre les séances pour ne garder que celles d'un jour donné.
+    public List<Seance> trouverSeancesParDate(LocalDate date) {
+        List<Seance> seancesTrouvees = new ArrayList<>();
         for (Seance seance : this.data) {
-            // On compare uniquement la partie "date" de l'objet LocalDateTime.
+            // On extrait la date à partir de l'objet LocalDateTime.
             if (seance.getDateHeureDebut().toLocalDate().isEqual(date)) {
-                resultat.add(seance);
+                seancesTrouvees.add(seance);
             }
         }
-        return resultat;
+        return seancesTrouvees;
     }
 
+    /**
+     * Met à jour les informations d'une séance existante.
+     *
+     * @param seanceMiseAJour L'objet Seance avec les données mises à jour.
+     */
     @Override
-    public void updateSeance(Seance updatedSeance) {
+    public void mettreAJourSeance(Seance seanceMiseAJour) {
         for (int i = 0; i < this.data.size(); i++) {
-            if (this.data.get(i).getId() == updatedSeance.getId()) {
-                this.data.set(i, updatedSeance);
-                saveToFile();
+            if (this.data.get(i).getId() == seanceMiseAJour.getId()) {
+                this.data.set(i, seanceMiseAJour);
+                sauvegarderDansFichier();
                 return;
             }
         }
     }
 
+    /**
+     * Supprime une séance de la programmation.
+     *
+     * @param id L'identifiant de la séance à supprimer.
+     */
     @Override
-    public void deleteSeance(int id) {
-        boolean changed = false;
+    public void supprimerSeanceParId(int id) {
+        int indexASupprimer = -1;
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getId() == id) {
-                this.data.remove(i);
-                changed = true;
+                indexASupprimer = i;
                 break;
             }
         }
-        if (changed) {
-            saveToFile();
+        if (indexASupprimer != -1) {
+            this.data.remove(indexASupprimer);
+            sauvegarderDansFichier();
         }
     }
 }

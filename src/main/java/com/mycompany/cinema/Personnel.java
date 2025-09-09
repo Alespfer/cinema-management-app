@@ -2,23 +2,43 @@ package com.mycompany.cinema;
 
 import java.io.Serializable;
 
+/**
+ * Représente un membre du personnel du cinéma. Contient ses informations
+ * personnelles et le rôle associé.
+ */
 public class Personnel implements Serializable {
 
+    // Identifiant unique du membre du personnel.
     private int idPersonnel;
+
+    // Nom du membre du personnel.
     private String nom;
+
+    // Prénom du membre du personnel.
     private String prenom;
+
+    // Adresse email (sert d'identifiant de connexion).
     private String email;
+
+    // Mot de passe du compte.
     private String motDePasse;
+
+    // Identifiant du rôle associé (ex: administrateur, vendeur...).
     private int idRole;
 
-    /**
-     * Constructeur vide (nécessité technique).
-     */
+    
     public Personnel() {
     }
 
     /**
-     * Constructeur principal et valide.
+     * Constructeur principal.
+     *
+     * @param idPersonnel identifiant unique
+     * @param nom nom du personnel
+     * @param prenom prénom du personnel
+     * @param email adresse email
+     * @param motDePasse mot de passe
+     * @param idRole identifiant du rôle
      */
     public Personnel(int idPersonnel, String nom, String prenom, String email, String motDePasse, int idRole) {
         this.idPersonnel = idPersonnel;
@@ -28,51 +48,53 @@ public class Personnel implements Serializable {
         this.motDePasse = motDePasse;
         this.idRole = idRole;
     }
+    
+    
+    // --- Getters / Setters ---
 
-    // --- ACCESSEURS (Getters) ---
+
     public int getId() {
         return idPersonnel;
+    }
+
+    public void setId(int idPersonnel) {
+        this.idPersonnel = idPersonnel;
     }
 
     public String getNom() {
         return nom;
     }
 
-    public String getPrenom() {
-        return prenom;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getMotDePasse() {
-        return motDePasse;
-    }
-
-    public int getIdRole() {
-        return idRole;
-    }
-
-    // --- MUTATEURS (Setters) ---
-    public void setId(int idPersonnel) {
-        this.idPersonnel = idPersonnel;
-    }
-
     public void setNom(String nom) {
         this.nom = nom;
+    }
+
+    public String getPrenom() {
+        return prenom;
     }
 
     public void setPrenom(String prenom) {
         this.prenom = prenom;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public void setEmail(String email) {
         this.email = email;
     }
 
+    public String getMotDePasse() {
+        return motDePasse;
+    }
+
     public void setMotDePasse(String motDePasse) {
         this.motDePasse = motDePasse;
+    }
+
+    public int getIdRole() {
+        return idRole;
     }
 
     public void setIdRole(int idRole) {

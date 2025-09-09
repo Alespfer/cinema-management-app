@@ -1,20 +1,19 @@
+// ========================================================================
+// FICHIER : TarifDAOImpl.java
+// ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Tarif;
 import com.mycompany.cinema.dao.TarifDAO;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion des tarifs dans le fichier
- * "tarifs.dat".
+ * Implémentation concrète pour la gestion des tarifs.
+ * Interagit avec le fichier "tarifs.dat".
  *
- * Pour le développeur de l'interface graphique : cette classe fournit les
- * données pour : - Le menu déroulant de sélection du tarif dans le `SiegePanel`
- * (via `getAllTarifs`). - Le panneau de gestion des tarifs de l'administrateur,
- * `GestionTarifsPanel`, qui utilise l'ensemble des méthodes CRUD pour la
- * maintenance.
+ * Fournit les données pour le menu déroulant de sélection du tarif dans l'interface
+ * de réservation, ainsi que pour le panneau de gestion des tarifs de l'administrateur.
  */
 public class TarifDAOImpl extends GenericDAOImpl<Tarif> implements TarifDAO {
 
@@ -22,15 +21,23 @@ public class TarifDAOImpl extends GenericDAOImpl<Tarif> implements TarifDAO {
         super("tarifs.dat");
     }
 
+    /**
+     * Ajoute un nouveau tarif.
+     * @param tarif Le tarif à enregistrer.
+     */
     @Override
-    public void addTarif(Tarif tarif) {
+    public void ajouterTarif(Tarif tarif) {
         this.data.add(tarif);
-        saveToFile();
+        sauvegarderDansFichier();
     }
 
-    // Dans TarifDAOImpl.java
+    /**
+     * Recherche un tarif par son identifiant unique.
+     * @param id L'identifiant du tarif.
+     * @return L'objet Tarif correspondant, ou `null` si non trouvé.
+     */
     @Override
-    public Tarif getTarifById(int id) {
+    public Tarif trouverTarifParId(int id) {
         for (Tarif tarif : this.data) {
             if (tarif.getId() == id) {
                 return tarif;
@@ -39,34 +46,46 @@ public class TarifDAOImpl extends GenericDAOImpl<Tarif> implements TarifDAO {
         return null;
     }
 
+    /**
+     * Retourne la liste de tous les tarifs disponibles.
+     * @return Une copie de la liste des tarifs.
+     */
     @Override
-    public List<Tarif> getAllTarifs() {
+    public List<Tarif> trouverTousLesTarifs() {
         return new ArrayList<>(this.data);
     }
 
+    /**
+     * Met à jour les informations d'un tarif.
+     * @param tarifMisAJour L'objet Tarif avec les nouvelles données.
+     */
     @Override
-    public void updateTarif(Tarif updatedTarif) {
+    public void mettreAJourTarif(Tarif tarifMisAJour) {
         for (int i = 0; i < this.data.size(); i++) {
-            if (this.data.get(i).getId() == updatedTarif.getId()) {
-                this.data.set(i, updatedTarif);
-                saveToFile();
+            if (this.data.get(i).getId() == tarifMisAJour.getId()) {
+                this.data.set(i, tarifMisAJour);
+                sauvegarderDansFichier();
                 return;
             }
         }
     }
 
+    /**
+     * Supprime un tarif à partir de son identifiant.
+     * @param id L'identifiant du tarif à supprimer.
+     */
     @Override
-    public void deleteTarif(int id) {
-        boolean changed = false;
+    public void supprimerTarifParId(int id) {
+        int indexASupprimer = -1;
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getId() == id) {
-                this.data.remove(i);
-                changed = true;
+                indexASupprimer = i;
                 break;
             }
         }
-        if (changed) {
-            saveToFile();
+        if (indexASupprimer != -1) {
+            this.data.remove(indexASupprimer);
+            sauvegarderDansFichier();
         }
     }
 }

@@ -1,3 +1,6 @@
+// ========================================================================
+// FICHIER : BilletDAOImpl.java
+// ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Billet;
@@ -7,74 +10,118 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Implémentation concrète pour gérer la sauvegarde et la lecture des billets de cinéma.
- * Cette classe s'occupe du fichier "billets.dat".
- * 
- * Pour le développeur de l'interface graphique : cette classe est le pilier de la réservation.
- * - Le `SiegePanel` l'utilisera (via le service) pour savoir quels sièges sont déjà vendus
- *   pour une séance donnée (`getBilletsBySeanceId`).
- * - Le `HistoriqueReservationsPanel` s'en servira pour afficher les détails d'une
- *   commande passée (`getBilletsByReservationId`).
+ * Implémentation de l'interface BilletDAO. Cette classe gère la persistance des
+ * objets Billet dans le fichier "billets.dat", fondamentale pour le processus
+ * de réservation et la consultation de l'historique.
+ *
  */
 public class BilletDAOImpl extends GenericDAOImpl<Billet> implements BilletDAO {
 
+    /**
+     * Constructeur. Spécifie le fichier de données "billets.dat" au
+     * gestionnaire générique parent.
+     */
     public BilletDAOImpl() {
         super("billets.dat");
     }
 
-    @Override
+    /**
+     * Ajoute un nouveau billet à la source de données.
+     *
+     * @param billet L'objet Billet à sauvegarder.
+     */
     public void addBillet(Billet billet) {
         this.data.add(billet);
-        saveToFile();
+        sauvegarderDansFichier();
     }
 
+    /**
+     * Recherche et retourne tous les billets associés à un identifiant de
+     * réservation.
+     *
+     * @param idReservation L'identifiant de la réservation pour laquelle on
+     * cherche les billets.
+     * @return Une liste de billets. Retourne une liste vide si la réservation
+     * est introuvable.
+     */
     @Override
-    public List<Billet> getBilletsByReservationId(int reservationId) {
-        List<Billet> resultat = new ArrayList<>();
-        // On parcourt tous les billets pour trouver ceux qui appartiennent à la même commande.
-        for (Billet b : this.data) {
-            if (b.getIdReservation() == reservationId) {
-                resultat.add(b);
+    public List<Billet> trouverBilletsParIdReservation(int idReservation) {
+        List<Billet> billetsTrouves = new ArrayList<>();
+        // Parcours de tous les billets pour filtrer ceux qui appartiennent à la même commande.
+        for (Billet billet : this.data) {
+            if (billet.getIdReservation() == idReservation) {
+                billetsTrouves.add(billet);
             }
         }
-        return resultat;
-    }
-    
-    @Override
-    public List<Billet> getBilletsBySeanceId(int seanceId) {
-        List<Billet> resultat = new ArrayList<>();
-        // On parcourt tous les billets pour trouver ceux qui ont été vendus pour une séance précise.
-        for (Billet b : this.data) {
-            if (b.getIdSeance() == seanceId) {
-                resultat.add(b);
-            }
-        }
-        return resultat;
+        return billetsTrouves;
     }
 
+    /**
+     * Recherche et retourne tous les billets vendus pour une séance spécifique.
+     * Cette méthode permet de déterminer quels sièges sont occupés.
+     *
+     * @param idSeance L'identifiant de la séance.
+     * @return Une liste de billets. Retourne une liste vide si aucun billet n'a
+     * été vendu.
+     */
     @Override
-    public List<Billet> getAllBillets() {
-        // On retourne une COPIE de la liste pour protéger les données internes.
-        // Ainsi, si l'interface modifie cette liste, elle ne modifie pas nos données sources.
+    public List<Billet> trouverBilletsParIdSeance(int idSeance) {
+        List<Billet> billetsTrouves = new ArrayList<>();
+        // Parcours de tous les billets pour ne garder que ceux de la séance demandée.
+        for (Billet billet : this.data) {
+            if (billet.getIdSeance() == idSeance) {
+                billetsTrouves.add(billet);
+            }
+        }
+        return billetsTrouves;
+    }
+
+    /**
+     * Retourne une liste de tous les billets enregistrés dans le système. * la
+     * liste interne n'est pas modifiable de l'extérieur (principe
+     * d'encapsulation).
+     */
+    @Override
+    public List<Billet> trouverTousLesBillets() {
         return new ArrayList<>(this.data);
     }
 
+    /**
+     * Supprime tous les billets associés à un identifiant de réservation. Cette
+     * opération est typiquement déclenchée lors de l'annulation d'une
+     * réservation.
+     *
+     *
+     * @param idReservation L'identifiant de la réservation dont les billets
+     * doivent être supprimés.
+     */
     @Override
-    public void deleteBilletsByReservationId(int reservationId) {
-        Iterator<Billet> iterator = this.data.iterator();
-        boolean changed = false;
-        // On parcourt la liste de manière sécurisée...
-        while (iterator.hasNext()) {
-            Billet b = iterator.next();
-            if (b.getIdReservation() == reservationId) {
-                // ...et on supprime tous les billets liés à la réservation annulée.
-                iterator.remove();
-                changed = true;
+    public void supprimerBilletsParIdReservation(int idReservation) {
+        // Variable pour suivre si au moins un billet a été supprimé.
+        boolean modificationEffectuee = false;
+
+        for (int i = this.data.size() - 1; i >= 0; i--) {
+            // On récupère le billet à l'index courant.
+            Billet billet = this.data.get(i);
+
+            // On vérifie si le billet correspond à la réservation à annuler.
+            if (billet.getIdReservation() == idReservation) {
+                // Si c'est le cas, on supprime le billet de la liste en mémoire.
+                this.data.remove(i);
+
+                // On note qu'une modification a eu lieu.
+                modificationEffectuee = true;
             }
         }
-        // On sauvegarde le fichier uniquement si des billets ont été supprimés.
-        if (changed) {
-            saveToFile();
+
+        // Si des billets ont été supprimés, on sauvegarde la liste mise à jour dans le fichier.
+        if (modificationEffectuee) {
+            sauvegarderDansFichier();
         }
+    }
+
+    @Override
+    public void ajouterBillet(Billet billet) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

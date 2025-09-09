@@ -1,37 +1,43 @@
-// Fichier : SalleDAOImpl.java
+// ========================================================================
+// FICHIER : SalleDAOImpl.java
+// ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Salle;
 import com.mycompany.cinema.dao.SalleDAO;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion des salles de projection dans
- * "salles.dat".
+ * Implémentation pour la gestion de la persistance des objets Salle.
+ * Interagit avec le fichier "salles.dat".
  *
- * Pour le développeur de l'interface graphique : cette classe fournit les
- * données nécessaires pour tout ce qui concerne les salles. - Le `SiegePanel` a
- * besoin de `getSalleById` pour connaître la capacité de la salle afin de
- * dessiner le plan des sièges. - Le `GestionSallesPanel` de l'administrateur
- * utilise toutes les méthodes CRUD de cette classe pour permettre la gestion
- * complète des salles.
+ * Cette classe fournit les informations de base sur l'infrastructure du cinéma. 
  */
 public class SalleDAOImpl extends GenericDAOImpl<Salle> implements SalleDAO {
 
     public SalleDAOImpl() {
         super("salles.dat");
     }
-
+    
+    
+    /**
+     * Ajoute une nouvelle salle au système.
+     * @param salle L'objet Salle à enregistrer.
+     */
     @Override
-    public void addSalle(Salle salle) {
+    public void ajouterSalle(Salle salle) {
         this.data.add(salle);
-        saveToFile();
+        sauvegarderDansFichier();
     }
 
+    /**
+     * Recherche une salle par son identifiant.
+     * @param id L'identifiant de la salle à trouver.
+     * @return L'objet Salle correspondant, ou `null` si non trouvé.
+     */
     @Override
-    public Salle getSalleById(int id) {
+    public Salle trouverSalleParId(int id) {
         for (Salle salle : this.data) {
             if (salle.getId() == id) {
                 return salle;
@@ -40,34 +46,46 @@ public class SalleDAOImpl extends GenericDAOImpl<Salle> implements SalleDAO {
         return null;
     }
 
+    /**
+     * Retourne la liste de toutes les salles enregistrées.
+     * @return Une copie de la liste des salles.
+     */
     @Override
-    public List<Salle> getAllSalles() {
+    public List<Salle> trouverToutesLesSalles() {
         return new ArrayList<>(this.data);
     }
 
+    /**
+     * Met à jour les informations d'une salle existante.
+     * @param salleMiseAJour L'objet Salle avec les données mises à jour.
+     */
     @Override
-    public void updateSalle(Salle updatedSalle) {
+    public void mettreAJourSalle(Salle salleMiseAJour) {
         for (int i = 0; i < this.data.size(); i++) {
-            if (this.data.get(i).getId() == updatedSalle.getId()) {
-                this.data.set(i, updatedSalle);
-                saveToFile();
+            if (this.data.get(i).getId() == salleMiseAJour.getId()) {
+                this.data.set(i, salleMiseAJour);
+                sauvegarderDansFichier();
                 return;
             }
         }
     }
 
+    /**
+     * Supprime une salle de la source de données à partir de son identifiant.
+     * @param id L'identifiant de la salle à supprimer.
+     */
     @Override
-    public void deleteSalle(int id) {
-        boolean changed = false;
+    public void supprimerSalleParId(int id) {
+        int indexASupprimer = -1;
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getId() == id) {
-                this.data.remove(i);
-                changed = true;
+                indexASupprimer = i;
                 break;
             }
         }
-        if (changed) {
-            saveToFile();
+        if (indexASupprimer != -1) {
+            this.data.remove(indexASupprimer);
+            sauvegarderDansFichier();
         }
     }
 }

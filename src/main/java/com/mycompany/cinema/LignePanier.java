@@ -3,12 +3,11 @@ package com.mycompany.cinema;
 import com.mycompany.cinema.ProduitSnack;
 
 /**
- * Classe de support simple pour représenter une ligne du panier de snacks.
- * Contient un produit et la quantité choisie. Cette structure remplace 
- * l'utilisation d'une Map pour rester conforme à la Doctrine.
+ * Représente une ligne du panier de snacks. Associe un produit à une quantité
+ * sélectionnée par le client.
  */
 public class LignePanier {
-    // Les attributs sont maintenant privés, protégeant l'état interne de l'objet.
+
     private ProduitSnack produit;
     private int quantite;
 
@@ -17,9 +16,10 @@ public class LignePanier {
         this.quantite = q;
     }
     
-    // --- ACCESSEURS (Getters & Setters) ---
-    // On fournit un accès contrôlé aux données.
     
+    // --- Getters / Setters ---
+
+
     public ProduitSnack getProduit() {
         return produit;
     }
@@ -32,13 +32,8 @@ public class LignePanier {
         return quantite;
     }
 
-    /**
-     * Modifie la quantité. On pourrait ajouter une validation ici
-     * pour empêcher les quantités négatives.
-     * @param quantite la nouvelle quantité (doit être positive).
-     */
     public void setQuantite(int quantite) {
-        if (quantite >= 0) { // Ajout d'une protection logique grâce à l'encapsulation
+        if (quantite >= 0) {
             this.quantite = quantite;
         }
     }

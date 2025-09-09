@@ -1,20 +1,20 @@
-// Fichier : ClientDAOImpl.java
+// ========================================================================
+// FICHIER : ClientDAOImpl.java
+// ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Client;
 import com.mycompany.cinema.dao.ClientDAO;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Implémentation concrète pour gérer la sauvegarde des comptes clients.
- * S'occupe du fichier "clients.dat".
+ * Implémentation pour la gestion de la persistance des comptes clients.
+ * S'occupe de la lecture et de l'écriture dans le fichier "clients.dat".
  *
- * Pour le développeur de l'interface graphique : c'est votre outil principal
- * pour interagir avec les données des utilisateurs. Chaque action dans
- * `RegisterDialog`, `LoginFrame`, et `InfosPersonnellesPanel` finira par
- * appeler (via le service) une des méthodes de cette classe.
+ * Cette classe gère les données des utilisateurs. Toutes les actions liées au
+ * compte client (inscription, connexion, modification des informations) passent
+ * par cette classe via la couche service.
  */
 public class ClientDAOImpl extends GenericDAOImpl<Client> implements ClientDAO {
 
@@ -22,14 +22,25 @@ public class ClientDAOImpl extends GenericDAOImpl<Client> implements ClientDAO {
         super("clients.dat");
     }
 
+    /**
+     * Enregistre un nouveau client dans la source de données.
+     *
+     * @param client L'objet Client à ajouter.
+     */
     @Override
-    public void addClient(Client client) {
+    public void ajouterClient(Client client) {
         this.data.add(client);
-        saveToFile();
+        sauvegarderDansFichier();
     }
 
+    /**
+     * Recherche un client par son identifiant unique.
+     *
+     * @param id L'identifiant du client à trouver.
+     * @return L'objet Client correspondant, ou `null` si non trouvé.
+     */
     @Override
-    public Client getClientById(int id) {
+    public Client trouverClientParId(int id) {
         for (Client client : this.data) {
             if (client.getId() == id) {
                 return client;
@@ -38,44 +49,69 @@ public class ClientDAOImpl extends GenericDAOImpl<Client> implements ClientDAO {
         return null;
     }
 
+    /**
+     * Recherche un client par son adresse email. La recherche n'est pas
+     * sensible à la casse.
+     *
+     * @param email L'email du client à rechercher.
+     * @return L'objet Client correspondant, ou `null` si aucune correspondance
+     * n'est trouvée.
+     */
     @Override
-    public Client getClientByEmail(String email) {
-        for (Client c : this.data) {   // this.data est ta liste en mémoire (héritée de GenericDAOImpl)
-            if (c.getEmail().equalsIgnoreCase(email)) {
-                return c;
+    public Client trouverClientParEmail(String email) {
+        for (Client client : this.data) {
+            if (client.getEmail().equalsIgnoreCase(email)) {
+                return client;
             }
         }
-        return null; // pas trouvé
+        return null;
     }
 
+    /**
+     * Retourne la liste de tous les clients enregistrés.
+     *
+     * @return Une copie de la liste pour protéger les données.
+     */
     @Override
-    public List<Client> getAllClients() {
+    public List<Client> trouverTousLesClients() {
         return new ArrayList<>(this.data);
     }
 
+    /**
+     * Met à jour les informations d'un client.
+     *
+     * @param clientMisAJour L'objet Client avec les données mises à jour.
+     */
     @Override
-    public void updateClient(Client updatedClient) {
+    public void mettreAJourClient(Client clientMisAJour) {
         for (int i = 0; i < this.data.size(); i++) {
-            if (this.data.get(i).getId() == updatedClient.getId()) {
-                this.data.set(i, updatedClient);
-                saveToFile();
+            if (this.data.get(i).getId() == clientMisAJour.getId()) {
+                this.data.set(i, clientMisAJour);
+                sauvegarderDansFichier();
                 return;
             }
         }
     }
 
+    /**
+     * Supprime un client de la source de données à partir de son identifiant.
+     *
+     * @param id L'identifiant du client à supprimer.
+     */
     @Override
-    public void deleteClient(int id) {
-        boolean changed = false;
+    public void supprimerClientParId(int id) {
+        int indexASupprimer = -1;
+
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getId() == id) {
-                this.data.remove(i);
-                changed = true;
+                indexASupprimer = i;
                 break;
             }
         }
-        if (changed) {
-            saveToFile();
+
+        if (indexASupprimer != -1) {
+            this.data.remove(indexASupprimer);
+            sauvegarderDansFichier();
         }
     }
 }

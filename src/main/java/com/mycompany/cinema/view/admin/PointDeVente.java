@@ -1,10 +1,15 @@
+/*
+ * PointDeVente.java
+ * Interface de vente dédiée au personnel avec le rôle "Vendeur".
+ * Permet d'ajouter des produits à un panier et de finaliser la vente.
+ */
 package com.mycompany.cinema.view.admin;
 
 import com.mycompany.cinema.LignePanier;
 import com.mycompany.cinema.Personnel;
 import com.mycompany.cinema.ProduitSnack;
 import com.mycompany.cinema.service.AdminService;
-import com.mycompany.cinema.view.Login;
+import com.mycompany.cinema.view.FenetreConnexion;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,17 +33,24 @@ public class PointDeVente extends javax.swing.JFrame {
         this.adminService = adminService;
         this.vendeurConnecte = vendeur;
         initComponents();
-        initModelsAndRenderers();
+        configurerModeleEtRenderers();
         this.panier = new ArrayList<>();
         chargerProduits();
         setTitle("Point de Vente - " + vendeur.getPrenom() + " " + vendeur.getNom());
         setLocationRelativeTo(null);
     }
 
-    private void initModelsAndRenderers() {
+    /**
+     * Initialise les modèles de données et les rendus pour la liste de produits
+     * et le tableau du panier.
+     */
+    private void configurerModeleEtRenderers() {
+
+        // Configuration de la JList des produits
         listModel = new DefaultListModel<>();
         listeProduits.setModel(listModel);
 
+        // Configuration de la JTable du panier
         String[] columnNames = {"Produit", "Quantité", "Prix Unitaire", "Sous-total"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -61,10 +73,13 @@ public class PointDeVente extends javax.swing.JFrame {
         });
     }
 
+    /**
+     * Charge la liste des produits disponibles depuis le service.
+     */
     private void chargerProduits() {
         try {
             listModel.clear();
-            List<ProduitSnack> produits = adminService.getAllProduitsSnack();
+            List<ProduitSnack> produits = adminService.trouverTousLesProduits();
             for (ProduitSnack p : produits) {
                 listModel.addElement(p);
             }
@@ -73,6 +88,10 @@ public class PointDeVente extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Ajoute le produit sélectionné au panier ou incrémente sa quantité s'il y
+     * est déjà.
+     */
     private void actionAjouter() {
         ProduitSnack produitSelectionne = listeProduits.getSelectedValue();
         if (produitSelectionne == null) {
@@ -95,6 +114,9 @@ public class PointDeVente extends javax.swing.JFrame {
         mettreAJourPanier();
     }
 
+    /**
+     * Supprime la ligne sélectionnée du panier.
+     */
     private void actionSupprimer() {
         int selectedRow = panierTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -105,6 +127,9 @@ public class PointDeVente extends javax.swing.JFrame {
         mettreAJourPanier();
     }
 
+    /**
+     * Vide entièrement le panier après confirmation.
+     */
     private void actionAnnuler() {
         if (panier.isEmpty()) {
             return;
@@ -116,6 +141,9 @@ public class PointDeVente extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Finalise la vente en appelant le service, puis réinitialise l'interface.
+     */
     private void actionValider() {
         if (panier.isEmpty()) {
             return;
@@ -130,12 +158,15 @@ public class PointDeVente extends javax.swing.JFrame {
         }
     }
 
-    // Version silencieuse d'actionAnnuler pour après une vente réussie
     private void actionAnnulerApresVente() {
         panier.clear();
         mettreAJourPanier();
     }
 
+    /**
+     * Met à jour l'affichage du tableau du panier et recalcule le total
+     * général.
+     */
     private void mettreAJourPanier() {
         tableModel.setRowCount(0);
         double totalGeneral = 0.0;
@@ -281,39 +312,37 @@ public class PointDeVente extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void ajouterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ajouterButtonActionPerformed
-        actionAjouter();// TODO add your handling code here:
+        actionAjouter();
     }//GEN-LAST:event_ajouterButtonActionPerformed
 
     private void annulerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_annulerButtonActionPerformed
-        actionAnnuler();// TODO add your handling code here:
+        actionAnnuler();
     }//GEN-LAST:event_annulerButtonActionPerformed
 
     private void validerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_validerButtonActionPerformed
-        actionValider();// TODO add your handling code here:
+        actionValider();
     }//GEN-LAST:event_validerButtonActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // 1. Définir les options des boutons en français
+        // Options en français
         Object[] options = {"Oui", "Non"};
 
-        // 2. Créer et afficher la boîte de dialogue personnalisée
         int reponse = JOptionPane.showOptionDialog(
-                this, // Composant parent
+                this, 
                 "Êtes-vous sûr de vouloir vous déconnecter ?", // Message
                 "Confirmation de déconnexion", // Titre
-                JOptionPane.YES_NO_OPTION, // Type d'option (pour l'icône)
-                JOptionPane.QUESTION_MESSAGE, // Type de message (icône '?')
-                null, // Icône personnalisée (aucune ici)
-                options, // Le tableau avec nos textes de boutons
-                options[0] // Le bouton par défaut 
+                JOptionPane.YES_NO_OPTION, 
+                JOptionPane.QUESTION_MESSAGE, 
+                null, 
+                options, // Le tableau avec nos textes de boutons en français
+                options[0] // Le bouton par défaut (Oui) 
         );
 
-        // 3. Traiter la réponse
         // L'option "Oui" correspond à l'index 0, "Non" à l'index 1
-        if (reponse == JOptionPane.YES_OPTION) { // ou (reponse == 0)
+        if (reponse == JOptionPane.YES_OPTION) { 
             this.dispose();
-            new Login().setVisible(true);
-        }// TODO add your handling code here:
+            new FenetreConnexion().setVisible(true);
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
 

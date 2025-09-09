@@ -3,37 +3,28 @@ package com.mycompany.cinema;
 import java.io.Serializable;
 
 /**
- * Représente un article vendu au comptoir de snacks, comme un popcorn ou une boisson.
- * 
- * Cet objet est crucial pour deux parties de l'interface graphique :
- * 1. Côté Client : Une liste d'objets `ProduitSnack` sera affichée dans le 
- *    `SnackSelectionPanel` pour que le client puisse composer son panier. L'attribut
- *    `stock` est important ici pour savoir si un produit est disponible.
- * 2. Côté Admin : Le `GestionProduitsSnackPanel` utilisera ces objets pour permettre
- *    à l'administrateur de gérer le catalogue (ajouter/modifier/supprimer des produits)
- *    et de mettre à jour les stocks.
+ * Représente un produit vendu au comptoir de snacks.
  */
 public class ProduitSnack implements Serializable {
-    
+
+    //Identifiant unique du produit.
     private int idProduit;
+
+    // Nom du produit (ex: "Popcorn Salé Grand").
     private String nomProduit;
+
+    // Description du produit.
     private String description;
+
+    // Prix de vente unitaire.
     private double prixVente;
-    private int stock; // La quantité restante de ce produit.
 
-    /**
-     * Constructeur vide (nécessité technique).
-     */
-    public ProduitSnack() {}
+    // Stock disponible.
+    private int stock;
 
-    /**
-     * Crée un nouveau produit pour le comptoir de snacks.
-     * @param id L'ID unique du produit.
-     * @param nom Le nom affiché au client (ex: "Popcorn Salé Grand").
-     * @param desc Une courte description.
-     * @param prix Le prix de vente d'une unité.
-     * @param stock La quantité initiale disponible.
-     */
+    public ProduitSnack() {
+    }
+
     public ProduitSnack(int id, String nom, String desc, double prix, int stock) {
         this.idProduit = id;
         this.nomProduit = nom;
@@ -41,41 +32,46 @@ public class ProduitSnack implements Serializable {
         this.prixVente = prix;
         this.stock = stock;
     }
+    
+    // --- Getters / Setters ---
 
-    // --- ACCESSEURS (Getters and Setters) ---
-
-    public int getId() { 
-        return idProduit; 
-    }
-    public void setId(int idProduit) { 
-        this.idProduit = idProduit; 
+    public int getId() {
+        return idProduit;
     }
 
-    public String getNomProduit() { 
-        return nomProduit; 
-    }
-    public void setNomProduit(String nomProduit) { 
-        this.nomProduit = nomProduit; 
+    public void setId(int idProduit) {
+        this.idProduit = idProduit;
     }
 
-    public String getDescription() { 
-        return description; 
-    }
-    public void setDescription(String description) { 
-        this.description = description; 
+    public String getNomProduit() {
+        return nomProduit;
     }
 
-    public double getPrixVente() { 
-        return prixVente; 
-    }
-    public void setPrixVente(double prixVente) { 
-        this.prixVente = prixVente; 
+    public void setNomProduit(String nomProduit) {
+        this.nomProduit = nomProduit;
     }
 
-    public int getStock() { 
-        return stock; 
+    public String getDescription() {
+        return description;
     }
-    public void setStock(int stock) { 
-        this.stock = stock; 
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public double getPrixVente() {
+        return prixVente;
+    }
+
+    public void setPrixVente(double prixVente) {
+        this.prixVente = prixVente;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
     }
 }

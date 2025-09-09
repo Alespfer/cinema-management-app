@@ -34,12 +34,12 @@ public final class DataInitializer {
      * test. Pense à elle comme un grand script qui remplit la base de données
      * de zéro.
      */
-    public static void seed() {
+    public static void initialiser() {
         System.out.println("Début de l'initialisation du jeu de données...");
 
         // --- PHASE 1: Création des données de base ---
         // On crée d'abord les objets simples qui ne dépendent de rien d'autre.
-        // Par exemple, la liste des "Rôles" (Admin, Vendeur) pour les employés.
+        // La liste des "Rôles" (Admin, Vendeur) pour les employés.
         List<Role> roles = createRoles();
         // La liste des "Tarifs" (Plein, Étudiant) que le client pourra choisir.
         List<Tarif> tarifs = createTarifs();
@@ -52,8 +52,8 @@ public final class DataInitializer {
         // Les "Caisses" où les ventes de snacks sont enregistrées.
         List<Caisse> caisses = createCaisses();
 
-        // --- PHASE 2: Création d'objets qui dépendent de la phase 1 ---
-        // On crée les sièges pour chaque salle créée juste avant.
+        // --- PHASE 2: Création des objets qui utilisent les briques de la phase 1 ---
+        // Les sièges pour chaque salle créée juste avant.
         List<Siege> sieges = createSieges(salles);
         // La liste des "Films" à l'affiche.
         List<Film> films = createFilms();
@@ -64,30 +64,28 @@ public final class DataInitializer {
 
         // --- PHASE 3: On relie les objets entre eux ---
         // On associe des genres à chaque film (ex: "Dune" est "SF" et "Aventure").
-        linkFilmsToGenres(films, genres);
+        lierFilmsAuxGenres(films, genres);
         // On crée les "Séances" : on dit quel film joue, dans quelle salle, et à quelle heure.
         List<Seance> seances = createSeances(films, salles);
         // On affecte un employé à une séance.
         List<AffectationSeance> affectations = createAffectations(personnel, seances);
         // On crée un "Planning" de travail pour un employé.
         List<Planning> plannings = createPlannings(personnel);
-        // On crée des "Évaluations" : un client donne une note et un avis sur un film.
+        // "Évaluations" : un client donne une note et un avis sur un film.
         List<EvaluationClient> evaluations = createEvaluations(clients, films);
 
-        // --- PHASE 4: Simulation de vraies actions utilisateur ---
+        // --- PHASE 4: Simulation de scénarios réels ---
         List<Reservation> reservations = new ArrayList<>();
         List<Billet> billets = new ArrayList<>();
         // On simule un client qui fait une réservation pour plusieurs sièges.
         createScenarioReservation(clients, seances, sieges, tarifs, reservations, billets);
 
         List<VenteSnack> ventesSnack = new ArrayList<>();
-        List<Comporte> lignesVente = new ArrayList<>();
-        // On simule une vente de snacks au comptoir.
+        List<LigneVente> lignesVente = new ArrayList<>();
         createScenarioVenteSnack(personnel, produitsSnack, caisses, clients, ventesSnack, lignesVente);
 
         // --- PHASE 5: Sauvegarde de tout dans des fichiers ---
-        // Une fois tous les objets créés en mémoire, on les sauvegarde un par un dans des fichiers.
-        // C'est ce qui assure que les données persistent même si on ferme l'application.
+
         System.out.println("Sauvegarde des données dans les fichiers...");
         saveList("roles.dat", roles);
         saveList("tarifs.dat", tarifs);
@@ -115,71 +113,71 @@ public final class DataInitializer {
     // Mon binôme : Le détail n'est pas important pour toi, c'est juste le "remplissage"
     // de la base de données.
     private static List<Role> createRoles() {
-        List<Role> items = new ArrayList<>();
-        items.add(new Role(1, "Administrateur"));
-        items.add(new Role(2, "Projectionniste"));
-        items.add(new Role(3, "Vendeur"));
-        return items;
+        List<Role> roles = new ArrayList<>();
+        roles.add(new Role(1, "Administrateur"));
+        roles.add(new Role(2, "Projectionniste"));
+        roles.add(new Role(3, "Vendeur"));
+        return roles;
     }
 
     private static List<Tarif> createTarifs() {
-        List<Tarif> items = new ArrayList<>();
-        items.add(new Tarif(1, "Plein Tarif", 9.20));
-        items.add(new Tarif(2, "Tarif Étudiant", 7.60));
-        items.add(new Tarif(3, "Tarif -14 ans", 5.90));
-        return items;
+        List<Tarif> tarifs = new ArrayList<>();
+        tarifs.add(new Tarif(1, "Plein Tarif", 9.20));
+        tarifs.add(new Tarif(2, "Tarif Étudiant", 7.60));
+        tarifs.add(new Tarif(3, "Tarif -14 ans", 5.90));
+        return tarifs;
     }
 
     private static List<Genre> createGenres() {
-        List<Genre> items = new ArrayList<>();
-        items.add(new Genre(1, "Science-Fiction"));
-        items.add(new Genre(2, "Aventure"));
-        items.add(new Genre(3, "Drame"));
-        items.add(new Genre(4, "Historique"));
-        items.add(new Genre(5, "Action"));
-        items.add(new Genre(6, "Animation"));
-        items.add(new Genre(7, "Fantastique"));
-        return items;
+        List<Genre> genres = new ArrayList<>();
+        genres.add(new Genre(1, "Science-Fiction"));
+        genres.add(new Genre(2, "Aventure"));
+        genres.add(new Genre(3, "Drame"));
+        genres.add(new Genre(4, "Historique"));
+        genres.add(new Genre(5, "Action"));
+        genres.add(new Genre(6, "Animation"));
+        genres.add(new Genre(7, "Fantastique"));
+        return genres;
     }
 
     private static List<Caisse> createCaisses() {
-        List<Caisse> items = new ArrayList<>();
-        // AJOUT : Caisse virtuelle pour les ventes en ligne. ID 0.
-        items.add(new Caisse(0, "Canal Web", "Vente en ligne"));
-        items.add(new Caisse(1, "Comptoir Principal", "Hall d'entrée"));
-        items.add(new Caisse(2, "Borne Automatique 1", "Hall d'entrée - Gauche"));
-        return items;
+        List<Caisse> caisses = new ArrayList<>();
+        // Ajout d'une caisse "virtuelle" (ID 0) pour gérer les ventes en ligne.
+        caisses.add(new Caisse(0, "Canal Web", "Vente en ligne"));
+        caisses.add(new Caisse(1, "Comptoir Principal", "Hall d'entrée"));
+        caisses.add(new Caisse(2, "Borne Automatique 1", "Hall d'entrée - Gauche"));
+        return caisses;
     }
 
     private static List<Salle> createSalles() {
-        List<Salle> items = new ArrayList<>();
-        items.add(new Salle(1, "Salle 1", 100));
-        items.add(new Salle(2, "Salle 2", 150));
-        items.add(new Salle(3, "Salle IMAX 3D", 240));
-        return items;
+        List<Salle> salles = new ArrayList<>();
+        salles.add(new Salle(1, "Salle 1", 100));
+        salles.add(new Salle(2, "Salle 2", 150));
+        salles.add(new Salle(3, "Salle IMAX 3D", 240));
+        return salles;
     }
 
     private static List<Siege> createSieges(List<Salle> salles) {
-        List<Siege> items = new ArrayList<>();
+        List<Siege> sieges = new ArrayList<>();
         int siegeIdCounter = 1;
         for (Salle salle : salles) {
             int seatsPerRow = (salle.getId() == 3) ? 20 : (salle.getId() == 2 ? 15 : 10);
             int rows = salle.getCapacite() / seatsPerRow;
             for (int r = 1; r <= rows; r++) {
                 for (int s = 1; s <= seatsPerRow; s++) {
-                    items.add(new Siege(siegeIdCounter++, r, s, salle.getId()));
+                    sieges.add(new Siege(siegeIdCounter++, r, s, salle.getId()));
                 }
             }
         }
-        return items;
+        return sieges;
     }
 
     private static List<Film> createFilms() {
-        List<Film> items = new ArrayList<>();
-        items.add(new Film(1, "Dune: Part Two", "Paul Atreides s'unit à Chani et aux Fremen...", 166, "Tous publics", "dune.jpg", 4.8));
-        items.add(new Film(2, "Oppenheimer", "Le portrait du physicien J. Robert Oppenheimer...", 180, "Tous publics avec avertissement", "oppenheimer.jpg", 4.5));
-        items.add(new Film(3, "Spider-Man: Across the Spider-Verse", "Miles Morales est catapulté à travers le Multivers...", 140, "Tous publics", "spiderman.jpg", 4.9));
-        items.add(new Film(
+        List<Film> films = new ArrayList<>();
+        films.add(new Film(1, "Dune: Part Two", "Paul Atreides s'unit à Chani et aux Fremen...", 166, "Tous publics", "dune.jpg", 4.8));
+        films.add(new Film(2, "Oppenheimer", "Le portrait du physicien J. Robert Oppenheimer...", 180, "Tous publics avec avertissement", "oppenheimer.jpg", 4.5));
+        films.add(new Film(3, "Spider-Man: Across the Spider-Verse", "Miles Morales est catapulté à travers le Multivers...", 140, "Tous publics", "spiderman.jpg", 4.9));
+        films.add(new Film(
                 4, // ID suivant disponible
                 "Le Seigneur des Anneaux : Le Retour du Roi",
                 "Les armées de Sauron ont assiégé Minas Tirith, la capitale de Gondor...",
@@ -188,7 +186,7 @@ public final class DataInitializer {
                 "seigneur_anneaux.jpg",
                 5.0
         ));
-        items.add(new Film(
+        films.add(new Film(
                 5, // ID suivant disponible
                 "PISE : Le Film",
                 "Le parcours initiatique d'un soldat du code face à une doctrine implacable.",
@@ -197,40 +195,36 @@ public final class DataInitializer {
                 "christophe.jpg",
                 4.2
         ));
-        return items;
+        return films;
     }
 
-    private static void linkFilmsToGenres(List<Film> films, List<Genre> genres) {
+    private static void lierFilmsAuxGenres(List<Film> films, List<Genre> genres) {
         films.get(0).getGenres().add(genres.get(0));
         films.get(0).getGenres().add(genres.get(1));
         films.get(1).getGenres().add(genres.get(2));
         films.get(1).getGenres().add(genres.get(3));
         films.get(2).getGenres().add(genres.get(5));
         films.get(2).getGenres().add(genres.get(4));
-        // --- LIAISON DES NOUVEAUX FILMS ---
-        // Le Retour du Roi (index 3 dans la liste 'films')
-        films.get(3).getGenres().add(genres.get(1)); // -> Aventure (index 1 dans 'genres')
-        films.get(3).getGenres().add(genres.get(6)); // -> Fantastique (index 6 dans 'genres')
-
-        // PISE : Le Film (index 4 dans la liste 'films')
-        films.get(4).getGenres().add(genres.get(2)); // -> Drame (index 2 dans 'genres')
+        films.get(3).getGenres().add(genres.get(1)); 
+        films.get(3).getGenres().add(genres.get(6)); 
+        films.get(4).getGenres().add(genres.get(2)); 
     }
 
     private static List<Client> createClients() {
-        List<Client> items = new ArrayList<>();
-        items.add(new Client(1, "Alice Martin", "alice.m@email.com", "pass123", LocalDate.of(2023, 5, 12)));
-        items.add(new Client(2, "Bob Durand", "bob.d@email.com", "azerty", LocalDate.of(2024, 1, 20)));
-        return items;
+        List<Client> clients = new ArrayList<>();
+        clients.add(new Client(1, "Alice Martin", "alice.m@email.com", "pass123", LocalDate.of(2023, 5, 12)));
+        clients.add(new Client(2, "Bob Durand", "bob.d@email.com", "azerty", LocalDate.of(2024, 1, 20)));
+        return clients;
     }
 
     private static List<Personnel> createPersonnel(List<Role> roles) {
-        List<Personnel> items = new ArrayList<>();
+        List<Personnel> employes = new ArrayList<>();
         // On remplace le nom d'utilisateur par un email
-        items.add(new Personnel(0, "Système", "En Ligne", "system@cinema.local", "system_pass", roles.get(0).getId()));
-        items.add(new Personnel(1, "Dupont", "Jean", "admin@pisecinema.com", "admin", roles.get(0).getId()));
-        items.add(new Personnel(2, "Garcia", "Maria", "maria@pisecinema.com", "proj", roles.get(1).getId()));
-        items.add(new Personnel(3, "Smith", "John", "vendeur@pisecinema.com", "vendeur", roles.get(2).getId()));
-        return items;
+        employes.add(new Personnel(0, "Système", "En Ligne", "system@cinema.local", "system_pass", roles.get(0).getId()));
+        employes.add(new Personnel(1, "Dupont", "Jean", "admin@pisecinema.com", "admin", roles.get(0).getId()));
+        employes.add(new Personnel(2, "Garcia", "Maria", "maria@pisecinema.com", "proj", roles.get(1).getId()));
+        employes.add(new Personnel(3, "Smith", "John", "vendeur@pisecinema.com", "vendeur", roles.get(2).getId()));
+        return employes;
     }
 
     // Dans le fichier DataInitializer.java
@@ -240,40 +234,34 @@ public final class DataInitializer {
         // On récupère la date et l'heure actuelles comme point de référence
         LocalDateTime maintenant = LocalDateTime.now();
 
-        // --- Planning pour Jean Dupont (Admin, ID 1) ---
-        // Il n'a pas de planning fixe car il est admin, on peut laisser vide ou ajouter
-        // un créneau de supervision pour l'exemple.
-        // Pas de planning ajouté pour lui pour l'instant.
         // --- Planning pour Maria Garcia (Projectionniste, ID 2) ---
-        // On lui assigne des créneaux de projection pour les séances du soir
         items.add(new Planning(
-                IdManager.getNextPlanningId(),
-                maintenant.withHour(17).withMinute(0).withSecond(0), // Aujourd'hui à 17h00
-                maintenant.withHour(23).withMinute(30).withSecond(0), // Aujourd'hui à 23h30
+                IdManager.obtenirProchainIdPlanning(),
+                maintenant.withHour(17).withMinute(0).withSecond(0), 
+                maintenant.withHour(23).withMinute(30).withSecond(0), 
                 "Projection Salle 1 & 2",
-                personnel.get(1).getId() // ID de Maria
+                personnel.get(1).getId() 
         ));
         items.add(new Planning(
-                IdManager.getNextPlanningId(),
-                maintenant.plusDays(1).withHour(17).withMinute(0).withSecond(0), // Demain à 17h00
+                IdManager.obtenirProchainIdPlanning(),
+                maintenant.plusDays(1).withHour(17).withMinute(0).withSecond(0), 
                 maintenant.plusDays(1).withHour(23).withMinute(30).withSecond(0), // Demain à 23h30
                 "Projection Salle 3 (IMAX)",
                 personnel.get(1).getId()
         ));
 
         // --- Planning pour John Smith (Vendeur, ID 3) ---
-        // On lui assigne des créneaux de vente au comptoir
         items.add(new Planning(
-                IdManager.getNextPlanningId(),
-                maintenant.withHour(18).withMinute(0).withSecond(0), // Aujourd'hui à 18h00
-                maintenant.withHour(22).withMinute(0).withSecond(0), // Aujourd'hui à 22h00
+                IdManager.obtenirProchainIdPlanning(),
+                maintenant.withHour(18).withMinute(0).withSecond(0), 
+                maintenant.withHour(22).withMinute(0).withSecond(0),
                 "Vente Snacking",
                 personnel.get(2).getId() // ID de John
         ));
         items.add(new Planning(
-                IdManager.getNextPlanningId(),
-                maintenant.plusDays(2).withHour(14).withMinute(0).withSecond(0), // Après-demain à 14h00
-                maintenant.plusDays(2).withHour(19).withMinute(0).withSecond(0), // Après-demain à 19h00
+                IdManager.obtenirProchainIdPlanning(),
+                maintenant.plusDays(2).withHour(14).withMinute(0).withSecond(0), 
+                maintenant.plusDays(2).withHour(19).withMinute(0).withSecond(0), 
                 "Accueil & Billetterie",
                 personnel.get(2).getId()
         ));
@@ -282,9 +270,9 @@ public final class DataInitializer {
     }
 
     private static List<Seance> createSeances(List<Film> films, List<Salle> salles) {
-        List<Seance> items = new ArrayList<>();
+        List<Seance> seances = new ArrayList<>();
 
-        // Logique dynamique : on calcule les dates par rapport à AUJOURD'HUI.
+        // On suit une logique dynamique : on calcule les dates par rapport à aujourd'hui.
         LocalDate aujourdhui = LocalDate.now();
         LocalDate demain = aujourdhui.plusDays(1);
         LocalDate apresDemain = aujourdhui.plusDays(2);
@@ -293,28 +281,28 @@ public final class DataInitializer {
 
         // --- Séances pour AUJOURD'HUI (uniquement si elles n'ont pas encore eu lieu) ---
         if (LocalTime.now().isBefore(LocalTime.of(14, 0))) {
-            items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(14, 0)), salles.get(1).getId(), films.get(1).getId())); // Oppenheimer
+            seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(14, 0)), salles.get(1).getId(), films.get(1).getId())); // Oppenheimer
         }
         if (LocalTime.now().isBefore(LocalTime.of(17, 30))) {
-            items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(17, 30)), salles.get(2).getId(), films.get(2).getId())); // Spider-Man
+            seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(17, 30)), salles.get(2).getId(), films.get(2).getId())); // Spider-Man
         }
         if (LocalTime.now().isBefore(LocalTime.of(20, 15))) {
-            items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(20, 15)), salles.get(0).getId(), films.get(0).getId())); // Dune
+            seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(20, 15)), salles.get(0).getId(), films.get(0).getId())); // Dune
         }
         if (LocalTime.now().isBefore(LocalTime.of(21, 0))) {
-            items.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(21, 0)), salles.get(1).getId(), films.get(1).getId())); // Oppenheimer
+            seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(21, 0)), salles.get(1).getId(), films.get(1).getId())); // Oppenheimer
         }
 
         // --- Séances pour DEMAIN ---
-        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(14, 0)), salles.get(0).getId(), films.get(0).getId())); // Dune
-        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(17, 0)), salles.get(1).getId(), films.get(2).getId())); // Spider-Man
-        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(20, 30)), salles.get(2).getId(), films.get(1).getId())); // Oppenheimer
+        seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(14, 0)), salles.get(0).getId(), films.get(0).getId())); // Dune
+        seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(17, 0)), salles.get(1).getId(), films.get(2).getId())); // Spider-Man
+        seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(20, 30)), salles.get(2).getId(), films.get(1).getId())); // Oppenheimer
 
         // --- Séances pour APRÈS-DEMAIN ---
-        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(apresDemain, LocalTime.of(17, 30)), salles.get(0).getId(), films.get(2).getId())); // Spider-Man
-        items.add(new Seance(seanceIdCounter++, LocalDateTime.of(apresDemain, LocalTime.of(21, 0)), salles.get(2).getId(), films.get(0).getId())); // Dune
+        seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(apresDemain, LocalTime.of(17, 30)), salles.get(0).getId(), films.get(2).getId())); // Spider-Man
+        seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(apresDemain, LocalTime.of(21, 0)), salles.get(2).getId(), films.get(0).getId())); // Dune
 
-        return items;
+        return seances;
     }
 
     private static List<AffectationSeance> createAffectations(List<Personnel> personnel, List<Seance> seances) {
@@ -326,22 +314,22 @@ public final class DataInitializer {
     }
 
     private static List<ProduitSnack> createProduitsSnack() {
-        List<ProduitSnack> items = new ArrayList<>();
-        items.add(new ProduitSnack(1, "Popcorn Salé Grand", "Maïs éclaté salé, 250g", 6.50, 100));
-        items.add(new ProduitSnack(2, "Soda 50cl", "Boisson gazeuse sucrée", 3.50, 200));
-        items.add(new ProduitSnack(3, "M&M's 200g", "Cacahuètes enrobées de chocolat", 4.00, 150));
-        items.add(new ProduitSnack(4, "Popcorn Sucré Moyen", "Maïs éclaté sucré, 150g", 5.50, 80));
-        items.add(new ProduitSnack(5, "Bouteille d'eau 50cl", "Eau de source plate", 2.00, 300));
-        items.add(new ProduitSnack(6, "Nachos & Fromage", "Tortilla chips avec sauce fromage", 7.00, 50));
-        return items;
+        List<ProduitSnack> produits = new ArrayList<>();
+        produits.add(new ProduitSnack(1, "Popcorn Salé Grand", "Maïs éclaté salé, 250g", 6.50, 100));
+        produits.add(new ProduitSnack(2, "Soda 50cl", "Boisson gazeuse sucrée", 3.50, 200));
+        produits.add(new ProduitSnack(3, "M&M's 200g", "Cacahuètes enrobées de chocolat", 4.00, 150));
+        produits.add(new ProduitSnack(4, "Popcorn Sucré Moyen", "Maïs éclaté sucré, 150g", 5.50, 80));
+        produits.add(new ProduitSnack(5, "Bouteille d'eau 50cl", "Eau de source plate", 2.00, 300));
+        produits.add(new ProduitSnack(6, "Nachos & Fromage", "Tortilla chips avec sauce fromage", 7.00, 50));
+        return produits;
     }
 
     private static List<EvaluationClient> createEvaluations(List<Client> clients, List<Film> films) {
-        List<EvaluationClient> items = new ArrayList<>();
-        items.add(new EvaluationClient(clients.get(0).getId(), films.get(0).getId(), 5, "Visuellement incroyable, une pure merveille !", LocalDateTime.now().minusDays(1)));
-        items.add(new EvaluationClient(clients.get(1).getId(), films.get(0).getId(), 4, "Très bon film, un peu long par moments.", LocalDateTime.now().minusHours(5)));
-        items.add(new EvaluationClient(clients.get(1).getId(), films.get(1).getId(), 5, "Un chef d'oeuvre. La performance de l'acteur est magistrale.", LocalDateTime.now().minusDays(3)));
-        return items;
+        List<EvaluationClient> evaluations = new ArrayList<>();
+        evaluations.add(new EvaluationClient(clients.get(0).getId(), films.get(0).getId(), 5, "Visuellement incroyable, une pure merveille !", LocalDateTime.now().minusDays(1)));
+        evaluations.add(new EvaluationClient(clients.get(1).getId(), films.get(0).getId(), 4, "Très bon film, un peu long par moments.", LocalDateTime.now().minusHours(5)));
+        evaluations.add(new EvaluationClient(clients.get(1).getId(), films.get(1).getId(), 5, "Un chef d'oeuvre. La performance de l'acteur est magistrale.", LocalDateTime.now().minusDays(3)));
+        return evaluations;
     }
 
     private static void createScenarioReservation(List<Client> clients, List<Seance> seances, List<Siege> sieges, List<Tarif> tarifs, List<Reservation> reservations, List<Billet> billets) {
@@ -354,32 +342,28 @@ public final class DataInitializer {
         billets.add(new Billet(2, res.getId(), tarifs.get(0).getId(), siege2.getId(), seances.get(0).getId()));
     }
 
-    private static void createScenarioVenteSnack(List<Personnel> personnel, List<ProduitSnack> produits, List<Caisse> caisses, List<Client> clients, List<VenteSnack> ventes, List<Comporte> lignes) {
+    private static void createScenarioVenteSnack(List<Personnel> personnel, List<ProduitSnack> produits, List<Caisse> caisses, List<Client> clients, List<VenteSnack> ventes, List<LigneVente> lignes) {
         VenteSnack vente = new VenteSnack(1, LocalDateTime.now().minusHours(2), personnel.get(2).getId(), caisses.get(0).getId(), null);
         ventes.add(vente);
 
-        lignes.add(new Comporte(vente.getIdVente(), produits.get(0).getId(), 1, produits.get(0).getPrixVente()));
-        lignes.add(new Comporte(vente.getIdVente(), produits.get(1).getId(), 1, produits.get(1).getPrixVente()));
+        lignes.add(new LigneVente(vente.getIdVente(), produits.get(0).getId(), 1, produits.get(0).getPrixVente()));
+        lignes.add(new LigneVente(vente.getIdVente(), produits.get(1).getId(), 1, produits.get(1).getPrixVente()));
     }
 
     /**
      * Méthode générique qui prend n'importe quelle liste d'objets et la
-     * sauvegarde dans un fichier binaire. C'est le cœur de notre système de
-     * persistance simple.
+     * sauvegarde dans un fichier binaire.
      *
      * @param filename Le nom du fichier (ex: "films.dat").
      * @param list La liste d'objets à sauvegarder.
      * @param <T> Le type des objets dans la liste.
      */
     private static <T> void saveList(String filename, List<T> list) {
-        // Crée le dossier "data" s'il n'existe pas.
+        // On s'assure que le dossier "data" existe. Si non, on le crée.
         new File("data").mkdirs();
-        // Utilise un "try-with-resources" pour s'assurer que le fichier est bien fermé après l'écriture.
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("data/" + filename))) {
-            // La commande magique : écrit toute la liste d'un coup dans le fichier.
             oos.writeObject(list);
         } catch (IOException e) {
-            // Si une erreur se produit (disque plein, pas les droits...), on affiche un message clair.
             System.err.println("ERREUR fatale lors de la sauvegarde du fichier " + filename);
             e.printStackTrace();
         }

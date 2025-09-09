@@ -1,20 +1,18 @@
+// ========================================================================
+// FICHIER : ReservationDAOImpl.java
+// ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Reservation;
 import com.mycompany.cinema.dao.ReservationDAO;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion des réservations (commandes) dans
- * "reservations.dat".
+ * Implémentation pour la gestion des réservations (commandes). Interagit avec
+ * le fichier "reservations.dat".
  *
- * Pour le développeur de l'interface graphique : cette classe est le cœur de
- * l'historique client. Le `HistoriqueReservationsPanel` dépend entièrement de
- * `getReservationsByClientId` pour afficher la liste des commandes passées par
- * l'utilisateur connecté. La méthode `deleteReservation` est appelée lorsque
- * l'utilisateur décide d'annuler sa commande.
+ * Cœur de l'historique des commandes du client.
  */
 public class ReservationDAOImpl extends GenericDAOImpl<Reservation> implements ReservationDAO {
 
@@ -22,52 +20,75 @@ public class ReservationDAOImpl extends GenericDAOImpl<Reservation> implements R
         super("reservations.dat");
     }
 
+    /**
+     * Ajoute une nouvelle réservation.
+     *
+     * @param reservation L'objet Reservation à enregistrer.
+     */
     @Override
-    public void addReservation(Reservation reservation) {
+    public void ajouterReservation(Reservation reservation) {
         this.data.add(reservation);
-        saveToFile();
+        sauvegarderDansFichier();
     }
 
-    // Dans ReservationDAOImpl.java
+    /**
+     * Recherche une réservation par son identifiant unique.
+     * @param id L'identifiant unique de la réservation.
+     * @return L'objet Reservation, ou `null` si non trouvé.
+     */
     @Override
-    public Reservation getReservationById(int id) {
-        for (Reservation r : this.data) {
-            if (r.getId() == id) {
-                return r;
+    public Reservation trouverReservationParId(int id) {
+        for (Reservation reservation : this.data) {
+            if (reservation.getId() == id) {
+                return reservation;
             }
         }
         return null;
     }
+    
 
+    /**
+     * Retourne la liste de toutes les réservations.
+     * @return Une copie de la liste des réservations.
+     */
     @Override
-    public List<Reservation> getAllReservations() {
+    public List<Reservation> trouverToutesLesReservations() {
         return new ArrayList<>(this.data);
     }
 
+
+     /**
+     * Recherche toutes les réservations effectuées par un client spécifique.
+     * @param idClient L'identifiant du client.
+     * @return Une liste des réservations de ce client.
+     */
     @Override
-    public List<Reservation> getReservationsByClientId(int clientId) {
-        List<Reservation> resultat = new ArrayList<>();
-        // On filtre toutes les réservations pour ne garder que celles du client spécifié.
-        for (Reservation r : this.data) {
-            if (r.getIdClient() == clientId) {
-                resultat.add(r);
+    public List<Reservation> trouverReservationsParIdClient(int idClient) {
+        List<Reservation> reservationsTrouvees = new ArrayList<>();
+        for (Reservation reservation : this.data) {
+            if (reservation.getIdClient() == idClient) {
+                reservationsTrouvees.add(reservation);
             }
         }
-        return resultat;
+        return reservationsTrouvees;
     }
 
+   /**
+     * Supprime une réservation à partir de son identifiant.
+     * @param id L'identifiant de la réservation à supprimer.
+     */
     @Override
-    public void deleteReservation(int id) {
-        boolean changed = false;
+    public void supprimerReservationParId(int id) {
+        int indexASupprimer = -1;
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getId() == id) {
-                this.data.remove(i);
-                changed = true;
+                indexASupprimer = i;
                 break;
             }
         }
-        if (changed) {
-            saveToFile();
+        if (indexASupprimer != -1) {
+            this.data.remove(indexASupprimer);
+            sauvegarderDansFichier();
         }
     }
 }

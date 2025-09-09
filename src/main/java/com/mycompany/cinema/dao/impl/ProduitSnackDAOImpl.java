@@ -1,21 +1,20 @@
+// ========================================================================
+// FICHIER : ProduitSnackDAOImpl.java
+// ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.ProduitSnack;
 import com.mycompany.cinema.dao.ProduitSnackDAO;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion du catalogue de snacks dans
- * "produits_snack.dat".
+ * Implémentation concrète pour la gestion du catalogue de snacks. Interagit
+ * avec le fichier "produits_snack.dat".
  *
- * Pour le développeur de l'interface graphique : cette classe est fondamentale
- * pour toute la partie "vente de snacks". - Le `SnackSelectionPanel` (côté
- * client) utilise `getAllProduits` pour afficher la liste des articles
- * disponibles à l'achat. - Le `GestionProduitsSnackPanel` (côté admin) utilise
- * toutes les méthodes de cette classe (add, get, update) pour permettre à
- * l'administrateur de gérer le catalogue et les stocks.
+ * Cette classe est utilisée à la fois par l'interface client (pour afficher les
+ * produits) et par l'administration (pour la gestion complète du catalogue et 
+ * des stocks).
  */
 public class ProduitSnackDAOImpl extends GenericDAOImpl<ProduitSnack> implements ProduitSnackDAO {
 
@@ -23,57 +22,71 @@ public class ProduitSnackDAOImpl extends GenericDAOImpl<ProduitSnack> implements
         super("produits_snack.dat");
     }
 
+     /**
+     * Ajoute un nouveau produit de snack.
+     * @param produit L'objet ProduitSnack à ajouter.
+     */
     @Override
-    public void addProduit(ProduitSnack produit) {
+    public void ajouterProduit(ProduitSnack produit) {
         this.data.add(produit);
-        saveToFile();
+        sauvegarderDansFichier();
     }
 
-    // Dans ProduitSnackDAOImpl.java
+    /**
+     * Recherche un produit de snack par son identifiant.
+     * @param id L'identifiant du produit.
+     * @return L'objet ProduitSnack, ou `null` si non trouvé.
+     */
     @Override
-    public ProduitSnack getProduitById(int id) {
-        for (ProduitSnack p : this.data) {
-            if (p.getId() == id) {
-                return p;
+    public ProduitSnack trouverProduitParId(int id) {
+        for (ProduitSnack produit : this.data) {
+            if (produit.getId() == id) {
+                return produit;
             }
         }
         return null;
     }
 
+    /**
+     * Retourne la liste de tous les produits de snack disponibles.
+     * @return Une copie de la liste des produits.
+     */
     @Override
-    public List<ProduitSnack> getAllProduits() {
+    public List<ProduitSnack> trouverTousLesProduits() {
         return new ArrayList<>(this.data);
     }
 
+    /**
+     * Met à jour les informations d'un produit de snack (typiquement le stock).
+     * @param produitMisAJour L'objet ProduitSnack avec les nouvelles données.
+     */
     @Override
-    public void updateProduit(ProduitSnack updatedProduit) {
-        // Cherche le produit par son ID et le remplace par la version mise à jour.
-        // Essentiel pour la mise à jour des stocks après une vente.
+    public void mettreAJourProduit(ProduitSnack produitMisAJour) {
         for (int i = 0; i < this.data.size(); i++) {
-            if (this.data.get(i).getId() == updatedProduit.getId()) {
-                this.data.set(i, updatedProduit);
-                saveToFile();
+            if (this.data.get(i).getId() == produitMisAJour.getId()) {
+                this.data.set(i, produitMisAJour);
+                sauvegarderDansFichier();
                 return;
             }
         }
     }
 
     /**
-     * Supprime un produit de la liste en mémoire et sauvegarde la modification
-     * dans le fichier.
+     * Supprime un produit de snack du catalogue à partir de son identifiant.
+     * @param id L'identifiant du produit à supprimer.
      */
     @Override
-    public void deleteProduit(int id) {
-        boolean changed = false;
+    public void supprimerProduitParId(int id) {
+        int indexASupprimer = -1;
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getId() == id) {
-                this.data.remove(i);
-                changed = true;
-                break; // Le produit est unique, on peut arrêter la boucle.
+                indexASupprimer = i;
+                break;
             }
         }
-        if (changed) {
-            saveToFile();
+        if (indexASupprimer != -1) {
+            this.data.remove(indexASupprimer);
+            sauvegarderDansFichier();
         }
     }
 }

@@ -1,3 +1,6 @@
+// ========================================================================
+// FICHIER : SiegeDAOImpl.java
+// ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Siege;
@@ -6,12 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implémentation concrète pour la gestion des sièges dans le fichier "sieges.dat".
- * 
- * Pour le développeur de l'interface graphique : cette classe est la source de données
- * pour le `SiegePanel`. Sa méthode la plus importante, `getSiegesBySalleId`, est
- * celle que vous appellerez (via le service) pour obtenir la liste de tous les sièges
- * à dessiner sur le plan de la salle.
+ * Implémentation pour la gestion des sièges.
+ * Interagit avec le fichier "sieges.dat".
  */
 public class SiegeDAOImpl extends GenericDAOImpl<Siege> implements SiegeDAO {
 
@@ -19,27 +18,39 @@ public class SiegeDAOImpl extends GenericDAOImpl<Siege> implements SiegeDAO {
         super("sieges.dat");
     }
 
+    /**
+     * Ajoute un nouveau siège à la source de données.
+     * Principalement utilisé lors de la création initiale d'une salle et de son plan.
+     * @param siege L'objet Siege à enregistrer.
+     */
     @Override
-    public void addSiege(Siege siege) {
+    public void ajouterSiege(Siege siege) {
         this.data.add(siege);
-        saveToFile();
+        sauvegarderDansFichier();
     }
 
+    /**
+     * Recherche et retourne tous les sièges appartenant à une salle spécifique.
+     * @param idSalle L'identifiant de la salle.
+     * @return Une liste des sièges de cette salle.
+     */
     @Override
-    public List<Siege> getSiegesBySalleId(int salleId) {
-        List<Siege> resultat = new ArrayList<>();
-        // On parcourt tous les sièges du cinéma pour ne retourner que ceux
-        // qui appartiennent à la salle demandée.
+    public List<Siege> trouverSiegesParIdSalle(int idSalle) {
+        List<Siege> siegesTrouves = new ArrayList<>();
         for (Siege siege : this.data) {
-            if (siege.getIdSalle() == salleId) {
-                resultat.add(siege);
+            if (siege.getIdSalle() == idSalle) {
+                siegesTrouves.add(siege);
             }
         }
-        return resultat;
+        return siegesTrouves;
     }
 
+    /**
+     * Retourne la liste de tous les sièges de tout le cinéma.
+     * @return Une copie de la liste de tous les sièges.
+     */
     @Override
-    public List<Siege> getAllSieges() {
+    public List<Siege> trouverTousLesSieges() {
         return new ArrayList<>(this.data);
     }
 }
