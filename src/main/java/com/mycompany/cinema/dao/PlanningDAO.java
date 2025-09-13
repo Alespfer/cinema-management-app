@@ -14,5 +14,7 @@ public interface PlanningDAO {
     void ajouterPlanning(Planning planning);
     List<Planning> trouverPlanningsParIdPersonnel(int idPersonnel);
     List<Planning> trouverTousLesPlannings();
+    void mettreAJourPlanning(Planning planning);
+    void supprimerPlanningParId(int planningId);
     void rechargerDonnees();
 }

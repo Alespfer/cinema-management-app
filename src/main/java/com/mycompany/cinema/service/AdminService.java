@@ -23,23 +23,31 @@ public interface AdminService extends CinemaService {
 
     void modifierPersonnel(Personnel personnel);
 
+    void desactiverPersonnel(int personnelId) throws Exception;
+    
+    void reactiverPersonnel(int personnelId) throws Exception; 
+
     void supprimerPersonnel(int personnelId);
 
-    List<Personnel> trouverToutLePersonnel();
+    List<Personnel> trouverToutLePersonnel(boolean inclureInactifs);
 
     List<Role> trouverTousLesRoles();
+    
+    Role trouverRoleParId(int idRole);
+
 
     // --- Gestion du Planning ---
     Planning creerPlanning(int personnelId, LocalDateTime debut, LocalDateTime fin, String poste) throws Exception;
 
     List<Planning> trouverPlanningPourPersonnel(int personnelId);
 
-    // void affecterPersonnelASeance(int personnelId, int seanceId) throws Exception;
-    // void desaffecterPersonnelDeSeance(int personnelId, int seanceId) throws Exception;
-    
-    
+    public List<Planning> trierPlanningsParDate(List<Planning> plannings);
+            
+    void modifierPlanning(Planning planning) throws Exception;
+
+    void supprimerPlanning(int planningId) throws Exception;
+
     // --- Gestion des Films, Genres, Salles, Tarifs ---
-    
     void ajouterFilm(Film film) throws Exception;
 
     void mettreAJourFilm(Film film) throws Exception;
@@ -56,8 +64,6 @@ public interface AdminService extends CinemaService {
 
     void ajouterSalleAvecPlan(Salle salle, int nbRangees, int nbSiegesParRangee) throws Exception;
 
-    public void modifierSalle(Salle salle) throws Exception;
-
     void supprimerSalle(int salleId) throws Exception;
 
     List<Salle> trouverToutesLesSalles();
@@ -71,7 +77,6 @@ public interface AdminService extends CinemaService {
     List<Tarif> trouverTousLesTarifs();
 
     // --- Gestion des Séances ---
-    
     void ajouterSeance(Seance seance) throws Exception;
 
     void modifierSeance(Seance seance) throws Exception;
@@ -81,7 +86,6 @@ public interface AdminService extends CinemaService {
     List<Seance> trouverToutesLesSeances();
 
     // --- Gestion du Snacking ---
-    
     List<ProduitSnack> trouverTousLesProduits();
 
     void ajouterProduitSnack(ProduitSnack produit) throws Exception;
@@ -95,7 +99,6 @@ public interface AdminService extends CinemaService {
     void ajusterStockProduit(int produitId, int quantiteAjustement) throws Exception;
 
     // --- Rapports de Ventes (Reporting) ---
-    
     double calculerChiffreAffairesPourFilm(int filmId);
 
     double calculerChiffreAffairesPourJour(LocalDate date);
@@ -113,7 +116,6 @@ public interface AdminService extends CinemaService {
     double calculerTotalPourVenteSnack(VenteSnack vente);
 
     // --- Méthodes de support pour les Vues Admin ---
-    
     Client trouverClientParId(int clientId);
 
     List<Billet> trouverBilletsParIdReservation(int reservationId);

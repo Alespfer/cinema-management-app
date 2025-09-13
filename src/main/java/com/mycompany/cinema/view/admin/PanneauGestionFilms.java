@@ -34,6 +34,7 @@ public class PanneauGestionFilms extends javax.swing.JPanel {
     public PanneauGestionFilms(AdminService adminService) {
         this.adminService = adminService;
         initComponents();
+        supprimerButton.setEnabled(false);
         filmListModel = new DefaultListModel<>();
         filmJList.setModel(filmListModel);
         configureFilmListRenderer();
@@ -443,13 +444,17 @@ public class PanneauGestionFilms extends javax.swing.JPanel {
 
     private void filmJListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_filmJListValueChanged
         if (!evt.getValueIsAdjusting()) {
-            filmSelectionne = filmJList.getSelectedValue();
-            afficherDetailsFilm(filmSelectionne);
-        }// TODO add your handling code here:
+        filmSelectionne = filmJList.getSelectedValue();
+        afficherDetailsFilm(filmSelectionne);
+        if (filmSelectionne != null) {
+            supprimerButton.setEnabled(true);
+        } else {
+            supprimerButton.setEnabled(false);
+        }
+    }
     }//GEN-LAST:event_filmJListValueChanged
 
     private void genreJListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_genreJListValueChanged
-        // TODO add your handling code here:
     }//GEN-LAST:event_genreJListValueChanged
 
     private void parcourirAfficheButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parcourirAfficheButtonActionPerformed
@@ -462,7 +467,7 @@ public class PanneauGestionFilms extends javax.swing.JPanel {
         if (resultat == JFileChooser.APPROVE_OPTION) {
             this.fichierAfficheSelectionne = chooser.getSelectedFile();
             nomFichierAfficheLabel.setText(fichierAfficheSelectionne.getName());
-        }// TODO add your handling code here:
+        }
     }//GEN-LAST:event_parcourirAfficheButtonActionPerformed
 
 

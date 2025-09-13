@@ -37,7 +37,10 @@ public class FenetreEspaceClient extends javax.swing.JDialog {
         // --- C'est ici qu'on ajoute notre logique après la construction ---
         // 1. On crée les instances de nos panneaux personnalisés
         //    (Ce sont des classes que vous avez déjà dans votre projet)
-        JPanel infosPanel = new PanneauInfosPersonnelles(clientService, clientConnecte, this);
+        
+        FenetrePrincipaleClient fenetrePrincipale = (FenetrePrincipaleClient) parent;
+
+        JPanel infosPanel = new PanneauInfosPersonnelles(clientService, clientConnecte, this, fenetrePrincipale);
         PanneauHistoriqueReservations historiquePanel = new PanneauHistoriqueReservations(clientService, clientConnecte);
 
         // 2. On remplace les panneaux vides (jPanel1, jPanel2) créés par le designer

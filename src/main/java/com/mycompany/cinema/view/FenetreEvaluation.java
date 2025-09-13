@@ -98,6 +98,9 @@ public class FenetreEvaluation extends javax.swing.JDialog {
                 evaluationExistante.setNote(note);
                 evaluationExistante.setCommentaire(commentaire);
                 evaluationExistante.setDateEvaluation(LocalDateTime.now());
+                
+                clientService.modifierEvaluation(evaluationExistante);
+
                 JOptionPane.showMessageDialog(this, "Votre avis a été mis à jour.", "Succès", JOptionPane.INFORMATION_MESSAGE);
             }
             dispose();

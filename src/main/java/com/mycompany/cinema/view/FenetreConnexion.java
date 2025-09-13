@@ -25,59 +25,64 @@ public class FenetreConnexion extends javax.swing.JFrame {
         this.adminService = serviceImpl;
         initComponents();
         setTitle("Cinema PISE 2025 - Connexion");
-        setLocationRelativeTo(null); // Centre la fenêtre à l'écran
+        // On centre la fenêtre à l'écran
+        setLocationRelativeTo(null); 
     }
 
+   
     /**
-     * Logique principale exécutée lors du clic sur le bouton "Connexion".
+     * Gère la logique d'authentification lorsque l'utilisateur clique sur
+     * "Connexion". Cette méthode vérifie les identifiants pour un client ou un
+     * membre du personnel et redirige vers l'interface appropriée.
      */
     private void actionConnexion() {
-        String user = utilisateurField.getText().trim();
-        String password = new String(passwordField.getPassword());
+        // 1. Récupération des informations saisies par l'utilisateur.
+        String identifiant = utilisateurField.getText().trim();
+        String motDePasse = new String(passwordField.getPassword());
 
-        if (user.isEmpty() || password.isEmpty()) {
+        // 2. Validation de base : on s'assure que les champs ne sont pas vides.
+        if (identifiant.isEmpty() || motDePasse.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
-            return;
+            return; // On arrête la méthode ici.
         }
 
-        // --- Logique pour CLIENT ---
+        // 3. On détermine si la tentative de connexion concerne un client ou un membre du personnel.
         if (clientRadio.isSelected()) {
-            if (!emailValide(user)) {
-                JOptionPane.showMessageDialog(this, "Adresse e-mail invalide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
+            // --- LOGIQUE POUR UN CLIENT ---
+
+            // On vérifie le format de l'email.
+            if (!emailValide(identifiant)) {
+                JOptionPane.showMessageDialog(this, "L'identifiant client doit être une adresse e-mail valide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            Client client = clientService.authentifierClient(user, password);
+
+            // On demande au service d'authentifier le client.
+            Client client = clientService.authentifierClient(identifiant, motDePasse);
             if (client != null) {
-                this.dispose();// On ferme la fenêtre de connexion
-                new FenetrePrincipaleClient(clientService, client).setVisible(true); // On ouvre la fenêtre principale client
+                this.dispose();
+                new FenetrePrincipaleClient(clientService, client).setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(this, "Email ou mot de passe client incorrect.", "Erreur d'authentification", JOptionPane.ERROR_MESSAGE);
             }
-            // --- Logique pour PERSONNEL ---
         } else {
-            if (!emailValide(user)) { // On vérifie aussi le format pour le personnel
-                JOptionPane.showMessageDialog(this, "L'identifiant du personnel doit être un email valide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            Personnel personnel = adminService.authentifierPersonnel(user, password);
-            if (personnel != null) {
-                Role role = null;
-                for (Role r : adminService.trouverTousLesRoles()) {
-                    if (r.getId() == personnel.getIdRole()) {
-                        role = r;
-                        break;
-                    }
-                }
-                this.dispose();
+            
+            // --- LOGIQUE POUR UN MEMBRE DU PERSONNEL ---
 
-                // Redirection en fonction du rôle
-                if (role != null && role.getLibelle().equalsIgnoreCase("Vendeur")) {
-                    new PointDeVente(adminService, personnel).setVisible(true);
-                } else {
+            Personnel personnel = adminService.authentifierPersonnel(identifiant, motDePasse);
+            if (personnel != null) {
+                Role role = adminService.trouverRoleParId(personnel.getIdRole());
+                this.dispose(); // On ferme la fenêtre de connexion dans tous les cas.
+
+                // On vérifie si l'employé a le rôle "Administrateur".
+                if (role != null && role.getLibelle().equalsIgnoreCase("Administrateur")) {
+                    // Cas 1 : L'employé est administrateur -> accès au back-office.
                     new FenetreAdmin(adminService, personnel).setVisible(true);
+                } else {
+                    // Cas 2 : Pour tous les autres rôles on redirige vers l'interface la plus restrictive, le point de vente.
+                    new PointDeVente(adminService, personnel).setVisible(true);
                 }
             } else {
-                JOptionPane.showMessageDialog(this, "Email ou mot de passe du personnel incorrect.", "Erreur d'authentification", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Identifiant ou mot de passe du personnel incorrect.", "Erreur d'authentification", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -104,7 +109,7 @@ public class FenetreConnexion extends javax.swing.JFrame {
         );
 
         if (email == null || email.trim().isEmpty()) {
-            return; // L'utilisateur a annulé
+            return; 
         }
 
         email = email.trim();
@@ -124,11 +129,11 @@ public class FenetreConnexion extends javax.swing.JFrame {
         ReinitialiserMotDePasse dialog = new ReinitialiserMotDePasse(this, true);
         String nouveauMotDePasse = dialog.afficherDialogue();
 
-        if (nouveauMotDePasse != null) { // L'utilisateur a validé un nouveau mot de passe
+        if (nouveauMotDePasse != null) { 
             try {
                 if (client != null) {
                     clientService.changerMotDePasseClient(client.getId(), nouveauMotDePasse);
-                } else { // C'est donc le membre du personnel
+                } else { 
                     adminService.changerMotDePassePersonnel(personnel.getId(), nouveauMotDePasse);
                 }
                 JOptionPane.showMessageDialog(this, "Votre mot de passe a été mis à jour avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
@@ -137,8 +142,7 @@ public class FenetreConnexion extends javax.swing.JFrame {
             }
         }
     }
-    
-    
+
     /**
      * Fonction utilitaire pour valider le format d'un email
      */

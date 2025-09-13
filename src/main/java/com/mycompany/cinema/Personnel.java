@@ -23,10 +23,12 @@ public class Personnel implements Serializable {
     // Mot de passe du compte.
     private String motDePasse;
 
+    // Variable booléenne pour indiquer si l'employé est actif 
+    private boolean estActif;
+
     // Identifiant du rôle associé (ex: administrateur, vendeur...).
     private int idRole;
 
-    
     public Personnel() {
     }
 
@@ -47,12 +49,10 @@ public class Personnel implements Serializable {
         this.email = email;
         this.motDePasse = motDePasse;
         this.idRole = idRole;
+        this.estActif = true; // Par défaut, l'employé est initialisé en tant qu'actif
     }
-    
-    
+
     // --- Getters / Setters ---
-
-
     public int getId() {
         return idPersonnel;
     }
@@ -100,4 +100,13 @@ public class Personnel implements Serializable {
     public void setIdRole(int idRole) {
         this.idRole = idRole;
     }
+
+    public boolean getEstActif() {
+        return estActif;
+    }
+
+    public void setEstActif(boolean estActif) {
+        this.estActif = estActif;
+    }
+
 }

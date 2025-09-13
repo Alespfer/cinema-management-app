@@ -75,6 +75,7 @@ public class FenetreInscription extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
+        jPanel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         jPanel1.setLayout(new java.awt.GridLayout(0, 2, 5, 10));
 
         jLabel1.setText("Nom complet : ");

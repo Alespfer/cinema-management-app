@@ -20,6 +20,9 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
     private Salle salleSelectionnee;
     private DefaultListModel<Salle> listModel;
 
+    /**
+     * Constructeur du panneau de gestion des salles.
+     */
     public PanneauGestionSalles(AdminService adminService) {
         this.adminService = adminService;
 
@@ -27,10 +30,20 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
         configurerModeleEtRenderers();
 
         chargerListeSalles();
+
+        // --- Configuration de l'état initial de l'interface ---
+        setFormulaireActif(false); // Les champs en mode "consultation" ne sont pas modifiables
+        ajouterButton.setEnabled(false);
+        supprimerButton.setEnabled(false);
+
     }
 
+    // ========================================================================
+    // --- Configuration et Mise à Jour de l'Interface ---
+    // ========================================================================
     /**
-     * Initialise le modèle de la JList et son rendu personnalisé.
+     * Personnalise l'affichage des objets Salle dans la JList pour une
+     * meilleure lisibilité.
      */
     private void configurerModeleEtRenderers() {
         listModel = new DefaultListModel<>();
@@ -72,36 +85,61 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
     }
 
     /**
-     * Met à jour les champs du formulaire avec les détails d'une salle.
+     * Active ou désactive les champs du formulaire pour basculer entre les
+     * modes "consultation" et "création".
+     *
+     * @param actif Mettre à 'true' pour activer les champs, 'false' pour les
+     * désactiver.
+     */
+    private void setFormulaireActif(boolean actif) {
+        numeroField.setEditable(actif);
+        capaciteField.setEditable(actif);
+    }
+
+    /**
+     * Affiche les détails d'une salle sélectionnée dans les champs du
+     * formulaire.
+     *
+     * @param salle La salle à afficher, ou null pour vider les champs.
      */
     private void mettreAJourChamps(Salle salle) {
         if (salle != null) {
             idField.setText(String.valueOf(salle.getId()));
             numeroField.setText(salle.getNumero());
             capaciteField.setText(String.valueOf(salle.getCapacite()));
-            supprimerButton.setEnabled(true);
         } else {
             idField.setText("");
             numeroField.setText("");
             capaciteField.setText("");
-            supprimerButton.setEnabled(false);
         }
     }
 
+    // ========================================================================
+    // --- Actions déclenchées par les Événements ---
+    // ========================================================================
+    
+    
     /**
-     * Réinitialise le formulaire.
+     * Prépare l'interface pour la création d'une nouvelle salle en activant le
+     * formulaire.
      */
     private void actionNouveau() {
-        salleSelectionnee = null;
         listeSalles.clearSelection();
-        mettreAJourChamps(null);
+        mettreAJourChamps(null); // Vide les champs du formulaire
+
+
+        // Mode création 
+        setFormulaireActif(true);       // Active les champs pour la saisie
+        ajouterButton.setEnabled(true);   // Active le bouton pour valider la création
+        supprimerButton.setEnabled(false); 
     }
 
-    /**
-     * Gère la sauvegarde (création ou modification) d'une salle. La création
-     * inclut une étape pour configurer le plan des sièges.
+        /**
+     * Gère la logique de création d'une nouvelle salle, y compris la
+     * configuration de son plan de sièges.
      */
-    private void actionEnregistrer() {
+    private void actionAjouter() {
+        // --- 1. Validation des données saisies dans le formulaire ---
         String numero = numeroField.getText().trim();
         if (numero.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Le numéro de la salle ne peut pas être vide.", "Validation", JOptionPane.WARNING_MESSAGE);
@@ -121,73 +159,61 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
         }
 
         try {
-            if (salleSelectionnee == null) { // Création
+            // --- 2. Interaction avec l'admin pour définir le plan des sièges ---
+            int nbRangees = 0;
+            int nbSiegesParRangee = 0;
+            boolean configurationValide = false;
 
-                int nbRangees = 0;
-                int nbSiegesParRangee = 0;
-                boolean configurationValide = false;
-
-                while (!configurationValide) {
-                    try {
-                        String nbRangeesStr = JOptionPane.showInputDialog(this, "Combien de rangées pour la salle '" + numero + "' ?", "Configuration de la salle", JOptionPane.QUESTION_MESSAGE);
-                        if (nbRangeesStr == null) {
-                            return; 
-                        }
-                        nbRangees = Integer.parseInt(nbRangeesStr.trim());
-
-                        String nbSiegesStr = JOptionPane.showInputDialog(this, "Combien de sièges par rangée ?", "Configuration de la salle", JOptionPane.QUESTION_MESSAGE);
-                        if (nbSiegesStr == null) {
-                            return; 
-                        }
-                        nbSiegesParRangee = Integer.parseInt(nbSiegesStr.trim());
-
-                        if (nbRangees <= 0 || nbSiegesParRangee <= 0) {
-                            JOptionPane.showMessageDialog(this, "Le nombre de rangées et de sièges doit être positif.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                            // Si nombre invalide, configurationValide reste false, la boucle va recommencer.
-                        } else if (nbRangees * nbSiegesParRangee != capacite) {
-                            JOptionPane.showMessageDialog(this,
-                                    "Incohérence : " + nbRangees + " rangées × " + nbSiegesParRangee + " sièges = " + (nbRangees * nbSiegesParRangee) + " places.\n"
-                                    + "Cela ne correspond pas à la capacité totale de " + capacite + " que vous avez indiquée.",
-                                    "Erreur de configuration", JOptionPane.ERROR_MESSAGE);
-                            // Si nombre incohérent, configurationValide reste false, la boucle va recommencer.
-                        } else {
-                            // Toutes les validations sont passées, on peut sortir de la boucle.
-                            configurationValide = true;
-                        }
-
-                    } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(this, "Veuillez entrer des nombres entiers valides.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
+            while (!configurationValide) {
+                try {
+                    String nbRangeesStr = JOptionPane.showInputDialog(this, "Combien de rangées pour la salle '" + numero + "' ?", "Configuration du plan", JOptionPane.QUESTION_MESSAGE);
+                    if (nbRangeesStr == null) {
+                        return; // L'utilisateur a cliqué sur "Annuler"
                     }
+                    nbRangees = Integer.parseInt(nbRangeesStr.trim());
+
+                    String nbSiegesStr = JOptionPane.showInputDialog(this, "Combien de sièges par rangée ?", "Configuration du plan", JOptionPane.QUESTION_MESSAGE);
+                    if (nbSiegesStr == null) {
+                        return; // L'utilisateur a cliqué sur "Annuler"
+                    }
+                    nbSiegesParRangee = Integer.parseInt(nbSiegesStr.trim());
+
+                    if (nbRangees <= 0 || nbSiegesParRangee <= 0) {
+                        JOptionPane.showMessageDialog(this, "Le nombre de rangées et de sièges doit être positif.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    } else if (nbRangees * nbSiegesParRangee != capacite) {
+                        JOptionPane.showMessageDialog(this,
+                                "Incohérence : " + nbRangees + " rangées × " + nbSiegesParRangee + " sièges = " + (nbRangees * nbSiegesParRangee) + " places.\n"
+                                + "Cela ne correspond pas à la capacité totale de " + capacite + " que vous avez indiquée.",
+                                "Erreur de configuration", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        configurationValide = true; // Si la configuration est correcte on sort de la boucle
+                    }
+
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Veuillez entrer des nombres entiers valides.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
                 }
-
-                int nouvelId = com.mycompany.cinema.util.IdManager.obtenirProchainIdSalle();
-                Salle nouvelleSalle = new Salle(nouvelId, numero, capacite);
-
-                adminService.ajouterSalleAvecPlan(nouvelleSalle, nbRangees, nbSiegesParRangee);
-
-                JOptionPane.showMessageDialog(this, "Salle et son plan de " + (nbRangees * nbSiegesParRangee) + " sièges créés avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
-
-            } else { // Modification
-                salleSelectionnee.setNumero(numero);
-                salleSelectionnee.setCapacite(capacite);
-                adminService.modifierSalle(salleSelectionnee);
-                JOptionPane.showMessageDialog(this, "Salle modifiée avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
             }
 
+            // --- 3. Création de l'objet et appel au service ---
+            int nouvelId = com.mycompany.cinema.util.IdManager.obtenirProchainIdSalle();
+            Salle nouvelleSalle = new Salle(nouvelId, numero, capacite);
+
+            adminService.ajouterSalleAvecPlan(nouvelleSalle, nbRangees, nbSiegesParRangee);
+
+            JOptionPane.showMessageDialog(this, "Salle créée avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
+
+            // --- 4. Réinitialisation de l'interface ---
             chargerListeSalles();
-            actionNouveau();
+            actionNouveau(); 
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Erreur lors de l'enregistrement : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Erreur lors de l'ajout : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    
-    
     /**
      * Gère la suppression de la salle sélectionnée.
      */
-
     private void actionSupprimer() {
         if (salleSelectionnee == null) {
             return;
@@ -199,7 +225,7 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
                 "Êtes-vous sûr de vouloir supprimer la salle '" + salleSelectionnee.getNumero() + "' ?",
                 "Confirmation de suppression",
                 JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE, 
+                JOptionPane.WARNING_MESSAGE,
                 null, options, options[0]
         );
 
@@ -234,7 +260,7 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
         capaciteField = new javax.swing.JTextField();
         buttonPanel = new javax.swing.JPanel();
         nouveauButton = new javax.swing.JButton();
-        enregistrerButton = new javax.swing.JButton();
+        ajouterButton = new javax.swing.JButton();
         supprimerButton = new javax.swing.JButton();
         panneauGauche = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -276,13 +302,14 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
         });
         buttonPanel.add(nouveauButton);
 
-        enregistrerButton.setText("Enregistrer");
-        enregistrerButton.addActionListener(new java.awt.event.ActionListener() {
+        ajouterButton.setText("Ajouter");
+        ajouterButton.setEnabled(false);
+        ajouterButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                enregistrerButtonActionPerformed(evt);
+                ajouterButtonActionPerformed(evt);
             }
         });
-        buttonPanel.add(enregistrerButton);
+        buttonPanel.add(ajouterButton);
 
         supprimerButton.setText("Supprimer");
         supprimerButton.setEnabled(false);
@@ -316,10 +343,6 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
         actionNouveau();
     }//GEN-LAST:event_nouveauButtonActionPerformed
 
-    private void enregistrerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enregistrerButtonActionPerformed
-        actionEnregistrer();
-    }//GEN-LAST:event_enregistrerButtonActionPerformed
-
     private void supprimerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supprimerButtonActionPerformed
         actionSupprimer();
     }//GEN-LAST:event_supprimerButtonActionPerformed
@@ -327,27 +350,36 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
     private void listeSallesValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_listeSallesValueChanged
         if (!evt.getValueIsAdjusting()) {
             salleSelectionnee = listeSalles.getSelectedValue();
-            mettreAJourChamps(salleSelectionnee);
+            mettreAJourChamps(salleSelectionnee); // Affiche les détails de la salle sélectionnée
+
+            setFormulaireActif(false); // Les champs sont en consultation, non modifiables
+            ajouterButton.setEnabled(false); 
+
+            supprimerButton.setEnabled(salleSelectionnee != null);
         }
     }//GEN-LAST:event_listeSallesValueChanged
 
     private void idFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_idFieldMouseClicked
         if (!idField.isEditable()) {
             JOptionPane.showMessageDialog(
-                    this, 
+                    this,
                     "L'identifiant (ID) est généré automatiquement par le système lors de la création d'un nouvel élément.\n"
-                    + "Il ne peut pas être modifié manuellement.", 
-                    "Information", 
-                    JOptionPane.INFORMATION_MESSAGE 
+                    + "Il ne peut pas être modifié manuellement.",
+                    "Information",
+                    JOptionPane.INFORMATION_MESSAGE
             );
         }
     }//GEN-LAST:event_idFieldMouseClicked
 
+    private void ajouterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ajouterButtonActionPerformed
+        actionAjouter();
+    }//GEN-LAST:event_ajouterButtonActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton ajouterButton;
     private javax.swing.JPanel buttonPanel;
     private javax.swing.JTextField capaciteField;
-    private javax.swing.JButton enregistrerButton;
     private javax.swing.JPanel formPanel;
     private javax.swing.JTextField idField;
     private javax.swing.JLabel jLabel1;

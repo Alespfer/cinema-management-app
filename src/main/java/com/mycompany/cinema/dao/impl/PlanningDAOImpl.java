@@ -5,6 +5,7 @@ package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Planning;
 import com.mycompany.cinema.dao.PlanningDAO;
+import com.mycompany.cinema.dao.impl.GenericDAOImpl;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +49,43 @@ public class PlanningDAOImpl extends GenericDAOImpl<Planning> implements Plannin
             }
         }
         return planningsTrouves;
+    }
+
+    /**
+     * Cherche un planning par son ID, le remplace par le nouvel objet, puis
+     * sauvegarde les changements dans le fichier.
+     */
+    @Override
+    public void mettreAJourPlanning(Planning planningMisAJour) {
+        for (int i = 0; i < this.data.size(); i++) {
+            if (this.data.get(i).getId() == planningMisAJour.getId()) {
+                this.data.set(i, planningMisAJour);
+                sauvegarderDansFichier();
+                return;
+            }
+        }
+    }
+
+    /**
+     * Cherche un planning par son ID et le retire de la liste avant de
+     * sauvegarder les changements dans le fichier.
+     */
+    @Override
+    public void supprimerPlanningParId(int planningId) {
+        boolean aEteSupprime = false;
+
+        for (int i = 0; i < this.data.size(); i++) {
+            Planning planning = this.data.get(i);
+            if (planning.getId() == planningId) {
+                this.data.remove(i);
+                aEteSupprime = true;
+                break; 
+            }
+        }
+
+        if (aEteSupprime) {
+            sauvegarderDansFichier();
+        }
     }
 
     /**

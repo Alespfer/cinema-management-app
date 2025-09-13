@@ -13,6 +13,7 @@ import com.mycompany.cinema.service.ClientService;
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Image;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -28,11 +29,11 @@ public class PanneauDetailsFilm extends javax.swing.JPanel {
     private int clientId;
     private Film filmActuel;
     private LocalDate dateActuelle;
-    
+
     // "Model" pour la liste des séances.
     private DefaultListModel<Seance> seanceListModel;
     private DefaultListModel<EvaluationClient> evaluationsListModel;
-    
+
     // --- Interfaces pour communiquer avec la fenêtre principale ---
     private SeanceSelectionListener seanceSelectionListener;
     private RetourListener retourListener;
@@ -54,8 +55,7 @@ public class PanneauDetailsFilm extends javax.swing.JPanel {
         configurerModelesEtRendus();
     }
 
-    
-     /**
+    /**
      * Initialise les modèles de liste et les renderers.
      */
     private void configurerModelesEtRendus() {
@@ -98,7 +98,6 @@ public class PanneauDetailsFilm extends javax.swing.JPanel {
         });
     }
 
-    
     /**
      * Méthode publique pour charger et afficher les données d'un film.
      */
@@ -111,12 +110,26 @@ public class PanneauDetailsFilm extends javax.swing.JPanel {
             titleLabel.setText(film.getTitre());
             infoLabel.setText("Durée: " + film.getDureeMinutes() + " min | Classification: " + film.getClassification());
             synopsisArea.setText(film.getSynopsis());
-            
-            // Chargement et redimensionnement de l'affiche
-            ImageIcon posterIcon = new ImageIcon("images/" + film.getUrlAffiche());
-            Image image = posterIcon.getImage().getScaledInstance(300, 450, Image.SCALE_SMOOTH);
-            posterLabel.setIcon(new ImageIcon(image));
-            
+
+            String nomFichierAffiche = film.getUrlAffiche();
+
+            // Récupération de ClassLoader pour l'exécution .jar
+            ClassLoader cl = getClass().getClassLoader();
+
+            // Chemin de l'image pour l'affiche
+            String cheminRessource = "images/" + nomFichierAffiche;
+
+            // Utilisation de cl.getResource() pour obtenir l'URL de la ressource.
+            URL imageUrl = cl.getResource(cheminRessource);
+
+            if (imageUrl != null) {
+                ImageIcon posterIcon = new ImageIcon(imageUrl);
+                Image image = posterIcon.getImage().getScaledInstance(300, 450, Image.SCALE_SMOOTH);
+                posterLabel.setIcon(new ImageIcon(image));
+            } else {
+                System.err.println("⚠ Ressource image non trouvée");
+
+            }
             // Calcul et affichage des notes
             notePresseLabel.setText("Presse: " + String.format("%.1f", film.getNotePresse()) + " / 5");
             double moyenneSpectateurs = clientService.calculerNoteMoyenneSpectateurs(film.getId());
@@ -132,7 +145,6 @@ public class PanneauDetailsFilm extends javax.swing.JPanel {
             noterButton.setText(aEvalue ? "Modifier mon avis" : "Donner un avis");
             noterButton.setEnabled(true);
 
-            
             // Chargement des séances
             seanceListModel.clear();
             List<Seance> seances = clientService.trouverSeancesPourFilmEtDate(film.getId(), date);
@@ -144,7 +156,6 @@ public class PanneauDetailsFilm extends javax.swing.JPanel {
         }
     }
 
-    
     /**
      * Réinitialise le panneau à son état par défaut.
      */

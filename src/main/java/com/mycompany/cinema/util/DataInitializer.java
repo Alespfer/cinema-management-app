@@ -13,11 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ATTENTION : Classe utilitaire pour créer le tout premier jeu de données.
- * Axelle : Tu n'auras jamais besoin de toucher ou d'appeler ce code. Il est
- * exécuté une seule fois pour générer les fichiers "data/nom_fichier.dat" que
- * le reste de l'application utilise comme une base de données. C'est la source
- * de toutes les informations que tu afficheras au démarrage.
+ * Classe utilitaire pour créer le tout premier jeu de données.
  */
 public final class DataInitializer {
 
@@ -85,7 +81,6 @@ public final class DataInitializer {
         createScenarioVenteSnack(personnel, produitsSnack, caisses, clients, ventesSnack, lignesVente);
 
         // --- PHASE 5: Sauvegarde de tout dans des fichiers ---
-
         System.out.println("Sauvegarde des données dans les fichiers...");
         saveList("roles.dat", roles);
         saveList("tarifs.dat", tarifs);
@@ -178,7 +173,7 @@ public final class DataInitializer {
         films.add(new Film(2, "Oppenheimer", "Le portrait du physicien J. Robert Oppenheimer...", 180, "Tous publics avec avertissement", "oppenheimer.jpg", 4.5));
         films.add(new Film(3, "Spider-Man: Across the Spider-Verse", "Miles Morales est catapulté à travers le Multivers...", 140, "Tous publics", "spiderman.jpg", 4.9));
         films.add(new Film(
-                4, // ID suivant disponible
+                4,
                 "Le Seigneur des Anneaux : Le Retour du Roi",
                 "Les armées de Sauron ont assiégé Minas Tirith, la capitale de Gondor...",
                 201,
@@ -187,11 +182,11 @@ public final class DataInitializer {
                 5.0
         ));
         films.add(new Film(
-                5, // ID suivant disponible
+                5,
                 "PISE : Le Film",
                 "Le parcours initiatique d'un soldat du code face à une doctrine implacable.",
                 240,
-                "Interdit aux -18 ans", // Classification non apte à tous les publics
+                "Interdit aux -18 ans",
                 "christophe.jpg",
                 4.2
         ));
@@ -205,15 +200,15 @@ public final class DataInitializer {
         films.get(1).getGenres().add(genres.get(3));
         films.get(2).getGenres().add(genres.get(5));
         films.get(2).getGenres().add(genres.get(4));
-        films.get(3).getGenres().add(genres.get(1)); 
-        films.get(3).getGenres().add(genres.get(6)); 
-        films.get(4).getGenres().add(genres.get(2)); 
+        films.get(3).getGenres().add(genres.get(1));
+        films.get(3).getGenres().add(genres.get(6));
+        films.get(4).getGenres().add(genres.get(2));
     }
 
     private static List<Client> createClients() {
         List<Client> clients = new ArrayList<>();
-        clients.add(new Client(1, "Alice Martin", "alice.m@email.com", "pass123", LocalDate.of(2023, 5, 12)));
-        clients.add(new Client(2, "Bob Durand", "bob.d@email.com", "azerty", LocalDate.of(2024, 1, 20)));
+        clients.add(new Client(1, "Alice Martin", "alice.m@email.com", "Alice123", LocalDate.of(2023, 5, 12)));
+        clients.add(new Client(2, "Bob Durand", "bob.d@email.com", "Azerty123", LocalDate.of(2024, 1, 20)));
         return clients;
     }
 
@@ -221,9 +216,9 @@ public final class DataInitializer {
         List<Personnel> employes = new ArrayList<>();
         // On remplace le nom d'utilisateur par un email
         employes.add(new Personnel(0, "Système", "En Ligne", "system@cinema.local", "system_pass", roles.get(0).getId()));
-        employes.add(new Personnel(1, "Dupont", "Jean", "admin@pisecinema.com", "admin", roles.get(0).getId()));
-        employes.add(new Personnel(2, "Garcia", "Maria", "maria@pisecinema.com", "proj", roles.get(1).getId()));
-        employes.add(new Personnel(3, "Smith", "John", "vendeur@pisecinema.com", "vendeur", roles.get(2).getId()));
+        employes.add(new Personnel(1, "Dupont", "Jean", "admin@pisecinema.com", "Admin123", roles.get(0).getId()));
+        employes.add(new Personnel(2, "Garcia", "Maria", "maria@pisecinema.com", "Project123", roles.get(1).getId()));
+        employes.add(new Personnel(3, "Smith", "John", "vendeur@pisecinema.com", "Vendeur123", roles.get(2).getId()));
         return employes;
     }
 
@@ -237,14 +232,14 @@ public final class DataInitializer {
         // --- Planning pour Maria Garcia (Projectionniste, ID 2) ---
         items.add(new Planning(
                 IdManager.obtenirProchainIdPlanning(),
-                maintenant.withHour(17).withMinute(0).withSecond(0), 
-                maintenant.withHour(23).withMinute(30).withSecond(0), 
+                maintenant.withHour(17).withMinute(0).withSecond(0),
+                maintenant.withHour(23).withMinute(30).withSecond(0),
                 "Projection Salle 1 & 2",
-                personnel.get(1).getId() 
+                personnel.get(1).getId()
         ));
         items.add(new Planning(
                 IdManager.obtenirProchainIdPlanning(),
-                maintenant.plusDays(1).withHour(17).withMinute(0).withSecond(0), 
+                maintenant.plusDays(1).withHour(17).withMinute(0).withSecond(0),
                 maintenant.plusDays(1).withHour(23).withMinute(30).withSecond(0), // Demain à 23h30
                 "Projection Salle 3 (IMAX)",
                 personnel.get(1).getId()
@@ -253,15 +248,15 @@ public final class DataInitializer {
         // --- Planning pour John Smith (Vendeur, ID 3) ---
         items.add(new Planning(
                 IdManager.obtenirProchainIdPlanning(),
-                maintenant.withHour(18).withMinute(0).withSecond(0), 
+                maintenant.withHour(18).withMinute(0).withSecond(0),
                 maintenant.withHour(22).withMinute(0).withSecond(0),
                 "Vente Snacking",
                 personnel.get(2).getId() // ID de John
         ));
         items.add(new Planning(
                 IdManager.obtenirProchainIdPlanning(),
-                maintenant.plusDays(2).withHour(14).withMinute(0).withSecond(0), 
-                maintenant.plusDays(2).withHour(19).withMinute(0).withSecond(0), 
+                maintenant.plusDays(2).withHour(14).withMinute(0).withSecond(0),
+                maintenant.plusDays(2).withHour(19).withMinute(0).withSecond(0),
                 "Accueil & Billetterie",
                 personnel.get(2).getId()
         ));
@@ -272,7 +267,7 @@ public final class DataInitializer {
     private static List<Seance> createSeances(List<Film> films, List<Salle> salles) {
         List<Seance> seances = new ArrayList<>();
 
-        // On suit une logique dynamique : on calcule les dates par rapport à aujourd'hui.
+        // On calcule les dates par rapport à aujourd'hui.
         LocalDate aujourdhui = LocalDate.now();
         LocalDate demain = aujourdhui.plusDays(1);
         LocalDate apresDemain = aujourdhui.plusDays(2);
@@ -333,17 +328,43 @@ public final class DataInitializer {
     }
 
     private static void createScenarioReservation(List<Client> clients, List<Seance> seances, List<Siege> sieges, List<Tarif> tarifs, List<Reservation> reservations, List<Billet> billets) {
-        Reservation res = new Reservation(1, LocalDateTime.now().minusDays(1), clients.get(0).getId());
+
+        // --- On rend le scénario de test fiable et déterministe ---
+        // 1. On cherche une séance spécifique qui existera TOUJOURS : 
+        //    celle de Dune (film ID 1), qui est programmée pour demain.
+        Seance seancePourReservation = null;
+        for (Seance s : seances) {
+            // On cible un film et une heure précise pour éviter toute ambiguïté.
+            if (s.getIdFilm() == 1 && s.getDateHeureDebut().getHour() == 14) {
+                seancePourReservation = s;
+                break; // On a trouvé la bonne séance, on arrête la recherche.
+            }
+        }
+
+        // 2. Sécurité : si pour une raison quelconque la séance n'est pas trouvée, on ne crée pas de réservation.
+        if (seancePourReservation == null) {
+            System.err.println("AVERTISSEMENT: La séance de test ('Dune' demain à 14h) n'a pas été trouvée. Le scénario de réservation est annulé.");
+            return;
+        }
+
+        // 3. On crée la réservation pour le premier client (Alice).
+        Reservation res = new Reservation(1, LocalDateTime.now().minusHours(1), clients.get(0).getId());
         reservations.add(res);
 
+        // 4. On choisit deux sièges spécifiques dans la salle correspondante (Salle 1, qui a 100 places).
+        //    Les sièges d'ID 58 et 59 correspondent à la Rangée 6, sièges 8 et 9.
         Siege siege1 = sieges.get(57);
         Siege siege2 = sieges.get(58);
-        billets.add(new Billet(1, res.getId(), tarifs.get(0).getId(), siege1.getId(), seances.get(0).getId()));
-        billets.add(new Billet(2, res.getId(), tarifs.get(0).getId(), siege2.getId(), seances.get(0).getId()));
+
+        // 5. On crée les billets en utilisant l'ID de la séance qu'on a spécifiquement ciblée.
+        billets.add(new Billet(1, res.getId(), tarifs.get(0).getId(), siege1.getId(), seancePourReservation.getId()));
+        billets.add(new Billet(2, res.getId(), tarifs.get(0).getId(), siege2.getId(), seancePourReservation.getId()));
+
+        System.out.println("INFO: Scénario de réservation créé pour Alice pour la séance de 'Dune' (ID: " + seancePourReservation.getId() + ") avec les sièges 58 et 59.");
     }
 
     private static void createScenarioVenteSnack(List<Personnel> personnel, List<ProduitSnack> produits, List<Caisse> caisses, List<Client> clients, List<VenteSnack> ventes, List<LigneVente> lignes) {
-        VenteSnack vente = new VenteSnack(1, LocalDateTime.now().minusHours(2), personnel.get(2).getId(), caisses.get(0).getId(), null);
+        VenteSnack vente = new VenteSnack(1, LocalDateTime.now().minusHours(2), personnel.get(0).getId(), caisses.get(0).getId(), 1);
         ventes.add(vente);
 
         lignes.add(new LigneVente(vente.getIdVente(), produits.get(0).getId(), 1, produits.get(0).getPrixVente()));

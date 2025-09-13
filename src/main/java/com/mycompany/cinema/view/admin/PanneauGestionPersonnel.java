@@ -8,6 +8,7 @@ package com.mycompany.cinema.view.admin;
 import com.mycompany.cinema.Personnel;
 import com.mycompany.cinema.Role;
 import com.mycompany.cinema.service.AdminService;
+import java.awt.Color;
 import java.awt.Component;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
@@ -26,6 +27,13 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
     public PanneauGestionPersonnel(AdminService adminService) {
         this.adminService = adminService;
         initComponents();
+        // A chaque clic sur la liste, la liste du personnel sera rafraîchie
+        afficherInactifsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                chargerListePersonnel();
+            }
+        });
         configurerModelesEtRendus();
         rafraichirDonnees();
     }
@@ -56,6 +64,11 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
                 if (value instanceof Personnel) {
                     Personnel p = (Personnel) value;
                     setText(p.getPrenom() + " " + p.getNom());
+
+                    // Les membres désactivés sont grisés
+                    if (!p.getEstActif()) {
+                        setForeground(Color.GRAY);
+                    }
                 }
                 return this;
             }
@@ -81,9 +94,13 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
      */
     private void chargerListePersonnel() {
         personnelListModel.clear();
-        List<Personnel> personnelList = adminService.trouverToutLePersonnel();
+        boolean inclureInactifs = afficherInactifsCheckBox.isSelected(); // La valeur de la checkbox
+        List<Personnel> personnelList = adminService.trouverToutLePersonnel(inclureInactifs);
         for (Personnel p : personnelList) {
-            personnelListModel.addElement(p);
+            // On n'affiche pas les informations de l'utilisateur Système (ID = 0)
+            if (p.getId() != 0) {
+                personnelListModel.addElement(p);
+            }
         }
     }
 
@@ -110,7 +127,12 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
             prenomField.setText(p.getPrenom());
             emailField.setText(p.getEmail());
             motDePasseField.setText("");
-            supprimerButton.setEnabled(true);
+            activationButton.setEnabled(true);
+            if (p.getEstActif()) {
+                activationButton.setText("Désactiver");
+            } else {
+                activationButton.setText("Réactiver");
+            }
 
             // Sélectionne le bon rôle dans la liste déroulante.
             Role roleAssigne = null;
@@ -139,7 +161,8 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
         emailField.setText("");
         motDePasseField.setText("");
         roleComboBox.setSelectedIndex(-1); // Aucune sélection
-        supprimerButton.setEnabled(false);
+        activationButton.setEnabled(false);
+        activationButton.setText("Désactiver");
     }
 
     /**
@@ -198,27 +221,48 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
     /**
      * Gère la suppression du membre du personnel sélectionné.
      */
-    private void actionSupprimer() {
-        if (personnelSelectionne == null) {
+    private void actionActivationButton() {
+        if (this.personnelSelectionne == null) {
             return;
         }
 
-        Object[] options = {"Oui", "Non"};
-        int response = JOptionPane.showOptionDialog(
-                this,
-                "Êtes-vous sûr de vouloir supprimer '" + personnelSelectionne.getPrenom() + " " + personnelSelectionne.getNom() + "' ?",
-                "Confirmation de suppression",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE,
-                null, options, options[0]);
-
-        if (response == JOptionPane.YES_OPTION) {
-            try {
-                adminService.supprimerPersonnel(personnelSelectionne.getId());
-                JOptionPane.showMessageDialog(this, "Membre supprimé avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
-                rafraichirDonnees();
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Erreur lors de la suppression : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+        if (personnelSelectionne.getEstActif()) {
+            // Logique de Désactivation
+            Object[] options = {"Oui", "Non"};
+            int reponse = JOptionPane.showOptionDialog(this,
+                    "Désactiver '" + personnelSelectionne.getPrenom() + " " + personnelSelectionne.getNom() + "' ?",
+                    "Confirmation de désactivation",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE,
+                    null,
+                    options,
+                    options[0]);
+            if (reponse == JOptionPane.YES_OPTION) {
+                try {
+                    adminService.desactiverPersonnel(personnelSelectionne.getId());
+                    rafraichirDonnees();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Erreur : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } else {
+            // Logique de Réactivation
+            Object[] options = {"Oui", "Non"};
+            int reponse = JOptionPane.showOptionDialog(this,
+                    "Réactiver '" + personnelSelectionne.getPrenom() + " " + personnelSelectionne.getNom() + "' ?",
+                    "Confirmation de réactivation",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null, // pas d'icône perso
+                    options, // texte des boutons
+                    options[0]);
+            if (reponse == JOptionPane.YES_OPTION) {
+                try {
+                    adminService.reactiverPersonnel(personnelSelectionne.getId());
+                    rafraichirDonnees();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Erreur : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
     }
@@ -233,7 +277,8 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
     private void initComponents() {
 
         panneauGauche = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        afficherInactifsCheckBox = new javax.swing.JCheckBox();
+        jScrollPane2 = new javax.swing.JScrollPane();
         listePersonnel = new javax.swing.JList<>();
         panneauDroite = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
@@ -252,21 +297,24 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
         jPanel3 = new javax.swing.JPanel();
         nouveauButton = new javax.swing.JButton();
         enregistrerButton = new javax.swing.JButton();
-        supprimerButton = new javax.swing.JButton();
+        activationButton = new javax.swing.JButton();
 
         setLayout(new java.awt.BorderLayout());
 
         panneauGauche.setBorder(javax.swing.BorderFactory.createTitledBorder("Membres du personnel"));
         panneauGauche.setLayout(new java.awt.BorderLayout());
 
+        afficherInactifsCheckBox.setText("Afficher les membres désactivés");
+        panneauGauche.add(afficherInactifsCheckBox, java.awt.BorderLayout.PAGE_END);
+
         listePersonnel.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
                 listePersonnelValueChanged(evt);
             }
         });
-        jScrollPane1.setViewportView(listePersonnel);
+        jScrollPane2.setViewportView(listePersonnel);
 
-        panneauGauche.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+        panneauGauche.add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
         add(panneauGauche, java.awt.BorderLayout.CENTER);
 
@@ -325,13 +373,13 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
         });
         jPanel3.add(enregistrerButton);
 
-        supprimerButton.setText("Supprimer");
-        supprimerButton.addActionListener(new java.awt.event.ActionListener() {
+        activationButton.setText("Désactiver");
+        activationButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                supprimerButtonActionPerformed(evt);
+                activationButtonActionPerformed(evt);
             }
         });
-        jPanel3.add(supprimerButton);
+        jPanel3.add(activationButton);
 
         panneauDroite.add(jPanel3, java.awt.BorderLayout.PAGE_END);
 
@@ -340,40 +388,40 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
 
     private void nouveauButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nouveauButtonActionPerformed
         reinitialiserFormulaire();
-// TODO add your handling code here:
     }//GEN-LAST:event_nouveauButtonActionPerformed
 
     private void enregistrerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enregistrerButtonActionPerformed
         actionEnregistrer();
-// TODO add your handling code here:
     }//GEN-LAST:event_enregistrerButtonActionPerformed
 
-    private void supprimerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supprimerButtonActionPerformed
-        actionSupprimer();// TODO add your handling code here:
-    }//GEN-LAST:event_supprimerButtonActionPerformed
-
-    private void listePersonnelValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_listePersonnelValueChanged
-        if (!evt.getValueIsAdjusting()) {
-            personnelSelectionne = listePersonnel.getSelectedValue();
-            afficherDetailsPersonnel(personnelSelectionne);
-        }// TODO add your handling code here:
-    }//GEN-LAST:event_listePersonnelValueChanged
+    private void activationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_activationButtonActionPerformed
+        actionActivationButton();
+    }//GEN-LAST:event_activationButtonActionPerformed
 
     private void idFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_idFieldMouseClicked
         // On vérifie que le champ est bien désactivé pour l'édition
         if (!idField.isEditable()) {
             JOptionPane.showMessageDialog(
-                    this, 
+                    this,
                     "L'identifiant (ID) est généré automatiquement par le système lors de la création d'un nouvel élément.\n"
                     + "Il ne peut pas être modifié manuellement.", // Le message à afficher
                     "Information",
-                    JOptionPane.INFORMATION_MESSAGE 
+                    JOptionPane.INFORMATION_MESSAGE
             );
-        } // TODO add your handling code here:
+        }
     }//GEN-LAST:event_idFieldMouseClicked
+
+    private void listePersonnelValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_listePersonnelValueChanged
+        if (!evt.getValueIsAdjusting()) {
+            Personnel selection = listePersonnel.getSelectedValue();
+            afficherDetailsPersonnel(selection);
+        }
+    }//GEN-LAST:event_listePersonnelValueChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton activationButton;
+    private javax.swing.JCheckBox afficherInactifsCheckBox;
     private javax.swing.JTextField emailField;
     private javax.swing.JButton enregistrerButton;
     private javax.swing.JTextField idField;
@@ -385,7 +433,7 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JList<com.mycompany.cinema.Personnel> listePersonnel;
     private javax.swing.JPasswordField motDePasseField;
     private javax.swing.JTextField nomField;
@@ -394,7 +442,6 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
     private javax.swing.JPanel panneauGauche;
     private javax.swing.JTextField prenomField;
     private javax.swing.JComboBox<com.mycompany.cinema.Role> roleComboBox;
-    private javax.swing.JButton supprimerButton;
     // End of variables declaration//GEN-END:variables
 
 }

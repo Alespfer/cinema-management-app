@@ -142,19 +142,86 @@ public class PointDeVente extends javax.swing.JFrame {
     }
 
     /**
-     * Finalise la vente en appelant le service, puis réinitialise l'interface.
+     * Gère le processus complet de finalisation d'une vente au point de vente.
+     * 
+     * Cette méthode est déclenchée par un clic sur le bouton "Valider la vente".
+     * 1. Vérifie si le panier n'est pas vide.
+     * 2. Calcule le montant total de la vente.
+     * 3. Ouvre une boîte de dialogue pour demander au vendeur de saisir le montant reçu du client.
+     * 4. Valide la saisie (format numérique, montant suffisant).
+     * 5. Si la validation est réussie, elle appelle le service pour enregistrer la vente en base de données.
+     * 6. Calcule et affiche la monnaie à rendre dans un message de confirmation.
+     * 7. Réinitialise l'interface pour préparer la vente suivante.
      */
     private void actionValider() {
         if (panier.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Le panier est vide. Veuillez ajouter des produits.", "Action impossible", JOptionPane.WARNING_MESSAGE);
             return;
         }
+
+        // On calcule le total à partir du panier 
+        double montantTotal = 0.0;
+        for (LignePanier ligne : panier) {
+            montantTotal += ligne.getProduit().getPrixVente() * ligne.getQuantite();
+        }
+
+        // Ouverture de la boîte de dialogue pour demander le montant reçu 
+        String montantRecuTexte = JOptionPane.showInputDialog(
+                this,
+                "Montant total dû : " + String.format("%.2f €", montantTotal) + "\n\nSaisir le montant reçu du client :",
+                "Encaissement",
+                JOptionPane.QUESTION_MESSAGE
+        );
+
+        // Gestion de l'annulation par l'utilisateur 
+        if (montantRecuTexte == null) {
+            return; 
+        }
+
+        // Validation de la saisie 
+        double montantRecu;
         try {
+            montantRecu = Double.parseDouble(montantRecuTexte.trim().replace(',', '.'));
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Le montant saisi est invalide. Veuillez entrer un nombre.", "Erreur de format", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Validation de la logique de paiement (montant reçu > montant dû) 
+        if (montantRecu < montantTotal) {
+            JOptionPane.showMessageDialog(this,
+                    "Le montant reçu (" + String.format("%.2f €", montantRecu) + ") est insuffisant.",
+                    "Paiement insuffisant",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Si tout est OK, finalisation de la vente 
+        try {
+            // On enregistre la vente (note: l'ID de caisse est toujours à 1, c'est OK pour ce projet)
             adminService.enregistrerVenteSnack(vendeurConnecte.getId(), 1, panier);
-            JOptionPane.showMessageDialog(this, "Vente enregistrée avec succès !", "Succès", JOptionPane.INFORMATION_MESSAGE);
+
+            // On calcule la monnaie à rendre
+            double monnaie = montantRecu - montantTotal;
+
+            // On affiche le message de succès final qui inclut la monnaie
+            JOptionPane.showMessageDialog(this,
+                    "Paiement validé !\n\n"
+                    + "Monnaie à rendre : " + String.format("%.2f €", monnaie),
+                    "Vente enregistrée",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            // On réinitialise pour la prochaine vente
             actionAnnulerApresVente();
+
+            // On met à jour l'affichage des stocks dans la liste de produits
             chargerProduits();
+
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Erreur: " + ex.getMessage(), "Erreur de Vente", JOptionPane.ERROR_MESSAGE);
+            // Gère les erreurs venant du service (par exemple, si le stock est devenu insuffisant)
+            JOptionPane.showMessageDialog(this, "Erreur lors de l'enregistrement : " + ex.getMessage(), "Erreur Critique", JOptionPane.ERROR_MESSAGE);
+            // Important : on recharge les produits pour afficher le stock correct qui a pu causer l'erreur.
+            chargerProduits();
         }
     }
 
@@ -328,18 +395,18 @@ public class PointDeVente extends javax.swing.JFrame {
         Object[] options = {"Oui", "Non"};
 
         int reponse = JOptionPane.showOptionDialog(
-                this, 
+                this,
                 "Êtes-vous sûr de vouloir vous déconnecter ?", // Message
                 "Confirmation de déconnexion", // Titre
-                JOptionPane.YES_NO_OPTION, 
-                JOptionPane.QUESTION_MESSAGE, 
-                null, 
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
                 options, // Le tableau avec nos textes de boutons en français
                 options[0] // Le bouton par défaut (Oui) 
         );
 
         // L'option "Oui" correspond à l'index 0, "Non" à l'index 1
-        if (reponse == JOptionPane.YES_OPTION) { 
+        if (reponse == JOptionPane.YES_OPTION) {
             this.dispose();
             new FenetreConnexion().setVisible(true);
         }

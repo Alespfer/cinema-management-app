@@ -54,6 +54,7 @@ public interface ClientService extends CinemaService {
     // --- Gestion des évaluations ---
 
     void ajouterEvaluation(EvaluationClient evaluation) throws Exception;
+    void modifierEvaluation(EvaluationClient evaluation) throws Exception; 
     boolean aDejaEvalue(int clientId, int filmId);
     List<EvaluationClient> trouverEvaluationsParFilmId(int filmId);
     EvaluationClient trouverEvaluation(int clientId, int filmId);

@@ -120,8 +120,13 @@ public class BilletDAOImpl extends GenericDAOImpl<Billet> implements BilletDAO {
         }
     }
 
+    /**
+     * Ajoute le billet en mémoire
+     * @param billet 
+     */
     @Override
     public void ajouterBillet(Billet billet) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        this.data.add(billet);      
+        sauvegarderDansFichier(); 
     }
 }

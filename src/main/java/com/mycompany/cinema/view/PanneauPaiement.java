@@ -188,11 +188,12 @@ public class PanneauPaiement extends javax.swing.JPanel {
     private void retourButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_retourButtonActionPerformed
         if (listener != null) {
             listener.gererRetour();
-        }// TODO add your handling code here:
+        }
     }//GEN-LAST:event_retourButtonActionPerformed
 
     private void payerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_payerButtonActionPerformed
-        validerPaiement();// TODO add your handling code here:
+
+        validerPaiement();
     }//GEN-LAST:event_payerButtonActionPerformed
 
 

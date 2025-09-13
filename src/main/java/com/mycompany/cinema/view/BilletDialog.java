@@ -42,6 +42,7 @@ public class BilletDialog extends javax.swing.JDialog {
         initComponents();
         this.BilletsTextArea.setText(contenuBillet);
         this.setTitle("Confirmation de Commande");
+        this.setSize(320, 480); // La fenêtre sera adapté à son contenu lors de l'affichage
         this.setLocationRelativeTo(parent);
     }
 

@@ -29,7 +29,7 @@ public class Film implements Serializable {
     private String classification;
 
     // Nom de fichier ou URL de l’affiche.
-    private String urlAffiche;
+    private String imageAffiche;
 
     // Note presse agrégée.
     private double notePresse;
@@ -51,7 +51,7 @@ public class Film implements Serializable {
         this.synopsis = synopsis;
         this.dureeMinutes = dureeMinutes;
         this.classification = classification;
-        this.urlAffiche = urlAffiche;
+        this.imageAffiche = urlAffiche;
         this.notePresse = notePresse;
         this.genres = new ArrayList<Genre>();
     }
@@ -98,11 +98,11 @@ public class Film implements Serializable {
     }
 
     public String getUrlAffiche() {
-        return urlAffiche;
+        return imageAffiche;
     }
 
-    public void setUrlAffiche(String urlAffiche) {
-        this.urlAffiche = urlAffiche;
+    public void setUrlAffiche(String imageAffiche) {
+        this.imageAffiche = imageAffiche;
     }
 
     public List<Genre> getGenres() {

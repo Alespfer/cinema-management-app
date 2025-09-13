@@ -90,12 +90,13 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="nouveauButtonActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JButton" name="enregistrerButton">
+            <Component class="javax.swing.JButton" name="ajouterButton">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Enregistrer"/>
+                <Property name="text" type="java.lang.String" value="Ajouter"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="enregistrerButtonActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="ajouterButtonActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JButton" name="supprimerButton">

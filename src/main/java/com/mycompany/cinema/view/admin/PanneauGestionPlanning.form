@@ -53,6 +53,22 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="ajouterButtonActionPerformed"/>
           </Events>
         </Component>
+        <Component class="javax.swing.JButton" name="modifierButton">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Modifier un cr&#xe9;neau"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="modifierButtonActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="supprimerButton">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Supprimer un cr&#xe9;neau"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="supprimerButtonActionPerformed"/>
+          </Events>
+        </Component>
       </SubComponents>
     </Container>
     <Container class="javax.swing.JScrollPane" name="jScrollPane">

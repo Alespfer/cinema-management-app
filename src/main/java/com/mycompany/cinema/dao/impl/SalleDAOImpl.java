@@ -56,21 +56,6 @@ public class SalleDAOImpl extends GenericDAOImpl<Salle> implements SalleDAO {
     }
 
     /**
-     * Met à jour les informations d'une salle existante.
-     * @param salleMiseAJour L'objet Salle avec les données mises à jour.
-     */
-    @Override
-    public void mettreAJourSalle(Salle salleMiseAJour) {
-        for (int i = 0; i < this.data.size(); i++) {
-            if (this.data.get(i).getId() == salleMiseAJour.getId()) {
-                this.data.set(i, salleMiseAJour);
-                sauvegarderDansFichier();
-                return;
-            }
-        }
-    }
-
-    /**
      * Supprime une salle de la source de données à partir de son identifiant.
      * @param id L'identifiant de la salle à supprimer.
      */

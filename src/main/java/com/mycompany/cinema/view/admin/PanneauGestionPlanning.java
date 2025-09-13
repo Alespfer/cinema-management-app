@@ -10,6 +10,7 @@ import java.awt.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
@@ -22,14 +23,24 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
     private final AdminService adminService;
     private DefaultComboBoxModel<Personnel> personnelComboBoxModel;
     private DefaultTableModel planningTableModel;
+    private List<Planning> planningsAffiches;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     public PanneauGestionPlanning(AdminService adminService) {
         this.adminService = adminService;
+        this.planningsAffiches = new ArrayList<>();
         initComponents();
         configurerModelesEtRenderers();
+        planningTable.getSelectionModel().addListSelectionListener(e -> {
+            // On vérifie si une ligne est bien sélectionnée.
+            boolean estSelectionne = !e.getValueIsAdjusting() && planningTable.getSelectedRow() != -1;
+            // On active ou désactive les boutons en conséquence.
+            modifierButton.setEnabled(estSelectionne);
+            supprimerButton.setEnabled(estSelectionne);
+        });
         rafraichirDonnees();
+
     }
 
     /**
@@ -76,9 +87,12 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
      */
     private void chargerPersonnel() {
         personnelComboBoxModel.removeAllElements();
-        List<Personnel> personnelList = adminService.trouverToutLePersonnel();
+        List<Personnel> personnelList = adminService.trouverToutLePersonnel(false);
         for (Personnel p : personnelList) {
-            personnelComboBoxModel.addElement(p);
+            // On n'affiche pas les informations de l'utilisateur Système (ID = 0)
+            if (p.getId() != 0) {
+                personnelComboBoxModel.addElement(p);
+            }
         }
         if (!personnelList.isEmpty()) {
             personnelComboBox.setSelectedIndex(0);
@@ -91,9 +105,11 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
      */
     private void chargerPlanningPourPersonnelSelectionne() {
         planningTableModel.setRowCount(0);
+        this.planningsAffiches.clear();
         Personnel selection = (Personnel) personnelComboBox.getSelectedItem();
         if (selection != null) {
             List<Planning> plannings = adminService.trouverPlanningPourPersonnel(selection.getId());
+            this.planningsAffiches = plannings;
             for (Planning p : plannings) {
                 planningTableModel.addRow(new Object[]{
                     p.getDateHeureDebutService().format(FORMATTER),
@@ -133,13 +149,11 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
             try {
                 debut = LocalDateTime.parse(dateDebutStr.trim(), FORMATTER);
 
-                // --- NOUVELLE VÉRIFICATION ---
                 // On vérifie que la date de début n'est pas dans le passé.
                 if (!estDansLePresentOuFutur(debut, LocalDateTime.now())) {
                     JOptionPane.showMessageDialog(this, "La date de début ne peut pas être dans le passé.", "Erreur de logique", JOptionPane.ERROR_MESSAGE);
                     continue; // La date est passée, on redemande la saisie.
                 }
-                // --- FIN DE LA NOUVELLE VÉRIFICATION ---
 
                 break; // La date est valide et future, on sort de la boucle.
             } catch (DateTimeParseException ex) {
@@ -147,7 +161,6 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
             }
         }
 
-        // --- BOUCLE DE VALIDATION POUR LA DATE DE FIN  ---
         while (true) {
             String dateFinStr = JOptionPane.showInputDialog(
                     this,
@@ -171,7 +184,7 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
             }
         }
 
-        // --- BOUCLE DE VALIDATION POUR LE POSTE ---
+        // --- Boucle de validation pour le poste ---
         while (true) {
             poste = JOptionPane.showInputDialog(
                     this,
@@ -190,7 +203,7 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
             }
         }
 
-        // --- ENREGISTREMENT FINAL ---
+        // Enregistrement final
         try {
             adminService.creerPlanning(selection.getId(), debut, fin, poste.trim());
             JOptionPane.showMessageDialog(this, "Créneau ajouté avec succès pour " + selection.getPrenom() + " !", "Succès", JOptionPane.INFORMATION_MESSAGE);
@@ -245,7 +258,7 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
             return false;
         }
 
-        return true; 
+        return true;
     }
 
     /**
@@ -261,6 +274,8 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
         jLabel1 = new javax.swing.JLabel();
         personnelComboBox = new javax.swing.JComboBox<>();
         ajouterButton = new javax.swing.JButton();
+        modifierButton = new javax.swing.JButton();
+        supprimerButton = new javax.swing.JButton();
         jScrollPane = new javax.swing.JScrollPane();
         planningTable = new javax.swing.JTable();
 
@@ -285,6 +300,22 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
             }
         });
         topPanel.add(ajouterButton);
+
+        modifierButton.setText("Modifier un créneau");
+        modifierButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                modifierButtonActionPerformed(evt);
+            }
+        });
+        topPanel.add(modifierButton);
+
+        supprimerButton.setText("Supprimer un créneau");
+        supprimerButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                supprimerButtonActionPerformed(evt);
+            }
+        });
+        topPanel.add(supprimerButton);
 
         add(topPanel, java.awt.BorderLayout.PAGE_START);
 
@@ -312,13 +343,80 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
         chargerPlanningPourPersonnelSelectionne();
     }//GEN-LAST:event_personnelComboBoxActionPerformed
 
+    private void modifierButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modifierButtonActionPerformed
+        int selectedRow = planningTable.getSelectedRow();
+        if (selectedRow == -1) {
+            return;
+        }
+
+        Planning planningAModifier = planningsAffiches.get(selectedRow);
+
+        // Ici, on utilisera des JOptionPane pour la simplicité, comme pour l'ajout.
+        // Une JDialog personnalisée serait plus élégante mais plus complexe à mettre en place.
+        try {
+            String nouvelleDateDebutStr = JOptionPane.showInputDialog(this, "Modifier la date de début :", planningAModifier.getDateHeureDebutService().format(FORMATTER));
+            if (nouvelleDateDebutStr == null) {
+                return;
+            }
+            LocalDateTime nouvelleDateDebut = LocalDateTime.parse(nouvelleDateDebutStr.trim(), FORMATTER);
+
+            String nouvelleDateFinStr = JOptionPane.showInputDialog(this, "Modifier la date de fin :", planningAModifier.getDateHeureFinService().format(FORMATTER));
+            if (nouvelleDateFinStr == null) {
+                return;
+            }
+            LocalDateTime nouvelleDateFin = LocalDateTime.parse(nouvelleDateFinStr.trim(), FORMATTER);
+
+            String nouveauPoste = JOptionPane.showInputDialog(this, "Modifier le poste :", planningAModifier.getPosteOccupe());
+            if (nouveauPoste == null) {
+                return;
+            }
+
+            // Mettre à jour l'objet
+            planningAModifier.setDateHeureDebutService(nouvelleDateDebut);
+            planningAModifier.setDateHeureFinService(nouvelleDateFin);
+            planningAModifier.setPosteOccupe(nouveauPoste.trim());
+
+            adminService.modifierPlanning(planningAModifier);
+            JOptionPane.showMessageDialog(this, "Créneau mis à jour.");
+            chargerPlanningPourPersonnelSelectionne();
+
+        } catch (DateTimeParseException ex) {
+            JOptionPane.showMessageDialog(this, "Format de date invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erreur de modification : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_modifierButtonActionPerformed
+
+    private void supprimerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supprimerButtonActionPerformed
+        int selectedRow = planningTable.getSelectedRow();
+        if (selectedRow == -1) {
+            return; // Sécurité, ne devrait pas arriver si le bouton est bien géré
+        }
+
+        // On récupère l'objet Planning complet grâce à notre liste
+        Planning planningSelectionne = planningsAffiches.get(selectedRow);
+
+        int reponse = JOptionPane.showConfirmDialog(this, "Supprimer ce créneau ?", "Confirmation", JOptionPane.YES_NO_OPTION);
+        if (reponse == JOptionPane.YES_OPTION) {
+            try {
+                adminService.supprimerPlanning(planningSelectionne.getId());
+                JOptionPane.showMessageDialog(this, "Créneau supprimé.");
+                chargerPlanningPourPersonnelSelectionne(); // Recharger la table
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erreur : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_supprimerButtonActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton ajouterButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane;
+    private javax.swing.JButton modifierButton;
     private javax.swing.JComboBox<com.mycompany.cinema.Personnel> personnelComboBox;
     private javax.swing.JTable planningTable;
+    private javax.swing.JButton supprimerButton;
     private javax.swing.JPanel topPanel;
     // End of variables declaration//GEN-END:variables
 }

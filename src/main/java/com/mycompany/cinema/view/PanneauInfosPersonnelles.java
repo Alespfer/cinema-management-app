@@ -8,6 +8,7 @@ package com.mycompany.cinema.view;
 import com.mycompany.cinema.Client;
 import com.mycompany.cinema.service.ClientService;
 import java.awt.Color;
+import java.awt.Window;
 import java.util.Arrays;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -18,11 +19,13 @@ public class PanneauInfosPersonnelles extends javax.swing.JPanel {
     private final ClientService clientService;
     private final Client clientConnecte;
     private final JDialog parentDialog; // Référence à la fenêtre qui le contient (EspaceClient)
+    private final FenetrePrincipaleClient fenetrePrincipale;
 
-    public PanneauInfosPersonnelles(ClientService clientService, Client clientConnecte, JDialog parentDialog) {
+    public PanneauInfosPersonnelles(ClientService clientService, Client clientConnecte, JDialog parentDialog, FenetrePrincipaleClient fenetrePrincipale) {
         this.clientService = clientService;
         this.clientConnecte = clientConnecte;
         this.parentDialog = parentDialog;
+        this.fenetrePrincipale = fenetrePrincipale;
         initComponents();
         chargerInfosClient();
     }
@@ -46,7 +49,7 @@ public class PanneauInfosPersonnelles extends javax.swing.JPanel {
 
         char[] nouveauMdp = passField.getPassword();
         char[] confirmationMdp = confirmPassField.getPassword();
-        
+
         // On ne met à jour le mot de passe que si l'utilisateur a tapé quelque chose.
         boolean motDePasseChange = nouveauMdp.length > 0;
 
@@ -73,8 +76,7 @@ public class PanneauInfosPersonnelles extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Erreur lors de la mise à jour : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
-    
+
     /**
      * Logique exécutée lors du clic sur le bouton "Supprimer mon compte".
      */
@@ -90,11 +92,17 @@ public class PanneauInfosPersonnelles extends javax.swing.JPanel {
         if (reponse == JOptionPane.YES_OPTION) {
             try {
                 clientService.supprimerCompteClient(clientConnecte.getId());
-                JOptionPane.showMessageDialog(this, "Votre compte a été supprimé avec succès.", "Compte Supprimé", JOptionPane.INFORMATION_MESSAGE);
 
-                // On ferme proprement toutes les fenêtres pour retourner à l'écran de connexion.
-                SwingUtilities.getWindowAncestor(this).dispose(); // Ferme EspaceClient
-                parentDialog.getOwner().dispose(); // Ferme FenetrePrincipaleClient
+                JOptionPane.showMessageDialog(this,
+                        "Votre compte a été supprimé avec succès. Un email de confirmation vous sera envoyé.",
+                        "Compte supprimé",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
+                this.fenetrePrincipale.dispose(); // Ferme la fenêtre principale
+                this.parentDialog.dispose(); // Ferme la fenêtre de l'espace 
+
+                // Retour à l'écran de connexion
                 new FenetreConnexion().setVisible(true);
 
             } catch (Exception ex) {
