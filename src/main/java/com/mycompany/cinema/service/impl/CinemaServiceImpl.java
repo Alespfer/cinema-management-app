@@ -24,7 +24,6 @@ import java.util.Set;
 public class CinemaServiceImpl implements ClientService, AdminService {
 
     // --- Déclaration de toutes les dépendances envers la couche DAO ---
-    // Toute l'application travaille sur une seule et même "source de vérité".
     private final FilmDAO filmDAO = new FilmDAOImpl();
     private final SeanceDAO seanceDAO = new SeanceDAOImpl();
     private final SalleDAO salleDAO = new SalleDAOImpl();
@@ -147,7 +146,6 @@ public class CinemaServiceImpl implements ClientService, AdminService {
             throw new Exception("L'adresse email est invalide.");
         }
         this.validerRobustesseMotDePasse(motDePasse);
-        // --- Fin de la validation ---
 
         if (clientDAO.trouverClientParEmail(email) != null) {
             throw new Exception("Un compte avec cet email existe déjà.");
@@ -555,10 +553,10 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         // Étape 1 : La réservation des billets est créée.
         Reservation reservation = effectuerReservation(clientId, seanceId, siegeIds, tarifId);
 
-        // Étape 2 : Si des snacks sont commandés, on les traite.
+        // Étape 2 : On traite les snacks s'ils sont commandés
         if (panierSnacks != null && !panierSnacks.isEmpty()) {
 
-            // On utilise l'ID 0 (Système) et la Caisse 0 (Canal Web), et on passe le clientId.
+            // On utilise l'ID 0 (Système) et la Caisse 0 (Canal Web) pour les ventes en ligne, et on passe le clientId.
             VenteSnack venteSnack = enregistrerVenteSnackPourClient(0, 0, panierSnacks, clientId);
 
             // Étape 3 : On lie la vente de snacks à la réservation de billets.
@@ -651,7 +649,6 @@ public class CinemaServiceImpl implements ClientService, AdminService {
     }
 
     public void modifierEvaluation(EvaluationClient evaluation) throws Exception {
-        // --- Étape 1 : Validation des données ---
         if (evaluation == null) {
             throw new Exception("L'objet d'évaluation ne peut pas être null.");
         }
@@ -661,8 +658,6 @@ public class CinemaServiceImpl implements ClientService, AdminService {
             throw new Exception("La note doit être comprise entre 1 et 5.");
         }
 
-        // On vérifie que l'évaluation à modifier existe bien.
-        // C'est une sécurité pour éviter de créer une évaluation par erreur.
         EvaluationClient evaluationExistante = evaluationClientDAO.trouverEvaluationParClientEtFilm(evaluation.getIdClient(), evaluation.getIdFilm());
         if (evaluationExistante == null) {
             throw new Exception("Impossible de modifier une évaluation qui n'existe pas.");
@@ -849,7 +844,6 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         personnelADesactiver.setEstActif(false);
 
         // 3. On demande au DAO de sauvegarder l'objet mis à jour.
-        // La méthode mettreAJourPersonnel existe déjà !
         personnelDAO.mettreAJourPersonnel(personnelADesactiver);
     }
 
@@ -860,8 +854,8 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         if (personnel == null) {
             throw new Exception("Membre du personnel non trouvé.");
         }
-        personnel.setEstActif(true); // On change simplement le statut
-        personnelDAO.mettreAJourPersonnel(personnel); // Et on sauvegarde
+        personnel.setEstActif(true); 
+        personnelDAO.mettreAJourPersonnel(personnel);
     }
 
     /**
@@ -1059,7 +1053,7 @@ public class CinemaServiceImpl implements ClientService, AdminService {
      */
     @Override
     public void mettreAJourFilm(Film film) throws Exception {
-        // On valide également l'objet AVANT de le mettre à jour.
+        // On valide l'objet avant de le mettre à jour.
         validerFilm(film);
 
         // Si la validation passe, on procède à la mise à jour.
@@ -1077,7 +1071,6 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         // On vérifie si le film n'est pas encore lié à une séance.
         for (Seance seance : seanceDAO.trouverToutesLesSeances()) {
             if (seance.getIdFilm() == filmId) {
-                // Si on trouve une séance, on lève une exception et on arrête tout.
                 throw new Exception("Impossible de supprimer ce film car il est encore programmé pour la séance du "
                         + seance.getDateHeureDebut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'à' HH:mm")) + ".");
             }
@@ -1284,7 +1277,7 @@ public class CinemaServiceImpl implements ClientService, AdminService {
             Film filmExistant = filmDAO.trouverFilmParId(seanceExistante.getIdFilm());
             if (filmExistant != null) {
                 LocalDateTime debutExistant = seanceExistante.getDateHeureDebut();
-                // On calcule la fin d'occupation de la séance existante en incluant aussi le battement.
+                // On calcule la fin d'occupation de la séance existante en incluant aussi le temps de battement.
                 LocalDateTime finExistant = debutExistant.plusMinutes(filmExistant.getDureeMinutes() + TEMPS_BATTEMENT_MINUTES);
 
                 // La condition de conflit : si la période de la nouvelle séance chevauche celle d'une séance existante.
@@ -1299,7 +1292,7 @@ public class CinemaServiceImpl implements ClientService, AdminService {
             }
         }
 
-        // Si aucune exception n'a été levée, on peut ajouter la séance en toute sécurité.
+        // Si aucune exception n'a été levée, on peut ajouter la séance en sécurité.
         seanceDAO.ajouterSeance(seance);
     }
 
@@ -1623,7 +1616,6 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         if (film.getGenres() == null || film.getGenres().isEmpty()) {
             throw new Exception("Le film doit avoir au moins un genre.");
         }
-        // La note de presse (notePresse) n'est pas vérifiée car elle est optionnelle.
     }
 
     /**
@@ -1736,7 +1728,7 @@ public class CinemaServiceImpl implements ClientService, AdminService {
         if (client == null) {
             throw new Exception("Aucun compte client trouvé avec cet e-mail.");
         }
-        String nouveauMdp = "temp" + System.currentTimeMillis() % 10000; // génération simple
+        String nouveauMdp = "temp" + System.currentTimeMillis() % 10000; 
         client.setMotDePasse(nouveauMdp);
         clientDAO.mettreAJourClient(client);
         return nouveauMdp;
