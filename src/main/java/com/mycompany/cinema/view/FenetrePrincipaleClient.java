@@ -35,7 +35,7 @@ public class FenetrePrincipaleClient extends javax.swing.JFrame {
     private Tarif tarifSelectionne;
 
     private PanneauPaiement panneauPaiement;
-    private List<LignePanier> panierSnacksEnCours;  // <-- LIGNE MANQUANTE
+    private List<LignePanier> panierSnacksEnCours;  
 
     /**
      * Constructeur de la fenêtre principale.
@@ -83,9 +83,7 @@ public class FenetrePrincipaleClient extends javax.swing.JFrame {
 
         // --- Étape 1 : De la PanneauProgrammation aux Détails du Film ---
         panneauProgrammation.setSeanceSelectionListener(new PanneauProgrammation.SeanceSelectionListener() {
-            // Qand l'utilisateur sélectionne une séance dans le panneau de programmation
-            // on charge les détails du film correspondant et on demande au gestionnaire 
-            // d'afficher le panneau des détails
+      
             public void gererSeanceSelectionnee(Seance seance) {
                 if (seance != null) {
                     Film film = clientService.trouverDetailsFilm(seance.getIdFilm());
@@ -236,9 +234,8 @@ public class FenetrePrincipaleClient extends javax.swing.JFrame {
             double prixBillets = tarifSelectionne.getPrix() * siegesSelectionnes.size();
             double prixSnacks = 0;
             if (panierSnacks != null) {
-                // "Pour chaque LignePanier 'ligne' dans le panierSnacks..."
+                // Pour chaque LignePanier 'ligne' dans le panierSnacks nous utilisons les getters
                 for (LignePanier ligne : panierSnacks) {
-                    // Nous utilisons les getters, conformément à notre correction sur l'encapsulation de LignePanier
                     prixSnacks = prixSnacks + (ligne.getProduit().getPrixVente() * ligne.getQuantite());
                 }
             }

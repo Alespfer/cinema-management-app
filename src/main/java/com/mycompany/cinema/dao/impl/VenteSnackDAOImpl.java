@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : VenteSnackDAOImpl.java
+// VenteSnackDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 
@@ -10,11 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implémentation concrète pour la gestion des tickets de caisse de snacks.
+ * Implémentation pour la gestion des tickets de caisse de snacks.
  * Interagit avec le fichier "ventes_snack.dat".
- *
- * Cette classe est principalement utilisée pour récupérer l'historique des ventes 
- * et calculer les chiffres d'affaires.
  */
 public class VenteSnackDAOImpl extends GenericDAOImpl<VenteSnack> implements VenteSnackDAO {
 
@@ -74,7 +71,6 @@ public class VenteSnackDAOImpl extends GenericDAOImpl<VenteSnack> implements Ven
 
     /**
      * Met à jour les informations d'une vente de snack.
-     * Utile par exemple pour lier une vente de snack à une réservation après coup.
      * @param venteMiseAJour L'objet VenteSnack avec les nouvelles données.
      */
     @Override

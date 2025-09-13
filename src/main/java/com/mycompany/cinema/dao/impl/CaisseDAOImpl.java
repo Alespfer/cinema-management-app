@@ -7,10 +7,9 @@ import com.mycompany.cinema.Caisse;
 import com.mycompany.cinema.dao.CaisseDAO;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Implémentation concrète pour la gestion de la persistance des objets Caisse.
+ * Implémentation pour la gestion de la persistance des objets Caisse.
  * Elle interagit avec le fichier "caisses.dat".
  *
  */
@@ -51,8 +50,7 @@ public class CaisseDAOImpl extends GenericDAOImpl<Caisse> implements CaisseDAO {
     /**
      * Retourne la liste de toutes les caisses enregistrées.
      *
-     * @return Une copie de la liste des caisses pour préserver l'intégrité des
-     * données internes.
+     * @return Une copie de la liste des caisses
      */
     @Override
     public List<Caisse> trouverToutesLesCaisses() {
@@ -85,7 +83,6 @@ public class CaisseDAOImpl extends GenericDAOImpl<Caisse> implements CaisseDAO {
     public void supprimerCaisseParId(int id) {
         int indexASupprimer = -1;
 
-        // Étape 1 : Trouver l'index de la caisse à supprimer.
         for (int i = 0; i < this.data.size(); i++) {
             if (this.data.get(i).getId() == id) {
                 indexASupprimer = i;
@@ -93,7 +90,6 @@ public class CaisseDAOImpl extends GenericDAOImpl<Caisse> implements CaisseDAO {
             }
         }
 
-        // Étape 2 : Si la caisse a été trouvée, la supprimer.
         if (indexASupprimer != -1) {
             this.data.remove(indexASupprimer);
             sauvegarderDansFichier();

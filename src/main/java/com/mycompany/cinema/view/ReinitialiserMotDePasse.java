@@ -18,7 +18,7 @@ public class ReinitialiserMotDePasse extends javax.swing.JDialog {
         super(parent, "Réinitialiser le mot de passe", modal);
         initComponents();
         setLocationRelativeTo(parent); // Centre la fenêtre sur son parent
-        getRootPane().setDefaultButton(enregistrerButton); // Permet d'appuyer sur "Entrée"
+        getRootPane().setDefaultButton(enregistrerButton);
     }
 
     /**
@@ -168,11 +168,11 @@ public class ReinitialiserMotDePasse extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void enregistrerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enregistrerButtonActionPerformed
-        actionEnregistrer();// TODO add your handling code here:
+        actionEnregistrer();
     }//GEN-LAST:event_enregistrerButtonActionPerformed
 
     private void annulerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_annulerButtonActionPerformed
-        this.dispose();// TODO add your handling code here:
+        this.dispose();
     }//GEN-LAST:event_annulerButtonActionPerformed
 
 

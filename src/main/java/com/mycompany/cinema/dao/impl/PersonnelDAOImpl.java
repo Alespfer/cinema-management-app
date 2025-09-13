@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : PersonnelDAOImpl.java
+// PersonnelDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 

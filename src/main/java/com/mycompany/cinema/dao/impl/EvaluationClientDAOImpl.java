@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : EvaluationClientDAOImpl.java
+// EvaluationClientDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 

@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : LigneVenteDAOImpl.java
+// LigneVenteDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 
@@ -10,10 +10,6 @@ import com.mycompany.cinema.dao.LigneVenteDAO;
 
 /**
  * Implémentation pour la gestion des lignes de vente de snacks.
- *
- * Cette classe a un rôle purement technique de "table de jointure" et est
- * invisible pour l'interface graphique. Elle est utilisée par la couche service
- * pour construire les détails d'un ticket de caisse.
  */
 public class LigneVenteDAOImpl extends GenericDAOImpl<LigneVente> implements LigneVenteDAO {
 

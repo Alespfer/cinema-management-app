@@ -160,7 +160,7 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
         prenomField.setText("");
         emailField.setText("");
         motDePasseField.setText("");
-        roleComboBox.setSelectedIndex(-1); // Aucune sélection
+        roleComboBox.setSelectedIndex(-1); 
         activationButton.setEnabled(false);
         activationButton.setText("Désactiver");
     }
@@ -176,7 +176,6 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
         String motDePasse = new String(motDePasseField.getPassword());
         Role roleSelectionne = (Role) roleComboBox.getSelectedItem();
 
-        // --- DEBUT DES MODIFICATIONS DE VALIDATION ---
         // 1. Validation des champs obligatoires
         if (nom.isEmpty() || prenom.isEmpty() || email.isEmpty() || roleSelectionne == null) {
             JOptionPane.showMessageDialog(this, "Nom, prénom, email et rôle sont obligatoires.", "Erreur de saisie", JOptionPane.WARNING_MESSAGE);
@@ -253,8 +252,8 @@ public class PanneauGestionPersonnel extends javax.swing.JPanel {
                     "Confirmation de réactivation",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE,
-                    null, // pas d'icône perso
-                    options, // texte des boutons
+                    null, 
+                    options, 
                     options[0]);
             if (reponse == JOptionPane.YES_OPTION) {
                 try {

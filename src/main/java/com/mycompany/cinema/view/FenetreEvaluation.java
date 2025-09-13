@@ -16,8 +16,8 @@ public class FenetreEvaluation extends javax.swing.JDialog {
     private int clientId;
     private int filmId;
 
-    // Cette variable sert de "flag". Si elle est null, on est en mode création.
-    // Sinon, on est en mode modification et elle contient les données à modifier.
+    // Cette variable sert de "flag". Si elle est null, on passera au mode création.
+    // Sinon, une évaluation précédente existe, donc on passe au mode modification.
     private EvaluationClient evaluationExistante;
 
     /**
@@ -87,6 +87,7 @@ public class FenetreEvaluation extends javax.swing.JDialog {
         String commentaire = jTextAreaCommentaire.getText();
 
         try {
+            // La séparation des modes création et modification évite qu'un client puisse voter plusieurs fois
             if (evaluationExistante == null) {
                 // --- MODE CRÉATION ---
                 EvaluationClient nouvelleEvaluation = new EvaluationClient(clientId, filmId, note, commentaire, LocalDateTime.now());

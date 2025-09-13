@@ -1,11 +1,10 @@
 // ========================================================================
-// FICHIER : PlanningDAOImpl.java
+// PlanningDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Planning;
 import com.mycompany.cinema.dao.PlanningDAO;
-import com.mycompany.cinema.dao.impl.GenericDAOImpl;
 import java.util.ArrayList;
 import java.util.List;
 

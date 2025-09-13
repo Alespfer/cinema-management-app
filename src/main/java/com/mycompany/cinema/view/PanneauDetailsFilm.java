@@ -30,7 +30,7 @@ public class PanneauDetailsFilm extends javax.swing.JPanel {
     private Film filmActuel;
     private LocalDate dateActuelle;
 
-    // "Model" pour la liste des séances.
+    // Model pour la liste des séances.
     private DefaultListModel<Seance> seanceListModel;
     private DefaultListModel<EvaluationClient> evaluationsListModel;
 
@@ -297,12 +297,11 @@ public class PanneauDetailsFilm extends javax.swing.JPanel {
     private void retourButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_retourButtonActionPerformed
         if (retourListener != null) {
             retourListener.gererRetour();
-        } // TODO add your handling code here:
+        } 
     }//GEN-LAST:event_retourButtonActionPerformed
 
     private void noterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_noterButtonActionPerformed
         if (filmActuel != null) {
-            // CORRECTION : Appel direct à la méthode et vérification de nullité.
             EvaluationClient eval = clientService.trouverEvaluation(clientId, filmActuel.getId());
 
             if (eval != null) { // Si une évaluation existe déjà, on la modifie.
@@ -320,7 +319,7 @@ public class PanneauDetailsFilm extends javax.swing.JPanel {
     private void seanceJListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_seanceJListValueChanged
         if (!evt.getValueIsAdjusting() && seanceJList.getSelectedValue() != null && seanceSelectionListener != null) {
             seanceSelectionListener.gererSeanceSelectionnee(seanceJList.getSelectedValue());
-        }// TODO add your handling code here:
+        }
     }//GEN-LAST:event_seanceJListValueChanged
 
 

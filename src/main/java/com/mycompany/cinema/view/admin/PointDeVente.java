@@ -144,7 +144,7 @@ public class PointDeVente extends javax.swing.JFrame {
     /**
      * Gère le processus complet de finalisation d'une vente au point de vente.
      * 
-     * Cette méthode est déclenchée par un clic sur le bouton "Valider la vente".
+     * Cette méthode est déclenchée par un clic sur le bouton "Valider la vente" : 
      * 1. Vérifie si le panier n'est pas vide.
      * 2. Calcule le montant total de la vente.
      * 3. Ouvre une boîte de dialogue pour demander au vendeur de saisir le montant reçu du client.
@@ -196,12 +196,12 @@ public class PointDeVente extends javax.swing.JFrame {
             return;
         }
 
-        // Si tout est OK, finalisation de la vente 
+        // Si tout OK, finalisation de la vente 
         try {
-            // On enregistre la vente (note: l'ID de caisse est toujours à 1, c'est OK pour ce projet)
+            // Enregistrment de la vente 
             adminService.enregistrerVenteSnack(vendeurConnecte.getId(), 1, panier);
 
-            // On calcule la monnaie à rendre
+            // Calcul de la monnaie à rendre
             double monnaie = montantRecu - montantTotal;
 
             // On affiche le message de succès final qui inclut la monnaie
@@ -211,16 +211,14 @@ public class PointDeVente extends javax.swing.JFrame {
                     "Vente enregistrée",
                     JOptionPane.INFORMATION_MESSAGE);
 
-            // On réinitialise pour la prochaine vente
+            // Réinitialisation pour la prochaine vente
             actionAnnulerApresVente();
 
-            // On met à jour l'affichage des stocks dans la liste de produits
+            // Mise à jour de l'affichage des stocks dans la liste de produits
             chargerProduits();
 
         } catch (Exception ex) {
-            // Gère les erreurs venant du service (par exemple, si le stock est devenu insuffisant)
             JOptionPane.showMessageDialog(this, "Erreur lors de l'enregistrement : " + ex.getMessage(), "Erreur Critique", JOptionPane.ERROR_MESSAGE);
-            // Important : on recharge les produits pour afficher le stock correct qui a pu causer l'erreur.
             chargerProduits();
         }
     }
@@ -391,21 +389,19 @@ public class PointDeVente extends javax.swing.JFrame {
     }//GEN-LAST:event_validerButtonActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // Options en français
         Object[] options = {"Oui", "Non"};
 
         int reponse = JOptionPane.showOptionDialog(
                 this,
-                "Êtes-vous sûr de vouloir vous déconnecter ?", // Message
-                "Confirmation de déconnexion", // Titre
+                "Êtes-vous sûr de vouloir vous déconnecter ?", 
+                "Confirmation de déconnexion", 
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null,
-                options, // Le tableau avec nos textes de boutons en français
+                options, 
                 options[0] // Le bouton par défaut (Oui) 
         );
 
-        // L'option "Oui" correspond à l'index 0, "Non" à l'index 1
         if (reponse == JOptionPane.YES_OPTION) {
             this.dispose();
             new FenetreConnexion().setVisible(true);

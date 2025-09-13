@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : AffectationSeanceDAO.java
+// AffectationSeanceDAO.java
 // ========================================================================
 package com.mycompany.cinema.dao;
 
@@ -8,6 +8,9 @@ import java.util.List;
 
 /**
  * Définit le contrat pour la persistance des données des affectations du personnel aux séances.
+ * 
+ * NB : Comme expliqué dans notre rapport (P.10), les méthodes de cette classe ont été initialement développées
+ * mais non priorisées dans le rendu final. Il serait possible de les incorporer dans une version future. 
  */
 public interface AffectationSeanceDAO {
 

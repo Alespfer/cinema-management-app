@@ -1,17 +1,11 @@
 package com.mycompany.cinema.util;
 
-import com.mycompany.cinema.*;
 import com.mycompany.cinema.dao.impl.*;
 import java.util.List;
 
 /**
- * Cette classe fournit un nouvel ID, garanti unique, pour n'importe quel
+ * Cette classe fournit un nouvel ID  unique pour n'importe quel
  * objet à créer (un nouveau film, un client, une réservation, etc.).
- *
- * Quand une action de l'utilisateur demande de créer un nouvel objet (par exemple, un admin
- * qui ajoute un film), le code va appeler la méthode correspondante ici
- * (ex: `obtenirProchainIdFilm()`). Cette méthode devra lire tous les films existants,
- * trouver l'ID le plus grand, et renvoyer ce nombre + 1.
  *
  */
 public final class IdManager {
@@ -20,9 +14,9 @@ public final class IdManager {
         throw new UnsupportedOperationException("Cette classe utilitaire ne peut pas être instanciée.");
     }
 
-    // --- Pour chaque type d'objet de l'application, on a une méthode dédiée ---
-    // 1. Calcule et retourne le prochain ID disponible pour un objet donné
-    // 2. Retourne un entier, nouvel ID unique de l'objet 
+    /*Pour chaque type d'objet de l'application : 
+        1. Calcule et retourne le prochain ID disponible pour un objet donné
+        2. Retourne un entier, nouvel ID unique de l'objet */
 
     /**
      * Calcule et retourne le prochain ID disponible pour un objet Film.

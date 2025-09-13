@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : SeanceDAOImpl.java
+// SeanceDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 
@@ -13,9 +13,6 @@ import java.util.List;
  * Implémentation pour la gestion des séances de projection. Interagit avec le
  * fichier "seances.dat".
  *
- * Cette classe est sollicitée par l'interface client pour afficher les séances
- * disponibles et appliquer les filtres de recherche (par film, par date), ainsi
- * que par l'administration pour la gestion du planning des projections.
  */
 public class SeanceDAOImpl extends GenericDAOImpl<Seance> implements SeanceDAO {
 

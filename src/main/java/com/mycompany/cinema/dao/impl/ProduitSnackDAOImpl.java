@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : ProduitSnackDAOImpl.java
+// ProduitSnackDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 
@@ -12,9 +12,6 @@ import java.util.List;
  * Implémentation concrète pour la gestion du catalogue de snacks. Interagit
  * avec le fichier "produits_snack.dat".
  *
- * Cette classe est utilisée à la fois par l'interface client (pour afficher les
- * produits) et par l'administration (pour la gestion complète du catalogue et 
- * des stocks).
  */
 public class ProduitSnackDAOImpl extends GenericDAOImpl<ProduitSnack> implements ProduitSnackDAO {
 

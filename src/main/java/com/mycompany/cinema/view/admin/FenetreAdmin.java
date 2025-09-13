@@ -106,7 +106,7 @@ public class FenetreAdmin extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void deconnexionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deconnexionButtonActionPerformed
-        // Étape 1 : On demande la confirmation à l'utilisateur.
+        // Confirmation de l'utilisateur.
         Object[] options = {"Oui", "Non"};
         int reponse = JOptionPane.showOptionDialog(
                 this, "Êtes-vous sûr de vouloir vous déconnecter ?",
@@ -118,13 +118,13 @@ public class FenetreAdmin extends javax.swing.JFrame {
                 options[0] // Le bouton par défaut ("Oui")
         );
 
-        // Étape 2 : Si l'utilisateur confirme, on ferme la fenêtre actuelle
+        // Fermeture de la fenêtre actuelle
         if (reponse == JOptionPane.YES_OPTION) {
             this.dispose();
 
-            // On lance une nouvelle fenêtre de connexion.
+            // Nouvelle fenêtre de connexion.
             new FenetreConnexion().setVisible(true);
-        }// TODO add your handling code here:
+        }
     }//GEN-LAST:event_deconnexionButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

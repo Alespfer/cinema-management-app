@@ -131,7 +131,7 @@ public class FenetreInscription extends javax.swing.JDialog {
     }//GEN-LAST:event_jButtonAnnulerActionPerformed
 
     private void inscriptionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inscriptionButtonActionPerformed
-        gererInscription(); // TODO add your handling code here:
+        gererInscription(); 
     }//GEN-LAST:event_inscriptionButtonActionPerformed
 
     private void annulerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_annulerButtonActionPerformed

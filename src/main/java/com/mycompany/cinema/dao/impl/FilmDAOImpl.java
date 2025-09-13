@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : FilmDAOImpl.java
+// FilmDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 
@@ -12,9 +12,6 @@ import java.util.List;
  * Implémentation pour la gestion du catalogue de films. Interagit avec le
  * fichier "films.dat".
  *
- * Elle fournit les données pour l'affichage de la programmation, les détails
- * des films, et permet les opérations de gestion (création, modification,
- * suppression) dans le panneau d'administration.
  */
 public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
 
@@ -52,7 +49,7 @@ public class FilmDAOImpl extends GenericDAOImpl<Film> implements FilmDAO {
     
     /**
      * Recherche des films dont le titre contient un mot-clé donné.
-     * La recherche est insensible à la cass (on convertit le mot en minuscules
+     * La recherche est insensible à la casse (on convertit le mot en minuscules
      * avant de comparer les titres)
      * @param motCle Le texte à rechercher dans les titres.
      * @return Une liste de films correspondant au critère.

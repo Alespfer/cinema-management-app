@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : GenreDAOImpl.java
+// GenreDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 
@@ -49,7 +49,7 @@ public class GenreDAOImpl extends GenericDAOImpl<Genre> implements GenreDAO {
     /**
      * Retourne la liste complète de tous les genres.
      *
-     * @return Une copie de la liste pour la sécurité des données.
+     * @return Une copie de la liste.
      */
     @Override
     public List<Genre> trouverTousLesGenres() {

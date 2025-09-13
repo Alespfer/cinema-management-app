@@ -30,7 +30,7 @@ public class PanneauProgrammation extends javax.swing.JPanel {
     private DefaultTableModel tableModel;
 
     // Listes pour gérer les données. Une pour le résultat complet de la recherche,
-    // l'autre pour ce qui est réellement affiché après le filtre temporel.
+    // l'autre pour ce qui est réellement affiché après le filtre.
     private List<Seance> seancesResultatRecherche;
     private List<Seance> seancesEffectivementAffichees;
     private DefaultComboBoxModel<Genre> genreComboBoxModel;
@@ -312,12 +312,11 @@ public class PanneauProgrammation extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void rechercheButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rechercheButtonActionPerformed
-        rechercher();// TODO add your handling code here:
+        rechercher();
     }//GEN-LAST:event_rechercheButtonActionPerformed
 
     private void reinitialisationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reinitialisationButtonActionPerformed
         reinitialiserFiltres();
-// TODO add your handling code here:
     }//GEN-LAST:event_reinitialisationButtonActionPerformed
 
     private void seancesTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_seancesTableMouseClicked
@@ -329,7 +328,7 @@ public class PanneauProgrammation extends javax.swing.JPanel {
                 System.out.println("Programmation Panel a détecté la sélection de la séance ID: " + selectedSeance.getId());
                 selectionListener.gererSeanceSelectionnee(selectedSeance);
             }
-        }// TODO add your handling code here:
+        }
     }//GEN-LAST:event_seancesTableMouseClicked
 
 

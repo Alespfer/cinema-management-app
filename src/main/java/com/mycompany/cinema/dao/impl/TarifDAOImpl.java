@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : TarifDAOImpl.java
+// TarifDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 
@@ -9,11 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implémentation concrète pour la gestion des tarifs.
+ * Implémentation pour la gestion des tarifs.
  * Interagit avec le fichier "tarifs.dat".
- *
- * Fournit les données pour le menu déroulant de sélection du tarif dans l'interface
- * de réservation, ainsi que pour le panneau de gestion des tarifs de l'administrateur.
  */
 public class TarifDAOImpl extends GenericDAOImpl<Tarif> implements TarifDAO {
 

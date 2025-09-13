@@ -24,7 +24,7 @@ public class PanneauRapportVentes extends javax.swing.JPanel {
         this.adminService = adminService;
         initComponents();
         initialiserModeles();
-        chargerToutesLesTablesEtTotaux(); // Ceci va maintenant charger les tables ET les totaux généraux.
+        chargerToutesLesTablesEtTotaux(); 
     }
 
     /**
@@ -77,7 +77,7 @@ public class PanneauRapportVentes extends javax.swing.JPanel {
     public void chargerToutesLesTablesEtTotaux() {
         chargerTableauReservations();
         chargerTableauVentesSnack();
-        calculerEtAfficherTotauxGeneraux(); // NOUVEL APPEL
+        calculerEtAfficherTotauxGeneraux(); 
     }
 
     /**
@@ -103,11 +103,11 @@ public class PanneauRapportVentes extends javax.swing.JPanel {
             caTotalSnacks += adminService.calculerTotalPourVenteSnack(vente);
         }
 
-        // Met à jour les nouveaux JLabels pour les totaux généraux
+        // Mise à jour des nouveaux JLabels pour les totaux généraux
         totalCaBilletsLabel.setText("CA TOTAL (Billets) : " + CURRENCY_FORMATTER.format(caTotalBillets));
         totalCaSnacksLabel.setText("CA TOTAL (Snacks) : " + CURRENCY_FORMATTER.format(caTotalSnacks));
 
-        // Initialise les labels journaliers
+        // Initialisation des labels journaliers
         resultatCaBilletsLabel.setText("CA du jour (Billets) : --,-- €");
         resultatCaSnacksLabel.setText("CA du jour (Snacks) : --,-- €");
     }

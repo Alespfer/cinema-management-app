@@ -15,13 +15,13 @@ public class EvaluationClient implements Serializable {
     // Identifiant du film évalué.
     private int idFilm;
 
-    // Note attribuée (échelle définie côté métier).
+    // Note attribuée. 
     private int note;
 
     // Commentaire libre du client.
     private String commentaire;
 
-    // Horodatage de la soumission de l’avis.
+    // Date de la soumission de l’avis.
     private LocalDateTime dateEvaluation;
 
     

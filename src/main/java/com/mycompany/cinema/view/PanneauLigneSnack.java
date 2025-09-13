@@ -23,17 +23,18 @@ public class PanneauLigneSnack extends javax.swing.JPanel {
 
         ProduitSnack produit = lignePanier.getProduit();
 
+        // Affichage 
         String labelText = "<html><b>" + produit.getNomProduit() + "</b><br>"
                 + "<i>" + produit.getDescription() + "</i><br>"
                 + "<font color='blue'>Prix: " + CURRENCY_FORMATTER.format(produit.getPrixVente()) + "</font></html>";
         infoLabel.setText(labelText);
 
-        // On configure le "modèle" du spinner pour dicter son comportement.
+        // On configure le modèle du spinner pour dicter son comportement.
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(
                 lignePanier.getQuantite(), // Valeur initiale
                 0, // Minimum 
                 produit.getStock(), // Maximum (on ne peut pas commander plus que le stock disponible
-                1 // Pas
+                1 // pas de 1
         );
         quantiteSpinner.setModel(spinnerModel);
 

@@ -1,6 +1,5 @@
 package com.mycompany.cinema.util;
 
-// Importe toutes les classes du modèle (Film, Client, etc.) pour pouvoir créer des objets.
 import com.mycompany.cinema.*;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,28 +12,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Classe utilitaire pour créer le tout premier jeu de données.
+ * Nous utilisons cette classe utilitaire pour créer le tout premier jeu de données
+ * au démarrage de l'application
  */
 public final class DataInitializer {
 
-    /**
-     * Le constructeur est privé pour empêcher quiconque de créer une instance
-     * de cette classe. On ne l'utilise qu'à travers sa méthode statique
-     * 'seed()'.
-     */
+ 
     private DataInitializer() {
     }
 
     /**
      * La méthode principale qui lance la création de toutes les données de
-     * test. Pense à elle comme un grand script qui remplit la base de données
-     * de zéro.
+     * test. 
      */
     public static void initialiser() {
         System.out.println("Début de l'initialisation du jeu de données...");
 
-        // --- PHASE 1: Création des données de base ---
-        // On crée d'abord les objets simples qui ne dépendent de rien d'autre.
         // La liste des "Rôles" (Admin, Vendeur) pour les employés.
         List<Role> roles = createRoles();
         // La liste des "Tarifs" (Plein, Étudiant) que le client pourra choisir.
@@ -48,7 +41,6 @@ public final class DataInitializer {
         // Les "Caisses" où les ventes de snacks sont enregistrées.
         List<Caisse> caisses = createCaisses();
 
-        // --- PHASE 2: Création des objets qui utilisent les briques de la phase 1 ---
         // Les sièges pour chaque salle créée juste avant.
         List<Siege> sieges = createSieges(salles);
         // La liste des "Films" à l'affiche.
@@ -58,19 +50,15 @@ public final class DataInitializer {
         // Quelques "Employés" avec leurs rôles.
         List<Personnel> personnel = createPersonnel(roles);
 
-        // --- PHASE 3: On relie les objets entre eux ---
         // On associe des genres à chaque film (ex: "Dune" est "SF" et "Aventure").
         lierFilmsAuxGenres(films, genres);
         // On crée les "Séances" : on dit quel film joue, dans quelle salle, et à quelle heure.
         List<Seance> seances = createSeances(films, salles);
-        // On affecte un employé à une séance.
-        List<AffectationSeance> affectations = createAffectations(personnel, seances);
         // On crée un "Planning" de travail pour un employé.
         List<Planning> plannings = createPlannings(personnel);
         // "Évaluations" : un client donne une note et un avis sur un film.
         List<EvaluationClient> evaluations = createEvaluations(clients, films);
 
-        // --- PHASE 4: Simulation de scénarios réels ---
         List<Reservation> reservations = new ArrayList<>();
         List<Billet> billets = new ArrayList<>();
         // On simule un client qui fait une réservation pour plusieurs sièges.
@@ -80,7 +68,7 @@ public final class DataInitializer {
         List<LigneVente> lignesVente = new ArrayList<>();
         createScenarioVenteSnack(personnel, produitsSnack, caisses, clients, ventesSnack, lignesVente);
 
-        // --- PHASE 5: Sauvegarde de tout dans des fichiers ---
+        // --- Sauvegarde de tout dans des fichiers ---
         System.out.println("Sauvegarde des données dans les fichiers...");
         saveList("roles.dat", roles);
         saveList("tarifs.dat", tarifs);
@@ -93,7 +81,6 @@ public final class DataInitializer {
         saveList("clients.dat", clients);
         saveList("personnel.dat", personnel);
         saveList("seances.dat", seances);
-        saveList("affectations_seance.dat", affectations);
         saveList("plannings.dat", plannings);
         saveList("reservations.dat", reservations);
         saveList("billets.dat", billets);
@@ -104,9 +91,8 @@ public final class DataInitializer {
         System.out.println("Initialisation du jeu de données terminée avec succès.");
     }
 
-    // --- Ci-dessous, les méthodes de création de chaque type d'objet. ---
-    // Mon binôme : Le détail n'est pas important pour toi, c'est juste le "remplissage"
-    // de la base de données.
+    // --- Méthodes de création de chaque type d'objet. ---
+
     private static List<Role> createRoles() {
         List<Role> roles = new ArrayList<>();
         roles.add(new Role(1, "Administrateur"));
@@ -214,7 +200,6 @@ public final class DataInitializer {
 
     private static List<Personnel> createPersonnel(List<Role> roles) {
         List<Personnel> employes = new ArrayList<>();
-        // On remplace le nom d'utilisateur par un email
         employes.add(new Personnel(0, "Système", "En Ligne", "system@cinema.local", "system_pass", roles.get(0).getId()));
         employes.add(new Personnel(1, "Dupont", "Jean", "admin@pisecinema.com", "Admin123", roles.get(0).getId()));
         employes.add(new Personnel(2, "Garcia", "Maria", "maria@pisecinema.com", "Project123", roles.get(1).getId()));
@@ -222,7 +207,6 @@ public final class DataInitializer {
         return employes;
     }
 
-    // Dans le fichier DataInitializer.java
     private static List<Planning> createPlannings(List<Personnel> personnel) {
         List<Planning> items = new ArrayList<>();
 
@@ -240,7 +224,7 @@ public final class DataInitializer {
         items.add(new Planning(
                 IdManager.obtenirProchainIdPlanning(),
                 maintenant.plusDays(1).withHour(17).withMinute(0).withSecond(0),
-                maintenant.plusDays(1).withHour(23).withMinute(30).withSecond(0), // Demain à 23h30
+                maintenant.plusDays(1).withHour(23).withMinute(30).withSecond(0), 
                 "Projection Salle 3 (IMAX)",
                 personnel.get(1).getId()
         ));
@@ -251,7 +235,7 @@ public final class DataInitializer {
                 maintenant.withHour(18).withMinute(0).withSecond(0),
                 maintenant.withHour(22).withMinute(0).withSecond(0),
                 "Vente Snacking",
-                personnel.get(2).getId() // ID de John
+                personnel.get(2).getId() 
         ));
         items.add(new Planning(
                 IdManager.obtenirProchainIdPlanning(),
@@ -267,45 +251,36 @@ public final class DataInitializer {
     private static List<Seance> createSeances(List<Film> films, List<Salle> salles) {
         List<Seance> seances = new ArrayList<>();
 
-        // On calcule les dates par rapport à aujourd'hui.
         LocalDate aujourdhui = LocalDate.now();
         LocalDate demain = aujourdhui.plusDays(1);
         LocalDate apresDemain = aujourdhui.plusDays(2);
 
         int seanceIdCounter = 1;
 
-        // --- Séances pour AUJOURD'HUI (uniquement si elles n'ont pas encore eu lieu) ---
+        // --- Séances pour aujourd'hui ---
         if (LocalTime.now().isBefore(LocalTime.of(14, 0))) {
-            seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(14, 0)), salles.get(1).getId(), films.get(1).getId())); // Oppenheimer
+            seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(14, 0)), salles.get(1).getId(), films.get(1).getId())); 
         }
         if (LocalTime.now().isBefore(LocalTime.of(17, 30))) {
-            seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(17, 30)), salles.get(2).getId(), films.get(2).getId())); // Spider-Man
+            seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(17, 30)), salles.get(2).getId(), films.get(2).getId())); 
         }
         if (LocalTime.now().isBefore(LocalTime.of(20, 15))) {
-            seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(20, 15)), salles.get(0).getId(), films.get(0).getId())); // Dune
+            seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(20, 15)), salles.get(0).getId(), films.get(0).getId())); 
         }
         if (LocalTime.now().isBefore(LocalTime.of(21, 0))) {
-            seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(21, 0)), salles.get(1).getId(), films.get(1).getId())); // Oppenheimer
+            seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(aujourdhui, LocalTime.of(21, 0)), salles.get(1).getId(), films.get(1).getId())); 
         }
 
-        // --- Séances pour DEMAIN ---
-        seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(14, 0)), salles.get(0).getId(), films.get(0).getId())); // Dune
-        seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(17, 0)), salles.get(1).getId(), films.get(2).getId())); // Spider-Man
-        seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(20, 30)), salles.get(2).getId(), films.get(1).getId())); // Oppenheimer
+        // --- Séances pour demain ---
+        seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(14, 0)), salles.get(0).getId(), films.get(0).getId())); 
+        seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(17, 0)), salles.get(1).getId(), films.get(2).getId())); 
+        seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(demain, LocalTime.of(20, 30)), salles.get(2).getId(), films.get(1).getId())); 
 
-        // --- Séances pour APRÈS-DEMAIN ---
+        // --- Séances pour après-demain ---
         seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(apresDemain, LocalTime.of(17, 30)), salles.get(0).getId(), films.get(2).getId())); // Spider-Man
         seances.add(new Seance(seanceIdCounter++, LocalDateTime.of(apresDemain, LocalTime.of(21, 0)), salles.get(2).getId(), films.get(0).getId())); // Dune
 
         return seances;
-    }
-
-    private static List<AffectationSeance> createAffectations(List<Personnel> personnel, List<Seance> seances) {
-        List<AffectationSeance> items = new ArrayList<>();
-        if (seances.size() >= 3) {
-            items.add(new AffectationSeance(seances.get(2).getId(), personnel.get(1).getId()));
-        }
-        return items;
     }
 
     private static List<ProduitSnack> createProduitsSnack() {
@@ -319,6 +294,7 @@ public final class DataInitializer {
         return produits;
     }
 
+    // Évaluations des clients
     private static List<EvaluationClient> createEvaluations(List<Client> clients, List<Film> films) {
         List<EvaluationClient> evaluations = new ArrayList<>();
         evaluations.add(new EvaluationClient(clients.get(0).getId(), films.get(0).getId(), 5, "Visuellement incroyable, une pure merveille !", LocalDateTime.now().minusDays(1)));
@@ -329,34 +305,31 @@ public final class DataInitializer {
 
     private static void createScenarioReservation(List<Client> clients, List<Seance> seances, List<Siege> sieges, List<Tarif> tarifs, List<Reservation> reservations, List<Billet> billets) {
 
-        // --- On rend le scénario de test fiable et déterministe ---
-        // 1. On cherche une séance spécifique qui existera TOUJOURS : 
-        //    celle de Dune (film ID 1), qui est programmée pour demain.
+        // --- Création d'un scénario de test  ---
+        
+        // Séance de Dune (film ID 1), programmée pour J+1 au lancement du programme (14h00)
         Seance seancePourReservation = null;
         for (Seance s : seances) {
-            // On cible un film et une heure précise pour éviter toute ambiguïté.
             if (s.getIdFilm() == 1 && s.getDateHeureDebut().getHour() == 14) {
                 seancePourReservation = s;
-                break; // On a trouvé la bonne séance, on arrête la recherche.
+                break; 
             }
         }
 
-        // 2. Sécurité : si pour une raison quelconque la séance n'est pas trouvée, on ne crée pas de réservation.
         if (seancePourReservation == null) {
             System.err.println("AVERTISSEMENT: La séance de test ('Dune' demain à 14h) n'a pas été trouvée. Le scénario de réservation est annulé.");
             return;
         }
 
-        // 3. On crée la réservation pour le premier client (Alice).
+        // On crée la réservation pour le premier client (Alice).
         Reservation res = new Reservation(1, LocalDateTime.now().minusHours(1), clients.get(0).getId());
         reservations.add(res);
 
-        // 4. On choisit deux sièges spécifiques dans la salle correspondante (Salle 1, qui a 100 places).
-        //    Les sièges d'ID 58 et 59 correspondent à la Rangée 6, sièges 8 et 9.
+        // On choisit deux sièges spécifiques dans la salle correspondante (Salle 1, qui a 100 places).
         Siege siege1 = sieges.get(57);
         Siege siege2 = sieges.get(58);
 
-        // 5. On crée les billets en utilisant l'ID de la séance qu'on a spécifiquement ciblée.
+        // On crée les billets en utilisant l'ID de la séance qu'on a spécifiquement ciblée.
         billets.add(new Billet(1, res.getId(), tarifs.get(0).getId(), siege1.getId(), seancePourReservation.getId()));
         billets.add(new Billet(2, res.getId(), tarifs.get(0).getId(), siege2.getId(), seancePourReservation.getId()));
 

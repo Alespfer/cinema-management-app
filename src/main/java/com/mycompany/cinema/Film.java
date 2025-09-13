@@ -133,9 +133,7 @@ public class Film implements Serializable {
         return idFilm == film.idFilm;
     }
 
-    /**
-     * Hash basé sur l’identifiant, conforme à equals.
-     */
+   
     @Override
     public int hashCode() {
         return Objects.hash(idFilm);

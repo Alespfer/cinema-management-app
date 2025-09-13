@@ -8,7 +8,6 @@ package com.mycompany.cinema.view;
 import com.mycompany.cinema.Client;
 import com.mycompany.cinema.service.ClientService;
 import java.awt.Color;
-import java.awt.Window;
 import java.util.Arrays;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -38,7 +37,7 @@ public class PanneauInfosPersonnelles extends javax.swing.JPanel {
     }
 
     /**
-     * Logique exécutée lors du clic sur le bouton "Mettre à jour".
+     * Logique exécutée après clic sur le bouton "Mettre à jour".
      */
     private void actionMettreAJour() {
         String nom = nomField.getText().trim();
@@ -227,12 +226,11 @@ public class PanneauInfosPersonnelles extends javax.swing.JPanel {
     }//GEN-LAST:event_nomFieldActionPerformed
 
     private void supprimerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supprimerButtonActionPerformed
-        actionSupprimerCompte();// TODO add your handling code here:
+        actionSupprimerCompte();
     }//GEN-LAST:event_supprimerButtonActionPerformed
 
     private void majButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_majButtonActionPerformed
         actionMettreAJour();
-    /// TODO add your handling code here:
     }//GEN-LAST:event_majButtonActionPerformed
 
 

@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : ReservationDAOImpl.java
+// ReservationDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 
@@ -12,7 +12,6 @@ import java.util.List;
  * Implémentation pour la gestion des réservations (commandes). Interagit avec
  * le fichier "reservations.dat".
  *
- * Cœur de l'historique des commandes du client.
  */
 public class ReservationDAOImpl extends GenericDAOImpl<Reservation> implements ReservationDAO {
 

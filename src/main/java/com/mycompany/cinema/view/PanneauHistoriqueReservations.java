@@ -119,8 +119,7 @@ public class PanneauHistoriqueReservations extends javax.swing.JPanel {
                 }
             }
             
-            // On prépare les données pour l'affichage, en gérant les cas où des 
-            // informations seraient manquantes.
+            // On prépare les données pour l'affichage
             String nomFilm = (film != null) ? film.getTitre() : "N/A";
             String dateSeance = (seance != null) ? seance.getDateHeureDebut().format(formatter) : "N/A";
 
@@ -207,7 +206,7 @@ public class PanneauHistoriqueReservations extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void annulerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_annulerButtonActionPerformed
-        gererAnnulerReservation(); // TODO add your handling code here:
+        gererAnnulerReservation(); 
     }//GEN-LAST:event_annulerButtonActionPerformed
 
 

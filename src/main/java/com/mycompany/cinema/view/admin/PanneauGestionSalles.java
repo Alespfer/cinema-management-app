@@ -38,9 +38,6 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
 
     }
 
-    // ========================================================================
-    // --- Configuration et Mise à Jour de l'Interface ---
-    // ========================================================================
     /**
      * Personnalise l'affichage des objets Salle dans la JList pour une
      * meilleure lisibilité.
@@ -117,8 +114,6 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
     // ========================================================================
     // --- Actions déclenchées par les Événements ---
     // ========================================================================
-    
-    
     /**
      * Prépare l'interface pour la création d'une nouvelle salle en activant le
      * formulaire.
@@ -127,14 +122,13 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
         listeSalles.clearSelection();
         mettreAJourChamps(null); // Vide les champs du formulaire
 
-
         // Mode création 
         setFormulaireActif(true);       // Active les champs pour la saisie
         ajouterButton.setEnabled(true);   // Active le bouton pour valider la création
-        supprimerButton.setEnabled(false); 
+        supprimerButton.setEnabled(false);
     }
 
-        /**
+    /**
      * Gère la logique de création d'une nouvelle salle, y compris la
      * configuration de son plan de sièges.
      */
@@ -168,13 +162,13 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
                 try {
                     String nbRangeesStr = JOptionPane.showInputDialog(this, "Combien de rangées pour la salle '" + numero + "' ?", "Configuration du plan", JOptionPane.QUESTION_MESSAGE);
                     if (nbRangeesStr == null) {
-                        return; // L'utilisateur a cliqué sur "Annuler"
+                        return; 
                     }
                     nbRangees = Integer.parseInt(nbRangeesStr.trim());
 
                     String nbSiegesStr = JOptionPane.showInputDialog(this, "Combien de sièges par rangée ?", "Configuration du plan", JOptionPane.QUESTION_MESSAGE);
                     if (nbSiegesStr == null) {
-                        return; // L'utilisateur a cliqué sur "Annuler"
+                        return; 
                     }
                     nbSiegesParRangee = Integer.parseInt(nbSiegesStr.trim());
 
@@ -186,7 +180,7 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
                                 + "Cela ne correspond pas à la capacité totale de " + capacite + " que vous avez indiquée.",
                                 "Erreur de configuration", JOptionPane.ERROR_MESSAGE);
                     } else {
-                        configurationValide = true; // Si la configuration est correcte on sort de la boucle
+                        configurationValide = true; 
                     }
 
                 } catch (NumberFormatException ex) {
@@ -204,7 +198,7 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
 
             // --- 4. Réinitialisation de l'interface ---
             chargerListeSalles();
-            actionNouveau(); 
+            actionNouveau();
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erreur lors de l'ajout : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
@@ -352,8 +346,8 @@ public class PanneauGestionSalles extends javax.swing.JPanel {
             salleSelectionnee = listeSalles.getSelectedValue();
             mettreAJourChamps(salleSelectionnee); // Affiche les détails de la salle sélectionnée
 
-            setFormulaireActif(false); // Les champs sont en consultation, non modifiables
-            ajouterButton.setEnabled(false); 
+            setFormulaireActif(false); 
+            ajouterButton.setEnabled(false);
 
             supprimerButton.setEnabled(salleSelectionnee != null);
         }

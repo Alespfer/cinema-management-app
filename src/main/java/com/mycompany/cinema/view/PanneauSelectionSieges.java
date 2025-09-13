@@ -31,19 +31,18 @@ import javax.swing.JToggleButton;
  */
 public class PanneauSelectionSieges extends javax.swing.JPanel {
 
-    // --- VARIABLES MÉTIER ---
+    // --- Variables métier ---
     private final ClientService clientService;
     private Seance seanceActuelle;
     private List<JToggleButton> listeBoutonsSiege = new ArrayList<>();
     private List<com.mycompany.cinema.Siege> listeObjetsSiege = new ArrayList<>();
 
-    // --- CONSTANTES POUR LES COULEURS DES SIÈGES ---
+    // --- Cosntantes pour les couleurs des sièges ---
     private static final Color COULEUR_DISPONIBLE = new Color(34, 177, 76);
     private static final Color COULEUR_OCCUPE = new Color(237, 28, 36);
     private static final Color COULEUR_SELECTIONNE = new Color(63, 72, 204);
 
-    // --- INTERFACES POUR LA COMMUNICATION ---
-    // Définit un "contrat" pour que la fenêtre principale puisse écouter les événements de ce panneau.
+    // --- Interfaces pour la communication ---
     public interface EcouteurRetour {
 
         void gererRetour();
@@ -56,7 +55,6 @@ public class PanneauSelectionSieges extends javax.swing.JPanel {
     }
     private EcouteurReservation ecouteurReservation;
 
-    // --- Constructeur du panneau ---
     public PanneauSelectionSieges(ClientService clientService, Client clientConnecte) {
         this.clientService = clientService;
         initComponents();
@@ -76,7 +74,6 @@ public class PanneauSelectionSieges extends javax.swing.JPanel {
                 if (value instanceof Tarif) {
                     Tarif t = (Tarif) value;
 
-                    // Formatage du texte pour chaque item de la liste.
                     setText(t.getLibelle() + " - " + String.format("%.2f", t.getPrix()) + " €");
                 }
                 return this;
@@ -153,18 +150,18 @@ public class PanneauSelectionSieges extends javax.swing.JPanel {
 
         if (seance != null) {
 
-            // 1. On récupère toutes les infos de la "base de données"
+            // 1. On récupère les infos de la "base de données"
             List<com.mycompany.cinema.Siege> tousLesSieges = clientService.trouverSiegesPourSalle(seance.getIdSalle());
             List<Billet> billetsVendus = clientService.trouverBilletsPourSeance(seance.getId());
 
-            // On stocke les IDs des sièges occupés pour une vérification rapide
+            // On stocke les IDs des sièges occupés à partir des billets vendus
             List<Integer> idsSiegesOccupes = new ArrayList<>();
             for (Billet billet : billetsVendus) {
                 idsSiegesOccupes.add(billet.getIdSiege());
             }
 
-            // 2. On détermine la taille de la grille (le nombre de rangées et de sièges par rangée)
-            int maxRangee = 0, maxSiegeNum = 0;
+            int maxRangee = 0;
+            int maxSiegeNum = 0;
             for (com.mycompany.cinema.Siege siege : tousLesSieges) {
                 if (siege.getNumeroRangee() > maxRangee) {
                     maxRangee = siege.getNumeroRangee();
@@ -174,15 +171,29 @@ public class PanneauSelectionSieges extends javax.swing.JPanel {
                 }
             }
 
-            // 3. On prépare une grille (GridLayout) et on y place nos sièges
-            panelContenu.setLayout(new GridLayout(maxRangee > 0 ? maxRangee : 1, maxSiegeNum > 0 ? maxSiegeNum : 1, 5, 5));
-            com.mycompany.cinema.Siege[][] grilleSieges = new com.mycompany.cinema.Siege[maxRangee][maxSiegeNum];
+            int nombreDeRangeesPourLaGrille;
+            int nombreDeSiegesParRangeePourLaGrille;
+
+            if (maxRangee > 0) {
+                nombreDeRangeesPourLaGrille = maxRangee;
+            } else {
+                nombreDeRangeesPourLaGrille = 1;
+            }
+
+            if (maxSiegeNum > 0) {
+                nombreDeSiegesParRangeePourLaGrille = maxSiegeNum;
+            } else {
+                nombreDeSiegesParRangeePourLaGrille = 1;
+            }
+
+            panelContenu.setLayout(new GridLayout(nombreDeRangeesPourLaGrille, nombreDeSiegesParRangeePourLaGrille, 5, 5));
+            com.mycompany.cinema.Siege[][] grilleSieges = new com.mycompany.cinema.Siege[nombreDeRangeesPourLaGrille][nombreDeSiegesParRangeePourLaGrille];
             for (com.mycompany.cinema.Siege siege : tousLesSieges) {
                 grilleSieges[siege.getNumeroRangee() - 1][siege.getNumeroSiege() - 1] = siege;
             }
 
-            for (int i = 0; i < maxRangee; i++) {
-                for (int j = 0; j < maxSiegeNum; j++) {
+            for (int i = 0; i < nombreDeRangeesPourLaGrille; i++) {
+                for (int j = 0; j < nombreDeSiegesParRangeePourLaGrille; j++) {
                     final com.mycompany.cinema.Siege siege = grilleSieges[i][j];
                     if (siege == null) {
                         panelContenu.add(new JPanel());
@@ -216,7 +227,7 @@ public class PanneauSelectionSieges extends javax.swing.JPanel {
             }
         }
 
-        // 5. On met à jour l'affichage
+        // Mise à jour de l'affichage
         planSallePanel.setViewportView(panelContenu);
         planSallePanel.revalidate();
         planSallePanel.repaint();

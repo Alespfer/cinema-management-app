@@ -26,7 +26,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class PanneauGestionFilms extends javax.swing.JPanel {
 
     private final AdminService adminService;
-    private Film filmSelectionne; // L'objet Film actuellement en cours d'édition.
+    private Film filmSelectionne; // L'objet Film en cours d'édition.
     private DefaultListModel<Film> filmListModel;
     private DefaultListModel<Genre> genreListModel;
     private File fichierAfficheSelectionne; // Stocke temporairement le fichier image choisi par l'utilisateur.
@@ -145,7 +145,7 @@ public class PanneauGestionFilms extends javax.swing.JPanel {
             return;
         }
 
-        // 1. On trouve les indices des genres du film dans le modèle de la JList.
+        // Récupération des indices des genres du film dans le modèle de la JList.
         List<Integer> indicesASelectionner = new ArrayList<>();
         for (int i = 0; i < genreListModel.size(); i++) {
             Genre genreDeLaListe = genreListModel.getElementAt(i);
@@ -157,13 +157,12 @@ public class PanneauGestionFilms extends javax.swing.JPanel {
             }
         }
 
-        // 2. On convertit la liste d'Integer en tableau de int[] pour la méthode de la JList.
+        // Conversion de la liste d'Integer en tableau de int[] pour la méthode de la JList.
         int[] indices = new int[indicesASelectionner.size()];
         for (int i = 0; i < indicesASelectionner.size(); i++) {
             indices[i] = indicesASelectionner.get(i);
         }
 
-        // 3. On applique la sélection à la JList.
         genreJList.setSelectedIndices(indices);
     }
 
@@ -192,7 +191,7 @@ public class PanneauGestionFilms extends javax.swing.JPanel {
      */
     private void actionEnregistrer() {
         try {
-            // --- VALIDATIONS ---
+            // --- Validations de saisie ---
             if (titreField.getText().trim().isEmpty() || dureeField.getText().trim().isEmpty() || notePresseField.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Le titre, la durée et la note de presse sont requis.", "Champs obligatoires", JOptionPane.WARNING_MESSAGE);
                 return;
@@ -209,12 +208,10 @@ public class PanneauGestionFilms extends javax.swing.JPanel {
             } else if (filmSelectionne != null) {
                 nomFichierAffiche = filmSelectionne.getUrlAffiche();
             } else {
-                // Si on crée un nouveau film, l'affiche est obligatoire.
                 JOptionPane.showMessageDialog(this, "Veuillez sélectionner une affiche pour le nouveau film.", "Affiche requise", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            // --- Le reste des validations ---
             String noteTexte = notePresseField.getText().trim().replace(',', '.');
             double notePresse = Double.parseDouble(noteTexte);
             int duree = Integer.parseInt(dureeField.getText().trim());
@@ -429,17 +426,14 @@ public class PanneauGestionFilms extends javax.swing.JPanel {
 
     private void nouveauButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nouveauButtonActionPerformed
         reinitialiserFormulaire();
-// TODO add your handling code here:
     }//GEN-LAST:event_nouveauButtonActionPerformed
 
     private void enregistrerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enregistrerButtonActionPerformed
         actionEnregistrer();
-// TODO add your handling code here:
     }//GEN-LAST:event_enregistrerButtonActionPerformed
 
     private void supprimerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supprimerButtonActionPerformed
         actionSupprimer();
-// TODO add your handling code here:
     }//GEN-LAST:event_supprimerButtonActionPerformed
 
     private void filmJListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_filmJListValueChanged

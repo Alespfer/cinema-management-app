@@ -15,7 +15,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 /**
- * Classe interne simple pour regrouper toutes les informations nécessaires à
+ * Classe interne pour regrouper toutes les informations nécessaires à
  * l'affichage du ticket.
  */
 class BilletInfo {
@@ -42,7 +42,7 @@ public class BilletDialog extends javax.swing.JDialog {
         initComponents();
         this.BilletsTextArea.setText(contenuBillet);
         this.setTitle("Confirmation de Commande");
-        this.setSize(320, 480); // La fenêtre sera adapté à son contenu lors de l'affichage
+        this.setSize(320, 480); // La fenêtre est adapté à cette taille lors de l'affichage
         this.setLocationRelativeTo(parent);
     }
 
@@ -65,7 +65,6 @@ public class BilletDialog extends javax.swing.JDialog {
         contenu += "Salle: " + infos.salleNumero + "\n";
         contenu += "Sièges Réservés:\n";
 
-        // Boucle FOR classique, conforme à la Doctrine.
         for (Siege siege : infos.sieges) {
             contenu += "  - Rangée " + siege.getNumeroRangee() + ", Siège " + siege.getNumeroSiege() + "\n";
         }
@@ -74,7 +73,6 @@ public class BilletDialog extends javax.swing.JDialog {
 
         if (infos.panierSnacks != null && !infos.panierSnacks.isEmpty()) {
             contenu += "\n--- SNACKS ---\n";
-            // Boucle FOR classique, conforme à la Doctrine.
             for (LignePanier ligne : infos.panierSnacks) {
                 contenu += "  - " + ligne.getQuantite() + "x " + ligne.getProduit().getNomProduit() + "\n";
             }
@@ -85,7 +83,7 @@ public class BilletDialog extends javax.swing.JDialog {
         contenu += "----------------------------------------\n\n";
         contenu += "Merci de votre visite et bonne séance !\n";
 
-        return contenu; // Retourne la chaîne de caractères finale.
+        return contenu; 
     }
 
     /**
@@ -95,7 +93,7 @@ public class BilletDialog extends javax.swing.JDialog {
     private void exportTxt() {
         
         
-        // 1. Création de la boîte de dialogue pour le choix du fichier.
+        // Création de la boîte de dialogue pour le choix du fichier.
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Enregistrer la confirmation");
         fileChooser.setSelectedFile(new File("Confirmation_Commande.txt"));
@@ -166,11 +164,10 @@ public class BilletDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void exportButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportButtonActionPerformed
-        exportTxt();       // TODO add your handling code here:
+        exportTxt();   
     }//GEN-LAST:event_exportButtonActionPerformed
 
     private void closeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeButtonActionPerformed
-        // TODO add your handling code here:
         this.dispose();
 
     }//GEN-LAST:event_closeButtonActionPerformed

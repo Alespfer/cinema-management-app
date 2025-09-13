@@ -13,7 +13,7 @@ public class Tarif implements Serializable {
     // Nom du tarif (ex: "Plein Tarif", "Étudiant").
     private String libelle;
 
-    // Prix en euros.
+    // Prix du tarif
     private double prix;
 
     

@@ -27,7 +27,6 @@ public interface CinemaService {
 
     /**
      * Recherche des films dont le titre contient un mot-clé donné.
-     * La recherche doit être implémentée de manière insensible à la casse (majuscules/minuscules).
      * @param motCle Le texte à rechercher dans les titres des films.
      * @return Une liste de films correspondant au critère de recherche ; peut être vide.
      */

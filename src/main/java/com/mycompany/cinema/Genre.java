@@ -13,7 +13,6 @@ public class Genre implements Serializable {
     // Libellé du genre.
     private String libelle;
 
-    // Constructeur par défaut requis pour la sérialisation.
     public Genre() {
     }
 

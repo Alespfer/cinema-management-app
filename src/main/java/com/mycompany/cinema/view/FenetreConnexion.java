@@ -25,7 +25,8 @@ public class FenetreConnexion extends javax.swing.JFrame {
         this.adminService = serviceImpl;
         initComponents();
         setTitle("Cinema PISE 2025 - Connexion");
-        // On centre la fenêtre à l'écran
+        
+        // Option pour centrer la fenêtre à l'écran
         setLocationRelativeTo(null); 
     }
 
@@ -36,21 +37,23 @@ public class FenetreConnexion extends javax.swing.JFrame {
      * membre du personnel et redirige vers l'interface appropriée.
      */
     private void actionConnexion() {
-        // 1. Récupération des informations saisies par l'utilisateur.
+        
+        // Récupération des informations saisies par l'utilisateur.
         String identifiant = utilisateurField.getText().trim();
         String motDePasse = new String(passwordField.getPassword());
 
-        // 2. Validation de base : on s'assure que les champs ne sont pas vides.
+        // Validation de base : on s'assure que les champs ne sont pas vides.
         if (identifiant.isEmpty() || motDePasse.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
             return; // On arrête la méthode ici.
         }
 
-        // 3. On détermine si la tentative de connexion concerne un client ou un membre du personnel.
+        // On détermine si la tentative de connexion concerne un client ou un membre du personnel.
         if (clientRadio.isSelected()) {
+            
             // --- LOGIQUE POUR UN CLIENT ---
 
-            // On vérifie le format de l'email.
+            // Validation du format de l'email.
             if (!emailValide(identifiant)) {
                 JOptionPane.showMessageDialog(this, "L'identifiant client doit être une adresse e-mail valide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -71,7 +74,7 @@ public class FenetreConnexion extends javax.swing.JFrame {
             Personnel personnel = adminService.authentifierPersonnel(identifiant, motDePasse);
             if (personnel != null) {
                 Role role = adminService.trouverRoleParId(personnel.getIdRole());
-                this.dispose(); // On ferme la fenêtre de connexion dans tous les cas.
+                this.dispose(); 
 
                 // On vérifie si l'employé a le rôle "Administrateur".
                 if (role != null && role.getLibelle().equalsIgnoreCase("Administrateur")) {
@@ -252,17 +255,15 @@ public class FenetreConnexion extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void inscriptionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inscriptionButtonActionPerformed
-        actionInscription();// TODO add your handling code here:
+        actionInscription();
     }//GEN-LAST:event_inscriptionButtonActionPerformed
 
     private void connexionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connexionButtonActionPerformed
-        actionConnexion();// TODO add your handling code here:
+        actionConnexion();
     }//GEN-LAST:event_connexionButtonActionPerformed
 
     private void motOublieButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_motOublieButtonActionPerformed
-        // 1. Demander à l'utilisateur quel type de compte il veut réinitialiser.
         actionMotDePasseOublie();
-        // Si l'utilisateur ferme la boîte, il ne se passe rien.// TODO add your handling code here:
     }//GEN-LAST:event_motOublieButtonActionPerformed
 
 

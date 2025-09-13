@@ -283,15 +283,15 @@ public class PanneauGestionProduitSnack extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void nouveauButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nouveauButtonActionPerformed
-        actionNouveau();// TODO add your handling code here:
+        actionNouveau();
     }//GEN-LAST:event_nouveauButtonActionPerformed
 
     private void enregistrerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enregistrerButtonActionPerformed
-        actionEnregistrer();// TODO add your handling code here:
+        actionEnregistrer();
     }//GEN-LAST:event_enregistrerButtonActionPerformed
 
     private void supprimerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supprimerButtonActionPerformed
-        actionSupprimer();// TODO add your handling code here:
+        actionSupprimer();
     }//GEN-LAST:event_supprimerButtonActionPerformed
 
     private void listeProduitsValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_listeProduitsValueChanged

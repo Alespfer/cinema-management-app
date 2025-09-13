@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : PersonnelDAO.java
+// PersonnelDAO.java
 // ========================================================================
 package com.mycompany.cinema.dao;
 
@@ -8,7 +8,6 @@ import java.util.List;
 
 /**
  * Définit le contrat pour la gestion des données des employés du cinéma.
- * Ce contrat est la base de toute la partie administrative de l'application.
  */
 public interface PersonnelDAO {
 

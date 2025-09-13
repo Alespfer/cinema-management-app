@@ -24,7 +24,6 @@ public class Client implements Serializable {
     // Date de création du compte.
     private LocalDate dateCreation;
 
-    // Constructeur par défaut requis pour la sérialisation.
     public Client() {
     }
 

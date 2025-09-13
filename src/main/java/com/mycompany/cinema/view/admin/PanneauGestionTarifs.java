@@ -17,16 +17,15 @@ public class PanneauGestionTarifs extends javax.swing.JPanel {
 
     private final AdminService adminService;
     private Tarif tarifSelectionne;
-    // Le modèle de la liste est géré manuellement.
     private DefaultListModel<Tarif> listModel;
 
     public PanneauGestionTarifs(AdminService adminService) {
         this.adminService = adminService;
 
         initComponents();
-        configurerModeleEtRenderers(); // Initialise notre modèle et configure l'affichage.
+        configurerModeleEtRenderers(); 
 
-        chargerListeTarifs(); // Charge les données initiales.
+        chargerListeTarifs(); 
     }
 
     /**
@@ -122,7 +121,7 @@ public class PanneauGestionTarifs extends javax.swing.JPanel {
                 // 1. Obtention d'un nouvel ID
                 int nouvelId = com.mycompany.cinema.util.IdManager.obtenirProchainIdTarif();
 
-                // 2. Création de l'objet avec l'ID
+                // 2. Création de l'objet tarif avec l'ID
                 Tarif nouveauTarif = new Tarif(
                         nouvelId,
                         libelle,

@@ -1,3 +1,4 @@
+
 /**
  * Méthode publique pour rafraîchir les données, appelée par la fenêtre principale.
  */
@@ -17,6 +18,7 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+
 
 public class PanneauGestionPlanning extends javax.swing.JPanel {
 
@@ -108,9 +110,16 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
         this.planningsAffiches.clear();
         Personnel selection = (Personnel) personnelComboBox.getSelectedItem();
         if (selection != null) {
-            List<Planning> plannings = adminService.trouverPlanningPourPersonnel(selection.getId());
-            this.planningsAffiches = plannings;
-            for (Planning p : plannings) {
+            List<Planning> planningsDuService = adminService.trouverPlanningPourPersonnel(selection.getId());
+
+            // --- DÉBUT DE LA CORRECTION ---
+            // On crée une NOUVELLE liste qui est une copie de celle du service.
+            // C'est cette copie que nous allons stocker et manipuler.
+            this.planningsAffiches = new ArrayList<>(planningsDuService);
+            // --- FIN DE LA CORRECTION ---
+
+            // Le reste du code ne change pas, mais il travaille maintenant sur la copie.
+            for (Planning p : this.planningsAffiches) {
                 planningTableModel.addRow(new Object[]{
                     p.getDateHeureDebutService().format(FORMATTER),
                     p.getDateHeureFinService().format(FORMATTER),
@@ -149,13 +158,13 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
             try {
                 debut = LocalDateTime.parse(dateDebutStr.trim(), FORMATTER);
 
-                // On vérifie que la date de début n'est pas dans le passé.
+                // La date de début ne doit pas être dans le passé.
                 if (!estDansLePresentOuFutur(debut, LocalDateTime.now())) {
                     JOptionPane.showMessageDialog(this, "La date de début ne peut pas être dans le passé.", "Erreur de logique", JOptionPane.ERROR_MESSAGE);
-                    continue; // La date est passée, on redemande la saisie.
+                    continue;
                 }
 
-                break; // La date est valide et future, on sort de la boucle.
+                break;
             } catch (DateTimeParseException ex) {
                 JOptionPane.showMessageDialog(this, "Format de date invalide. Utilisez bien jj/MM/aaaa HH:mm.", "Erreur de format", JOptionPane.ERROR_MESSAGE);
             }
@@ -344,16 +353,17 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
     }//GEN-LAST:event_personnelComboBoxActionPerformed
 
     private void modifierButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modifierButtonActionPerformed
+
         int selectedRow = planningTable.getSelectedRow();
         if (selectedRow == -1) {
             return;
         }
 
+        // Récupération du planning à la ligne sélectionnée.
         Planning planningAModifier = planningsAffiches.get(selectedRow);
 
-        // Ici, on utilisera des JOptionPane pour la simplicité, comme pour l'ajout.
-        // Une JDialog personnalisée serait plus élégante mais plus complexe à mettre en place.
         try {
+            // Saisie de nouvelles valeurs par l'utilisateur
             String nouvelleDateDebutStr = JOptionPane.showInputDialog(this, "Modifier la date de début :", planningAModifier.getDateHeureDebutService().format(FORMATTER));
             if (nouvelleDateDebutStr == null) {
                 return;
@@ -362,38 +372,44 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
 
             String nouvelleDateFinStr = JOptionPane.showInputDialog(this, "Modifier la date de fin :", planningAModifier.getDateHeureFinService().format(FORMATTER));
             if (nouvelleDateFinStr == null) {
-                return;
+                return; 
             }
             LocalDateTime nouvelleDateFin = LocalDateTime.parse(nouvelleDateFinStr.trim(), FORMATTER);
 
             String nouveauPoste = JOptionPane.showInputDialog(this, "Modifier le poste :", planningAModifier.getPosteOccupe());
             if (nouveauPoste == null) {
-                return;
+                return; 
             }
 
-            // Mettre à jour l'objet
+            // Mise à jour de l'objet en mémoire 
             planningAModifier.setDateHeureDebutService(nouvelleDateDebut);
             planningAModifier.setDateHeureFinService(nouvelleDateFin);
             planningAModifier.setPosteOccupe(nouveauPoste.trim());
 
+            // On envoie l'objet mis à jour au service pour persistance 
             adminService.modifierPlanning(planningAModifier);
+
+            // On met à jour la ligne spécifique dans le tableau.
+            planningTableModel.setValueAt(nouvelleDateDebut.format(FORMATTER), selectedRow, 0);
+            planningTableModel.setValueAt(nouvelleDateFin.format(FORMATTER), selectedRow, 1);
+            planningTableModel.setValueAt(nouveauPoste.trim(), selectedRow, 2);
+
             JOptionPane.showMessageDialog(this, "Créneau mis à jour.");
-            chargerPlanningPourPersonnelSelectionne();
 
         } catch (DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "Format de date invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Format de date invalide. La modification est annulée.", "Erreur", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erreur de modification : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+            chargerPlanningPourPersonnelSelectionne();
         }
     }//GEN-LAST:event_modifierButtonActionPerformed
 
     private void supprimerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supprimerButtonActionPerformed
         int selectedRow = planningTable.getSelectedRow();
         if (selectedRow == -1) {
-            return; // Sécurité, ne devrait pas arriver si le bouton est bien géré
+            return;
         }
 
-        // On récupère l'objet Planning complet grâce à notre liste
         Planning planningSelectionne = planningsAffiches.get(selectedRow);
 
         int reponse = JOptionPane.showConfirmDialog(this, "Supprimer ce créneau ?", "Confirmation", JOptionPane.YES_NO_OPTION);
@@ -401,7 +417,7 @@ public class PanneauGestionPlanning extends javax.swing.JPanel {
             try {
                 adminService.supprimerPlanning(planningSelectionne.getId());
                 JOptionPane.showMessageDialog(this, "Créneau supprimé.");
-                chargerPlanningPourPersonnelSelectionne(); // Recharger la table
+                chargerPlanningPourPersonnelSelectionne();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Erreur : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
             }

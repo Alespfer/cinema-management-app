@@ -10,7 +10,6 @@ import javax.swing.JOptionPane;
 
 public class PanneauPaiement extends javax.swing.JPanel {
 
-    // --- INTERFACE DE COMMUNICATION ---
     public interface PaiementListener {
 
         void PaiementValide(); // Informer que le paiement est "réussi"
@@ -60,7 +59,7 @@ public class PanneauPaiement extends javax.swing.JPanel {
             return;
         }
 
-        // --- 2. VALIDATION LOGIQUE DE LA DATE D'EXPIRATION ---
+        // --- 2. VALIDATION DE LA DATE D'EXPIRATION ---
         try {
             // On découpe la chaîne "MM/AA" pour obtenir le mois et l'année
             String[] dateParts = expiryDate.split("/");
@@ -70,8 +69,7 @@ public class PanneauPaiement extends javax.swing.JPanel {
 
             LocalDate dateActuelle = LocalDate.now();
             
-            // On vérifie si l'année de la carte est déjà passée,
-            // ou si l'année est la même mais le mois est déjà passé.
+            // On vérifie si l'année de la carte est déjà passée, ou si l'année est la même mais le mois est déjà passé.
             int moisActuel = dateActuelle.getMonthValue();
             int anneeActuelle = dateActuelle.getYear();
 
@@ -89,7 +87,6 @@ public class PanneauPaiement extends javax.swing.JPanel {
                 return;
             }
         } catch (Exception e) {
-            // Sécurité en cas de problème lors de la conversion, bien que peu probable grâce à la regex
             JOptionPane.showMessageDialog(this, "La date d'expiration n'a pas pu être validée.", "Erreur", JOptionPane.ERROR_MESSAGE);
             return;
         }

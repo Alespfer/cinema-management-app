@@ -108,7 +108,7 @@ public class PanneauSelectionSnack extends javax.swing.JPanel {
         }
         totalLabel.setText("Total Snacks: " + CURRENCY_FORMATTER.format(total));
 
-        // On active/désactive les boutons en fonction de l'état du panier.
+        // Activation/désactivation des boutons en fonction de l'état du panier.
         skipButton.setEnabled(panierEstVide);
         validerButton.setEnabled(!panierEstVide);
     }
@@ -218,20 +218,19 @@ public class PanneauSelectionSnack extends javax.swing.JPanel {
     private void validerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_validerButtonActionPerformed
         if (listener != null) {
             listener.SelectionSnacksTerminee(getPanierFinal());
-        }// TODO add your handling code here:
+        }
     }//GEN-LAST:event_validerButtonActionPerformed
 
     private void skipButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skipButtonActionPerformed
         if (navigationListener != null) {
             navigationListener.Skip();
         }
-// TODO add your handling code here:
     }//GEN-LAST:event_skipButtonActionPerformed
 
     private void retourButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_retourButtonActionPerformed
         if (navigationListener != null) {
             navigationListener.RetourVersSieges();
-        }// TODO add your handling code here:
+        }
     }//GEN-LAST:event_retourButtonActionPerformed
 
 

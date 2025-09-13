@@ -1,26 +1,21 @@
 // ========================================================================
-// FICHIER : BilletDAOImpl.java
+// BilletDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 
 import com.mycompany.cinema.Billet;
 import com.mycompany.cinema.dao.BilletDAO;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
  * Implémentation de l'interface BilletDAO. Cette classe gère la persistance des
- * objets Billet dans le fichier "billets.dat", fondamentale pour le processus
- * de réservation et la consultation de l'historique.
+ * objets Billet dans le fichier "billets.dat". 
  *
  */
 public class BilletDAOImpl extends GenericDAOImpl<Billet> implements BilletDAO {
 
-    /**
-     * Constructeur. Spécifie le fichier de données "billets.dat" au
-     * gestionnaire générique parent.
-     */
+    
     public BilletDAOImpl() {
         super("billets.dat");
     }
@@ -47,7 +42,6 @@ public class BilletDAOImpl extends GenericDAOImpl<Billet> implements BilletDAO {
     @Override
     public List<Billet> trouverBilletsParIdReservation(int idReservation) {
         List<Billet> billetsTrouves = new ArrayList<>();
-        // Parcours de tous les billets pour filtrer ceux qui appartiennent à la même commande.
         for (Billet billet : this.data) {
             if (billet.getIdReservation() == idReservation) {
                 billetsTrouves.add(billet);
@@ -77,9 +71,7 @@ public class BilletDAOImpl extends GenericDAOImpl<Billet> implements BilletDAO {
     }
 
     /**
-     * Retourne une liste de tous les billets enregistrés dans le système. * la
-     * liste interne n'est pas modifiable de l'extérieur (principe
-     * d'encapsulation).
+     * Retourne une liste de tous les billets enregistrés dans le système. 
      */
     @Override
     public List<Billet> trouverTousLesBillets() {
@@ -87,10 +79,7 @@ public class BilletDAOImpl extends GenericDAOImpl<Billet> implements BilletDAO {
     }
 
     /**
-     * Supprime tous les billets associés à un identifiant de réservation. Cette
-     * opération est typiquement déclenchée lors de l'annulation d'une
-     * réservation.
-     *
+     * Supprime tous les billets associés à un identifiant de réservation.
      *
      * @param idReservation L'identifiant de la réservation dont les billets
      * doivent être supprimés.
@@ -101,12 +90,10 @@ public class BilletDAOImpl extends GenericDAOImpl<Billet> implements BilletDAO {
         boolean modificationEffectuee = false;
 
         for (int i = this.data.size() - 1; i >= 0; i--) {
-            // On récupère le billet à l'index courant.
             Billet billet = this.data.get(i);
 
-            // On vérifie si le billet correspond à la réservation à annuler.
+            // On vérifie si le billet correspond à la réservation à annuler et on le supprime de la liste si c'est le cas
             if (billet.getIdReservation() == idReservation) {
-                // Si c'est le cas, on supprime le billet de la liste en mémoire.
                 this.data.remove(i);
 
                 // On note qu'une modification a eu lieu.

@@ -5,8 +5,9 @@ import java.io.Serializable;
 /**
  * Représente l’affectation d’un membre du personnel à une séance donnée.
  * 
- * Utilisée principalement en back-office pour gérer le planning et les rôles
- * lors des projections.
+ * Conçue pour gérer le planning et les rôles lors des projections.
+ * NB : Comme expliqué dans notre rapport (P.10), les méthodes de cette classe ont été initialement développées
+ * mais non priorisées dans le rendu final. Il serait possible de les incorporer dans une version future. 
  */
 public class AffectationSeance implements Serializable {
     
@@ -16,7 +17,6 @@ public class AffectationSeance implements Serializable {
     // Identifiant unique du membre du personnel affecté. 
     private int idPersonnel;
 
-    // Constructeur par défaut requis pour la sérialisation.
     public AffectationSeance() {}
 
     /**

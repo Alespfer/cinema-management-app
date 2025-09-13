@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : ClientDAOImpl.java
+// ClientDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 
@@ -10,11 +10,7 @@ import java.util.List;
 
 /**
  * Implémentation pour la gestion de la persistance des comptes clients.
- * S'occupe de la lecture et de l'écriture dans le fichier "clients.dat".
- *
- * Cette classe gère les données des utilisateurs. Toutes les actions liées au
- * compte client (inscription, connexion, modification des informations) passent
- * par cette classe via la couche service.
+ * S'occupe de la lecture et de l'écriture dans le fichier "clients.dat"
  */
 public class ClientDAOImpl extends GenericDAOImpl<Client> implements ClientDAO {
 

@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : SeanceDAO.java
+// SeanceDAO.java
 // ========================================================================
 package com.mycompany.cinema.dao;
 
@@ -9,7 +9,6 @@ import java.util.List;
 
 /**
  * Définit le contrat pour la gestion des séances (projections de films).
- * C'est un contrat central pour l'interface client.
  */
 public interface SeanceDAO {
     

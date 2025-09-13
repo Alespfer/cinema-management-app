@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : CinemaServiceImpl.java
+// CinemaServiceImpl.java
 // ========================================================================
 package com.mycompany.cinema.service.impl;
 
@@ -19,10 +19,7 @@ import java.util.Set;
 
 /**
  * Implémentation unique et centrale de toute la logique métier de
- * l'application. Cette classe reçoit les demandes de l'interface graphique,
- * interagit avec les différentes classes DAO (Couche d'Accès aux Données) pour
- * manipuler les objets, applique les règles de gestion (ex: un siège ne peut
- * être vendu deux fois), et retourne le résultat à la Vue.
+ * l'application. 
  */
 public class CinemaServiceImpl implements ClientService, AdminService {
 

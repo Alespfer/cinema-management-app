@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : SalleDAOImpl.java
+// SalleDAOImpl.java
 // ========================================================================
 package com.mycompany.cinema.dao.impl;
 
@@ -12,7 +12,6 @@ import java.util.List;
  * Implémentation pour la gestion de la persistance des objets Salle.
  * Interagit avec le fichier "salles.dat".
  *
- * Cette classe fournit les informations de base sur l'infrastructure du cinéma. 
  */
 public class SalleDAOImpl extends GenericDAOImpl<Salle> implements SalleDAO {
 

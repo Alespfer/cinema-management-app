@@ -1,5 +1,5 @@
 // ========================================================================
-// FICHIER : CaisseDAO.java
+// CaisseDAO.java
 // ========================================================================
 package com.mycompany.cinema.dao;
 
@@ -8,6 +8,8 @@ import java.util.List;
 
 /**
  * Définit le contrat pour la gestion des caisses enregistreuses (points de vente).
+ * NB : Comme pour les affectations des séances, les fonctionnalités ont été développées mais non priorisées 
+ * dans le rendu final
  */
 public interface CaisseDAO {
 

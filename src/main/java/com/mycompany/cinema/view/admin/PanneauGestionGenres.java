@@ -50,7 +50,7 @@ public class PanneauGestionGenres extends javax.swing.JPanel {
 
     /**
      * Charge la liste complète des genres depuis le service et met à jour le
-     * modèle de la JList, ce qui rafraîchit l'affichage.
+     * modèle de la JList.
      */
     private void chargerGenres() {
         genreListModel.clear();
@@ -65,7 +65,7 @@ public class PanneauGestionGenres extends javax.swing.JPanel {
     }
 
     /**
-     * Méthode publique appelée par la fenêtre principale pour s'assurer que les
+     * Méthode appelée par la fenêtre principale pour s'assurer que les
      * données sont à jour lorsque l'onglet devient visible.
      */
     public void rafraichirDonnees() {
@@ -114,7 +114,7 @@ public class PanneauGestionGenres extends javax.swing.JPanel {
                 JOptionPane.showMessageDialog(this, "Genre ajouté avec succès !");
             } else { // Modification
                 genreSelectionne.setLibelle(libelleField.getText().trim());
-                adminService.modifierGenre(genreSelectionne); // corrigé
+                adminService.modifierGenre(genreSelectionne); 
                 JOptionPane.showMessageDialog(this, "Genre mis à jour avec succès !");
             }
 
@@ -131,7 +131,7 @@ public class PanneauGestionGenres extends javax.swing.JPanel {
      */
     private void actionSupprimer() {
         if (genreSelectionne == null) {
-            return; // Sécurité : ne rien faire si aucun genre n'est sélectionné.
+            return; // Ne rien faire si aucun genre n'est sélectionné.
         }
 
         Object[] options = {"Oui", "Non"};
@@ -261,22 +261,22 @@ public class PanneauGestionGenres extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void nouveauButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nouveauButtonActionPerformed
-        reinitialiserFormulaire();// TODO add your handling code here:
+        reinitialiserFormulaire();
     }//GEN-LAST:event_nouveauButtonActionPerformed
 
     private void enregistrerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enregistrerButtonActionPerformed
-        actionEnregistrer();// TODO add your handling code here:
+        actionEnregistrer();
     }//GEN-LAST:event_enregistrerButtonActionPerformed
 
     private void supprimerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supprimerButtonActionPerformed
-        actionSupprimer();// TODO add your handling code here:
+        actionSupprimer();
     }//GEN-LAST:event_supprimerButtonActionPerformed
 
     private void genreJListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_genreJListValueChanged
         if (!evt.getValueIsAdjusting()) {
             genreSelectionne = genreJList.getSelectedValue();
             afficherDetailsGenre(genreSelectionne);
-        }// TODO add your handling code here:
+        }
     }//GEN-LAST:event_genreJListValueChanged
 
     private void idFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_idFieldMouseClicked
@@ -289,7 +289,7 @@ public class PanneauGestionGenres extends javax.swing.JPanel {
                     "Information", // Le titre de la fenêtre pop-up
                     JOptionPane.INFORMATION_MESSAGE // Le type de message (icône "i")
             );
-        }        // TODO add your handling code here:
+        }        
     }//GEN-LAST:event_idFieldMouseClicked
 
 

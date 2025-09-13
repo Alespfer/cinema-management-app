@@ -1,9 +1,8 @@
-
-
-
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
+ * FenetreEspaceClient.java
+ * Fenêtre pour la gestion de l'espace client.
+ * Elle utilise un système d'onglets pour séparer la gestion des informations
+ * personnelles de l'historique des réservations.
  */
 package com.mycompany.cinema.view;
 
@@ -14,53 +13,37 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-/**
- *
- * @author albertoesperon
- */
+
 public class FenetreEspaceClient extends javax.swing.JDialog {
 
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FenetreEspaceClient.class.getName());
 
-    /**
-     * Creates new form EspaceClient
-     */
-    /**
-     * CONSTRUCTEUR MODIFIÉ Remplacez le constructeur généré par NetBeans par
-     * celui-ci.
-     */
+   
     public FenetreEspaceClient(java.awt.Frame parent, boolean modal, ClientService clientService, Client clientConnecte) {
 
-        // Appel au code généré par NetBeans pour construire l'interface visuelle
         initComponents();
 
-        // --- C'est ici qu'on ajoute notre logique après la construction ---
-        // 1. On crée les instances de nos panneaux personnalisés
-        //    (Ce sont des classes que vous avez déjà dans votre projet)
+        // Création des instances de nos panneaux personnalisés
         
         FenetrePrincipaleClient fenetrePrincipale = (FenetrePrincipaleClient) parent;
 
         JPanel infosPanel = new PanneauInfosPersonnelles(clientService, clientConnecte, this, fenetrePrincipale);
         PanneauHistoriqueReservations historiquePanel = new PanneauHistoriqueReservations(clientService, clientConnecte);
 
-        // 2. On remplace les panneaux vides (jPanel1, jPanel2) créés par le designer
-        //    par nos vrais panneaux. L'index 0 correspond au premier onglet, 1 au second.
+        // L'index 0 correspond au premier onglet, 1 au second.
         tabbedPane.setComponentAt(0, infosPanel);
         tabbedPane.setComponentAt(1, historiquePanel);
 
-        // 3. On ajoute l'écouteur d'événement qui se déclenche quand on change d'onglet.
+        // On ajoute l'écouteur d'événement qui se déclenche quand on change d'onglet.
         tabbedPane.addChangeListener(new ChangeListener() {
-            @Override // Annotation recommandée par la doctrine (p. 162)
+            @Override 
             public void stateChanged(ChangeEvent e) {
-                // Si l'onglet qui est maintenant visible est celui de l'historique...
                 if (tabbedPane.getSelectedComponent() == historiquePanel) {
-                    // ...alors on appelle sa méthode publique pour recharger les données.
                     historiquePanel.chargerHistorique();
                 }
             }
         });
 
-        // 4. On finalise la configuration de la fenêtre (titre, taille, position).
         this.setTitle("Mon Espace Client");
         this.setSize(800, 600);
         this.setLocationRelativeTo(parent);

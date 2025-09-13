@@ -6,17 +6,11 @@ import java.util.List;
 
 /**
  * Classe abstraite servant de "boîte à outils" pour toutes les autresclasses
- * DAO du projet. Elle centralise la logique commune de lecture et
- * d'écritured'une liste d'objets dans un fichier.
- *
- * Le mécanisme de "génériques" (représenté par <T>) lui permet de fonctionner
- * avec n'importe quel type d'objet (Film, Client, etc.) sans avoir à réécrire
- * le code.
- *
+ * DAO. Elle centralise la logique commune de lecture et d'écritured'une liste d'objets dans un fichier.
  */
 public abstract class GenericDAOImpl<T> {
 
-    // Le chemin complet vers le fichier de sauvegarde (ex: "data/films.dat").
+    // Le chemin complet vers le fichier de sauvegarde (par ex : "data/films.dat").
     private final String cheminFichier;
     // La liste des objets (films, clients, etc.) actuellement chargée en mémoire.
     protected List<T> data;
@@ -29,7 +23,6 @@ public abstract class GenericDAOImpl<T> {
      */
     public GenericDAOImpl(String nomFichier) {
         this.cheminFichier = "data/" + nomFichier;
-        // Dès l'instanciation, on charge immédiatement les données depuis le disque.
         this.data = chargerDepuisFichier();
     }
 
@@ -65,9 +58,7 @@ public abstract class GenericDAOImpl<T> {
 
     /**
      * Sauvegarde la liste complète des objets actuellement en mémoire dans un
-     * fichier binaire (sérialisation). Toute modification (ajout, mise à jour,
-     * suppression) dans une sous-classe doit appeler cette méthode pour rendre
-     * le changement permanent.
+     * fichier binaire (sérialisation). 
      */
     protected void sauvegarderDansFichier() {
         new File("data").mkdirs();
